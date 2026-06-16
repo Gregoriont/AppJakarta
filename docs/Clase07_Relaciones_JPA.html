@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clase 07 — Relaciones JPA | Jakarta EE 10</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1a3a5c;--azul2:#2563a8;--azul3:#3b82d1;--azul-cl:#dbeafe;--azul-50:#eff6ff;
+  --verde:#166534;--verde-cl:#dcfce7;--verde2:#16a34a;
+  --naranja:#92400e;--naranja-cl:#fef3c7;--naranja2:#d97706;
+  --rojo:#991b1b;--rojo-cl:#fee2e2;--rojo2:#dc2626;
+  --violeta:#4c1d95;--violeta-cl:#ede9fe;--violeta2:#7c3aed;
+  --celeste:#0c4a6e;--celeste-cl:#e0f2fe;--celeste2:#0284c7;
+  --gris:#f1f5f9;--gris2:#e2e8f0;--gris3:#94a3b8;--gris4:#475569;--texto:#0f172a;
+  --fuente:'Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{font-family:var(--fuente);background:#f8fafc;color:var(--texto);font-size:15px;line-height:1.6}
+a{color:var(--azul2);text-decoration:none}
+code{font-family:'Cascadia Code','Fira Code','Consolas',monospace}
+
+/* ══ PORTADA ══════════════════════════════════════════════════ */
+.portada{background:linear-gradient(135deg,#0f172a 0%,#1e3a5c 40%,#2563a8 80%,#7c3aed 100%);
+  color:#fff;padding:72px 40px;text-align:center;border-radius:0 0 28px 28px;
+  box-shadow:0 8px 40px rgba(0,0,0,.35);margin-bottom:44px}
+.portada-badge{display:inline-block;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);padding:6px 20px;border-radius:20px;
+  font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px}
+.portada-num{font-size:5rem;font-weight:900;line-height:1;opacity:.2;margin-bottom:-10px}
+.portada h1{font-size:2.4rem;font-weight:800;margin-bottom:8px;line-height:1.2}
+.portada h2{font-size:1.1rem;font-weight:400;opacity:.8;margin-bottom:28px}
+.portada-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px}
+.tag{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);
+  padding:4px 13px;border-radius:16px;font-size:11px;font-weight:600}
+
+/* ══ ÍNDICE ══════════════════════════════════════════════════ */
+.indice{max-width:880px;margin:0 auto 44px;background:#fff;border-radius:16px;
+  border:1px solid var(--gris2);box-shadow:0 2px 10px rgba(0,0,0,.07);overflow:hidden}
+.indice-hdr{background:var(--azul);color:#fff;padding:14px 24px;font-size:.95rem;font-weight:700}
+.indice-lista{list-style:none;display:grid;grid-template-columns:1fr 1fr}
+.indice-lista li{border-bottom:1px solid var(--gris2);border-right:1px solid var(--gris2)}
+.indice-lista a{display:flex;align-items:center;gap:12px;padding:11px 18px;
+  color:var(--texto);font-size:.87rem;transition:background .15s}
+.indice-lista a:hover{background:var(--azul-cl)}
+.ind-n{width:26px;height:26px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+@media(max-width:600px){.indice-lista{grid-template-columns:1fr}}
+
+/* ══ SECCIONES ══════════════════════════════════════════════ */
+.sec{max-width:880px;margin:0 auto 52px;scroll-margin-top:20px;padding:0 20px}
+.sec-hdr{display:flex;align-items:center;gap:14px;margin-bottom:22px;
+  padding-bottom:12px;border-bottom:3px solid var(--violeta2)}
+.sec-num{width:46px;height:46px;background:linear-gradient(135deg,var(--azul),var(--violeta2));
+  color:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:1rem;font-weight:800;flex-shrink:0}
+.sec-titulo{font-size:1.4rem;font-weight:800;color:var(--azul)}
+
+/* ══ DIAP NUM ════════════════════════════════════════════════ */
+.dn{display:inline-block;background:var(--violeta2);color:#fff;
+  font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:10px;
+  margin-bottom:8px;letter-spacing:.5px}
+
+/* ══ CARDS ══════════════════════════════════════════════════ */
+.card{background:#fff;border:1px solid var(--gris2);border-radius:12px;
+  box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:16px;overflow:hidden}
+.card-hdr{padding:11px 18px;font-weight:700;font-size:.9rem;border-bottom:1px solid var(--gris2)}
+.card-body{padding:18px}
+.c-azul   .card-hdr{background:var(--azul-cl);color:var(--azul)}
+.c-verde  .card-hdr{background:var(--verde-cl);color:var(--verde)}
+.c-naranja .card-hdr{background:var(--naranja-cl);color:var(--naranja)}
+.c-rojo   .card-hdr{background:var(--rojo-cl);color:var(--rojo)}
+.c-violeta .card-hdr{background:var(--violeta-cl);color:var(--violeta)}
+.c-celeste .card-hdr{background:var(--celeste-cl);color:var(--celeste)}
+
+/* ══ ALERTAS ═════════════════════════════════════════════════ */
+.alerta{display:flex;gap:12px;padding:13px 16px;border-radius:10px;margin:14px 0;font-size:.88rem}
+.a-info {background:var(--azul-cl);border-left:4px solid var(--azul2)}
+.a-ok   {background:var(--verde-cl);border-left:4px solid var(--verde2)}
+.a-warn {background:var(--naranja-cl);border-left:4px solid var(--naranja2)}
+.a-err  {background:var(--rojo-cl);border-left:4px solid var(--rojo2)}
+.a-viol {background:var(--violeta-cl);border-left:4px solid var(--violeta2)}
+.a-ico  {font-size:1.2rem;flex-shrink:0;margin-top:1px}
+
+/* ══ CÓDIGO ══════════════════════════════════════════════════ */
+pre{background:#0f172a;color:#e2e8f0;padding:20px 22px;border-radius:10px;
+  overflow-x:auto;font-size:13px;line-height:1.8;margin:12px 0;
+  border:1px solid #1e293b;position:relative}
+.cl{background:#1e293b;border-radius:5px;padding:2px 8px;font-size:10px;
+  color:#94a3b8;font-family:var(--fuente);position:absolute;top:8px;right:10px;letter-spacing:.4px}
+.kw{color:#93c5fd}.an{color:#86efac}.st{color:#fca5a5}
+.cm{color:#64748b;font-style:italic}.cn{color:#fde68a}.mt{color:#c4b5fd}.nm{color:#fdba74}
+
+/* ══ TABLA ══════════════════════════════════════════════════ */
+table{width:100%;border-collapse:collapse;font-size:.88rem;margin:12px 0}
+th{background:var(--azul);color:#fff;padding:9px 13px;text-align:left;
+  font-size:.78rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:8px 13px;border-bottom:1px solid var(--gris2);vertical-align:top}
+tr:nth-child(even) td{background:var(--gris)}
+tr:hover td{background:var(--azul-cl)}
+
+/* ══ GRIDS ══════════════════════════════════════════════════ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:12px 0}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}}
+
+/* ══ BADGES ═════════════════════════════════════════════════ */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-verde  {background:var(--verde-cl);color:var(--verde)}
+.b-rojo   {background:var(--rojo-cl);color:var(--rojo)}
+.b-azul   {background:var(--azul-cl);color:var(--azul2)}
+.b-naranja{background:var(--naranja-cl);color:var(--naranja)}
+.b-violeta{background:var(--violeta-cl);color:var(--violeta2)}
+
+/* ══ DIAGRAMA ENTIDAD-RELACIÓN ══════════════════════════════ */
+.er-wrapper{background:#0f172a;border-radius:16px;padding:32px 24px;
+  margin:16px 0;display:flex;flex-direction:column;align-items:center;gap:0}
+.er-entidad{border-radius:12px;border:2px solid;min-width:220px;max-width:280px;overflow:hidden}
+.er-ent-titulo{padding:10px 16px;font-weight:800;font-size:.95rem;text-align:center}
+.er-ent-campos{padding:10px 16px;font-size:.78rem;line-height:2}
+.er-pk  {color:#fde68a;font-weight:700}
+.er-fk  {color:#86efac;font-weight:700}
+.er-attr{color:#cbd5e1}
+
+.er-cliente  {border-color:#3b82d1;background:#1e3a5f}
+.er-cliente  .er-ent-titulo{background:#1e3a5f;color:#93c5fd}
+.er-mascota  {border-color:#a855f7;background:#2e1065}
+.er-mascota  .er-ent-titulo{background:#2e1065;color:#d8b4fe}
+.er-turno    {border-color:#34d399;background:#064e3b}
+.er-turno    .er-ent-titulo{background:#064e3b;color:#6ee7b7}
+
+.er-rel{display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:2px}
+.er-linea{width:2px;height:18px;background:#475569}
+.er-etiq{background:#1e293b;border:1px solid #334155;color:#94a3b8;
+  padding:4px 14px;border-radius:20px;font-size:.73rem;font-weight:700}
+.er-punta{color:#475569;font-size:1rem;line-height:1}
+
+/* ══ COMPARATIVA SQL vs JPA ══════════════════════════════════ */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:12px;overflow:hidden;margin:14px 0;border:1px solid var(--gris2)}
+.cmp-col{overflow:hidden}
+.cmp-hdr{padding:10px 16px;font-weight:700;font-size:.85rem;text-align:center}
+.cmp-hdr-sql{background:#1e293b;color:#94a3b8}
+.cmp-hdr-jpa{background:linear-gradient(90deg,var(--azul),var(--violeta2));color:#fff}
+@media(max-width:600px){.cmp{grid-template-columns:1fr}}
+.cmp pre{border-radius:0;margin:0;border:none;border-top:1px solid #1e293b}
+
+/* ══ FETCH VISUAL ════════════════════════════════════════════ */
+.fetch-box{background:#0f172a;border-radius:12px;padding:20px;margin:12px 0}
+.fetch-row{display:flex;gap:16px;align-items:stretch;margin-bottom:12px}
+.fetch-row:last-child{margin-bottom:0}
+.fetch-label{width:80px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;font-weight:800;font-size:.8rem;text-align:center;padding:8px 4px}
+.fetch-lazy {background:#14532d;color:#86efac}
+.fetch-eager{background:#7f1d1d;color:#fca5a5}
+.fetch-query{flex:1;background:#1e293b;border-radius:8px;padding:12px 14px;
+  font-family:'Cascadia Code','Consolas',monospace;font-size:.78rem;color:#e2e8f0;line-height:1.6}
+.fetch-query .ok{color:#86efac}.fetch-query .bad{color:#fca5a5}
+.fetch-query .cm{color:#475569;font-style:italic}
+
+/* ══ OBJETIVOS ═══════════════════════════════════════════════ */
+.obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+@media(max-width:600px){.obj-grid{grid-template-columns:1fr}}
+.obj-item{background:#fff;border:1px solid var(--gris2);border-left:4px solid var(--violeta2);
+  border-radius:8px;padding:11px 14px;font-size:.88rem;display:flex;align-items:flex-start;gap:10px}
+
+/* ══ PASOS ═══════════════════════════════════════════════════ */
+.paso{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start}
+.paso-n{width:34px;height:34px;background:var(--violeta2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0;margin-top:2px}
+.paso-body h4{font-size:.9rem;color:var(--azul);margin-bottom:3px;font-weight:700}
+.paso-body p{font-size:.84rem;color:var(--gris4)}
+
+/* ══ SEP ═════════════════════════════════════════════════════ */
+.sep{height:2px;background:linear-gradient(90deg,var(--violeta2),transparent);
+  max-width:880px;margin:0 auto 52px;border-radius:2px}
+
+/* ══ FOOTER ══════════════════════════════════════════════════ */
+footer{background:var(--azul);color:rgba(255,255,255,.65);text-align:center;
+  padding:22px;font-size:.8rem;margin-top:60px}
+</style>
+</head>
+<body>
+
+
+<!-- PORTADA -->
+<div class="portada">
+  <div class="portada-badge">Programación Web Avanzada — Backend</div>
+  <div class="portada-num">07</div>
+  <h1>Relaciones entre Entidades con JPA</h1>
+  <h2>@OneToMany · @ManyToOne · @OneToOne · @ManyToMany · FetchType · CascadeType · JPQL con JOIN</h2>
+  <div class="portada-tags">
+    <span class="tag">Jakarta EE 10</span><span class="tag">JPA 3.1</span>
+    <span class="tag">EclipseLink</span><span class="tag">MySQL 8</span>
+    <span class="tag">CDI 4.0</span><span class="tag">JDK 21</span>
+  </div>
+</div>
+
+<!-- ÍNDICE -->
+<div style="max-width:880px;margin:0 auto;padding:0 20px">
+<div class="indice">
+  <div class="indice-hdr">📚 Clase 07 — Índice de contenidos</div>
+  <ul class="indice-lista">
+    <li><a href="#obj"><span class="ind-n">🎯</span>Objetivos de la clase</a></li>
+    <li><a href="#s1"><span class="ind-n">1</span>¿Qué es una relación en JPA?</a></li>
+    <li><a href="#s2"><span class="ind-n">2</span>Tipos de relaciones</a></li>
+    <li><a href="#s3"><span class="ind-n">3</span>@ManyToOne — el lado FK</a></li>
+    <li><a href="#s4"><span class="ind-n">4</span>@OneToMany — el lado inverso</a></li>
+    <li><a href="#s5"><span class="ind-n">5</span>Relación bidireccional completa</a></li>
+    <li><a href="#s6"><span class="ind-n">6</span>FetchType: LAZY vs EAGER</a></li>
+    <li><a href="#s7"><span class="ind-n">7</span>Problema N+1 y JOIN FETCH</a></li>
+    <li><a href="#s8"><span class="ind-n">8</span>CascadeType</a></li>
+    <li><a href="#s9"><span class="ind-n">9</span>@OneToOne</a></li>
+    <li><a href="#s10"><span class="ind-n">10</span>@ManyToMany</a></li>
+    <li><a href="#s11"><span class="ind-n">11</span>JPQL con relaciones</a></li>
+    <li><a href="#s12"><span class="ind-n">12</span>Relaciones en la vista JSF</a></li>
+    <li><a href="#res"><span class="ind-n">✅</span>Resumen y actividad práctica</a></li>
+  </ul>
+</div>
+</div>
+
+<!-- OBJETIVOS -->
+<div class="sec" id="obj">
+  <div class="sec-hdr"><div class="sec-num">🎯</div><div class="sec-titulo">Objetivos de la clase</div></div>
+  <div class="obj-grid">
+    <div class="obj-item"><span>🔗</span>Comprender los 4 tipos de relaciones JPA y cuándo usar cada uno</div>
+    <div class="obj-item"><span>🏗️</span>Implementar @ManyToOne y @OneToMany de forma bidireccional</div>
+    <div class="obj-item"><span>⚡</span>Entender FetchType LAZY vs EAGER y sus implicancias en performance</div>
+    <div class="obj-item"><span>🔍</span>Detectar y resolver el problema N+1 con JOIN FETCH en JPQL</div>
+    <div class="obj-item"><span>🌊</span>Aplicar CascadeType correctamente para propagar operaciones</div>
+    <div class="obj-item"><span>🔄</span>Modelar @OneToOne y @ManyToMany con tabla intermedia</div>
+    <div class="obj-item"><span>📝</span>Escribir JPQL con navegación por relaciones (path expressions)</div>
+    <div class="obj-item"><span>🖥️</span>Resolver relaciones en la vista JSF con selectores dinámicos</div>
+  </div>
+  <div class="alerta a-viol">
+    <span class="a-ico">💡</span>
+    <div><strong>Contexto:</strong> Hasta ahora trabajamos con entidades aisladas. En el mundo real, los datos están relacionados: un cliente tiene mascotas, una mascota tiene turnos. Esta clase enseña a modelar y trabajar con esas relaciones de forma profesional usando JPA.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 1: QUÉ ES UNA RELACIÓN -->
+<div class="sec" id="s1">
+  <div class="sec-hdr"><div class="sec-num">1</div><div class="sec-titulo">¿Qué es una relación en JPA?</div></div>
+
+  <div class="dn">DIAPOSITIVA 1 — Concepto fundamental</div>
+  <div class="c-azul card">
+    <div class="card-hdr">🔗 Base de datos vs Mundo Orientado a Objetos</div>
+    <div class="card-body">
+      <p>En una base de datos relacional, las tablas se vinculan mediante <strong>claves foráneas (FK)</strong>. En Java, los objetos se vinculan mediante <strong>referencias a otros objetos</strong>. JPA es el puente que traduce un mundo al otro automáticamente.</p>
+    </div>
+  </div>
+
+  <div class="cmp">
+    <div class="cmp-col">
+      <div class="cmp-hdr cmp-hdr-sql">🗄️ MySQL — Clave Foránea</div>
+<pre><code>CREATE TABLE mascota (
+  id         BIGINT PRIMARY KEY,
+  nombre     VARCHAR(80),
+  <span style="color:#fde68a">cliente_id BIGINT NOT NULL,</span>
+  FOREIGN KEY (cliente_id)
+    REFERENCES cliente(id)
+);
+
+-- Para obtener mascota CON su dueño:
+SELECT m.nombre, c.apellido
+FROM mascota m
+INNER JOIN cliente c
+  ON m.cliente_id = c.id;</code></pre>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-hdr cmp-hdr-jpa">☕ JPA — Referencia a objeto</div>
+<pre><code><span class="an">@Entity</span>
+<span class="kw">public class</span> <span class="cn">Mascota</span> {
+  <span class="an">@Id</span> <span class="kw">private</span> <span class="cn">Long</span> id;
+  <span class="kw">private</span> <span class="cn">String</span> nombre;
+
+  <span class="cm">// No hay "cliente_id" — hay un objeto Cliente</span>
+  <span class="an">@ManyToOne</span>
+  <span class="an">@JoinColumn</span>(name = <span class="st">"cliente_id"</span>)
+  <span class="kw">private</span> <span class="cn">Cliente</span> cliente; <span class="cm">// ← objeto Java</span>
+}
+
+<span class="cm">// Para obtener mascota CON su dueño:</span>
+mascota.<span class="mt">getCliente</span>().<span class="mt">getApellido</span>()</code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 2 — Modelo completo: Cliente → Mascota → Turno</div>
+  <div class="er-wrapper">
+    <div class="er-entidad er-cliente">
+      <div class="er-ent-titulo">🧑 CLIENTE</div>
+      <div class="er-ent-campos">
+        <span class="er-pk">🔑 id: Long (PK)</span><br/>
+        <span class="er-attr">documento: String (UNIQUE)</span><br/>
+        <span class="er-attr">nombre: String</span><br/>
+        <span class="er-attr">apellido: String</span><br/>
+        <span class="er-attr">email: String (UNIQUE)</span><br/>
+        <span class="er-attr">activo: boolean</span>
+      </div>
+    </div>
+    <div class="er-rel">
+      <div class="er-linea"></div>
+      <div class="er-etiq">@OneToMany (un cliente tiene muchas mascotas)</div>
+      <div class="er-etiq">@ManyToOne (muchas mascotas tienen un cliente)</div>
+      <div class="er-linea"></div>
+      <div class="er-punta">▼</div>
+    </div>
+    <div class="er-entidad er-mascota">
+      <div class="er-ent-titulo">🐶 MASCOTA</div>
+      <div class="er-ent-campos">
+        <span class="er-pk">🔑 id: Long (PK)</span><br/>
+        <span class="er-attr">nombre: String</span><br/>
+        <span class="er-attr">especie: String</span><br/>
+        <span class="er-attr">raza: String</span><br/>
+        <span class="er-attr">activo: boolean</span><br/>
+        <span class="er-fk">🔗 cliente: Cliente (FK cliente_id)</span>
+      </div>
+    </div>
+    <div class="er-rel">
+      <div class="er-linea"></div>
+      <div class="er-etiq">@OneToMany (una mascota tiene muchos turnos)</div>
+      <div class="er-etiq">@ManyToOne (muchos turnos tienen una mascota)</div>
+      <div class="er-linea"></div>
+      <div class="er-punta">▼</div>
+    </div>
+    <div class="er-entidad er-turno">
+      <div class="er-ent-titulo">📅 TURNO</div>
+      <div class="er-ent-campos">
+        <span class="er-pk">🔑 id: Long (PK)</span><br/>
+        <span class="er-attr">fechaHora: LocalDateTime</span><br/>
+        <span class="er-attr">motivo: String</span><br/>
+        <span class="er-attr">estado: String</span><br/>
+        <span class="er-fk">🔗 mascota: Mascota (FK mascota_id)</span>
+      </div>
+    </div>
+  </div>
+  <div class="alerta a-info">
+    <span class="a-ico">💡</span>
+    <div><strong>Regla de las FK:</strong> La clave foránea siempre está en el lado <strong>"muchos"</strong>. Mascota tiene <code>cliente_id</code> porque una mascota pertenece a un cliente. Turno tiene <code>mascota_id</code> porque un turno pertenece a una mascota.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 2: TIPOS DE RELACIONES -->
+<div class="sec" id="s2">
+  <div class="sec-hdr"><div class="sec-num">2</div><div class="sec-titulo">Tipos de relaciones JPA</div></div>
+
+  <div class="dn">DIAPOSITIVA 3 — Las 4 anotaciones de relación</div>
+  <table>
+    <thead><tr><th>Anotación</th><th>Cardinalidad</th><th>¿Dónde va la FK?</th><th>Ejemplo del mundo real</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>@ManyToOne</code></td>
+        <td>Muchos → Uno</td>
+        <td>En la tabla del lado <strong>Muchos</strong></td>
+        <td>Muchas Mascotas → un Cliente</td>
+      </tr>
+      <tr>
+        <td><code>@OneToMany</code></td>
+        <td>Uno → Muchos</td>
+        <td>En la tabla del lado <strong>Muchos</strong> (igual que @ManyToOne)</td>
+        <td>Un Cliente → muchas Mascotas</td>
+      </tr>
+      <tr>
+        <td><code>@OneToOne</code></td>
+        <td>Uno → Uno</td>
+        <td>En cualquiera de las dos tablas</td>
+        <td>Un Usuario → un Perfil</td>
+      </tr>
+      <tr>
+        <td><code>@ManyToMany</code></td>
+        <td>Muchos → Muchos</td>
+        <td>Tabla intermedia (JPA la crea automáticamente)</td>
+        <td>Muchos Médicos ↔ Muchos Pacientes</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 4 — Unidireccional vs Bidireccional</div>
+  <div class="g2">
+    <div class="c-azul card">
+      <div class="card-hdr">➡️ Unidireccional — solo un lado conoce la relación</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// UNIDIRECCIONAL:
+// Solo Mascota conoce a Cliente
+// Cliente no sabe que tiene mascotas</span>
+
+<span class="kw">public class</span> <span class="cn">Mascota</span> {
+  <span class="an">@ManyToOne</span>
+  <span class="kw">private</span> <span class="cn">Cliente</span> cliente; <span class="cm">// ✅ conoce al cliente</span>
+}
+
+<span class="kw">public class</span> <span class="cn">Cliente</span> {
+  <span class="cm">// ❌ No tiene List&lt;Mascota&gt;</span>
+  <span class="cm">// No puede navegar cliente.getMascotas()</span>
+}</code></pre>
+        <p style="padding:12px;font-size:.83rem">Más simple. Usar cuando no necesitamos navegar desde el lado "uno".</p>
+      </div>
+    </div>
+    <div class="c-verde card">
+      <div class="card-hdr">↔️ Bidireccional — ambos lados se conocen</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// BIDIRECCIONAL:
+// Ambas clases se conocen entre sí</span>
+
+<span class="kw">public class</span> <span class="cn">Mascota</span> {
+  <span class="an">@ManyToOne</span>
+  <span class="kw">private</span> <span class="cn">Cliente</span> cliente; <span class="cm">// lado dueño (tiene FK)</span>
+}
+
+<span class="kw">public class</span> <span class="cn">Cliente</span> {
+  <span class="an">@OneToMany</span>(mappedBy = <span class="st">"cliente"</span>)
+  <span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; mascotas;
+  <span class="cm">// ✅ puede: cliente.getMascotas()</span>
+}</code></pre>
+        <p style="padding:12px;font-size:.83rem">Más útil. Permite navegar en ambas direcciones con getters.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">⚠️</span>
+    <div><strong>Clave del @OneToMany bidireccional:</strong> el atributo <code>mappedBy</code> es <strong>obligatorio</strong> y debe contener el nombre del campo en la clase del lado "Muchos" que tiene la FK. En el ejemplo: <code>mappedBy = "cliente"</code> porque en <code>Mascota</code> el campo se llama <code>cliente</code>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 3: @ManyToOne -->
+<div class="sec" id="s3">
+  <div class="sec-hdr"><div class="sec-num">3</div><div class="sec-titulo">@ManyToOne — el lado de la clave foránea</div></div>
+
+  <div class="dn">DIAPOSITIVA 5 — @ManyToOne: la anotación más usada</div>
+  <div class="alerta a-viol">
+    <span class="a-ico">📌</span>
+    <div><strong>Regla de oro:</strong> <code>@ManyToOne</code> siempre va en la clase que <strong>tiene la clave foránea</strong> en su tabla. <code>Mascota</code> tiene <code>cliente_id</code> → <code>@ManyToOne</code> va en <code>Mascota</code>.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Mascota.java — @ManyToOne completo con todos los atributos</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"mascota"</span>)
+<span class="kw">public class</span> <span class="cn">Mascota</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="an">@Id</span>
+    <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    <span class="kw">private</span> <span class="cn">Long</span> id;
+
+    <span class="kw">private</span> <span class="cn">String</span> nombre;
+    <span class="kw">private</span> <span class="cn">String</span> especie;
+
+    <span class="cm">// ═══ RELACIÓN @ManyToOne ══════════════════════════════════</span>
+    <span class="an">@ManyToOne</span>(
+        fetch    = FetchType.LAZY,   <span class="cm">// no carga cliente hasta que se acceda</span>
+        optional = <span class="kw">false</span>            <span class="cm">// = NOT NULL — mascota DEBE tener cliente</span>
+    )
+    <span class="an">@JoinColumn</span>(
+        name             = <span class="st">"cliente_id"</span>, <span class="cm">// nombre de la columna FK en tabla mascota</span>
+        nullable         = <span class="kw">false</span>,       <span class="cm">// restricción en la BD</span>
+        foreignKey       = <span class="an">@ForeignKey</span>(name = <span class="st">"fk_mascota_cliente"</span>)
+    )
+    <span class="kw">private</span> <span class="cn">Cliente</span> cliente;
+    <span class="cm">// ══════════════════════════════════════════════════════════</span>
+    <span class="cm">// EclipseLink genera en MySQL:
+    // FOREIGN KEY (cliente_id) REFERENCES cliente(id)</span>
+
+    <span class="cm">// Getters y Setters</span>
+    <span class="kw">public</span> <span class="cn">Cliente</span> <span class="mt">getCliente</span>()             { <span class="kw">return</span> cliente; }
+    <span class="kw">public void</span>    <span class="mt">setCliente</span>(<span class="cn">Cliente</span> c)    { <span class="kw">this</span>.cliente = c; }
+
+    <span class="cm">// Helper útil para la vista</span>
+    <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getNombreConDueno</span>() {
+        <span class="kw">return</span> nombre + <span class="st">" ("</span> + cliente.<span class="mt">getApellido</span>() + <span class="st">")"</span>;
+    }
+}<span class="cl">Mascota.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 6 — Atributos de @ManyToOne y @JoinColumn</div>
+  <table>
+    <thead><tr><th>Atributo</th><th>Anotación</th><th>Valores posibles</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><code>fetch</code></td><td><code>@ManyToOne</code></td><td><code>LAZY</code> / <code>EAGER</code></td><td>¿Cuándo cargar el objeto relacionado?</td></tr>
+      <tr><td><code>optional</code></td><td><code>@ManyToOne</code></td><td><code>true</code> / <code>false</code></td><td>¿Puede ser null? false = NOT NULL</td></tr>
+      <tr><td><code>cascade</code></td><td><code>@ManyToOne</code></td><td>CascadeType.ALL, PERSIST…</td><td>¿Propagar operaciones al objeto relacionado?</td></tr>
+      <tr><td><code>name</code></td><td><code>@JoinColumn</code></td><td>String (nombre de columna)</td><td>Nombre de la columna FK en la tabla</td></tr>
+      <tr><td><code>nullable</code></td><td><code>@JoinColumn</code></td><td><code>true</code> / <code>false</code></td><td>¿La FK puede ser null en la BD?</td></tr>
+      <tr><td><code>referencedColumnName</code></td><td><code>@JoinColumn</code></td><td>String</td><td>Columna referenciada (por defecto: PK del padre)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">✅</span>
+    <div><strong>Por defecto:</strong> <code>@ManyToOne</code> sin ningún atributo es equivalente a <code>@ManyToOne(fetch=EAGER, optional=true)</code>. En aplicaciones profesionales siempre conviene especificar <code>fetch=LAZY</code> y <code>optional=false</code> cuando el campo no puede ser nulo.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 4: @OneToMany -->
+<div class="sec" id="s4">
+  <div class="sec-hdr"><div class="sec-num">4</div><div class="sec-titulo">@OneToMany — el lado inverso (sin FK)</div></div>
+
+  <div class="dn">DIAPOSITIVA 7 — @OneToMany: la colección del lado "uno"</div>
+  <div class="alerta a-viol">
+    <span class="a-ico">📌</span>
+    <div><strong>Importante:</strong> <code>@OneToMany</code> <strong>no crea ninguna columna nueva</strong> en la tabla <code>cliente</code>. Solo le dice a JPA que puede navegar la relación en sentido inverso. La FK sigue siendo <code>cliente_id</code> en la tabla <code>mascota</code>.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Cliente.java — @OneToMany con todos los atributos explicados</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"cliente"</span>)
+<span class="kw">public class</span> <span class="cn">Cliente</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="an">@Id</span>
+    <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    <span class="kw">private</span> <span class="cn">Long</span> id;
+
+    <span class="kw">private</span> <span class="cn">String</span> nombre;
+    <span class="kw">private</span> <span class="cn">String</span> email;
+
+    <span class="cm">// ═══ RELACIÓN @OneToMany ════════════════════════════════</span>
+    <span class="an">@OneToMany</span>(
+        mappedBy      = <span class="st">"cliente"</span>,   <span class="cm">// campo en Mascota que tiene la FK</span>
+        cascade       = CascadeType.ALL, <span class="cm">// propaga persist/merge/remove</span>
+        fetch         = FetchType.LAZY,  <span class="cm">// no carga lista hasta que se acceda</span>
+        orphanRemoval = <span class="kw">true</span>           <span class="cm">// elimina mascotas sin cliente</span>
+    )
+    <span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; mascotas = <span class="kw">new</span> <span class="cn">ArrayList</span>&lt;&gt;();
+    <span class="cm">// ════════════════════════════════════════════════════════
+    // NO genera ninguna columna en tabla cliente
+    // La FK cliente_id ya existe en tabla mascota
+    // Permite: cliente.getMascotas()  ← navegar la relación</span>
+
+    <span class="kw">public</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; <span class="mt">getMascotas</span>()          { <span class="kw">return</span> mascotas; }
+    <span class="kw">public void</span>           <span class="mt">setMascotas</span>(<span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; m) { <span class="kw">this</span>.mascotas = m; }
+
+    <span class="cm">// Helper: cantidad de mascotas activas</span>
+    <span class="kw">public long</span> <span class="mt">getCantidadMascotas</span>() {
+        <span class="kw">return</span> mascotas.<span class="mt">stream</span>()
+                       .<span class="mt">filter</span>(<span class="cn">Mascota</span>::<span class="mt">isActivo</span>)
+                       .<span class="mt">count</span>();
+    }
+}<span class="cl">Cliente.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 8 — Atributos de @OneToMany</div>
+  <table>
+    <thead><tr><th>Atributo</th><th>Tipo</th><th>Descripción</th><th>¿Cuándo usarlo?</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>mappedBy</code></td>
+        <td>String</td>
+        <td>Nombre del campo en la entidad "Muchos" que tiene la FK. <strong>Obligatorio en bidireccional.</strong></td>
+        <td>Siempre en relación bidireccional</td>
+      </tr>
+      <tr>
+        <td><code>cascade</code></td>
+        <td>CascadeType[]</td>
+        <td>Operaciones que se propagan a los hijos (PERSIST, MERGE, REMOVE, ALL)</td>
+        <td>Cuando los hijos son "propiedad" del padre</td>
+      </tr>
+      <tr>
+        <td><code>fetch</code></td>
+        <td>FetchType</td>
+        <td>LAZY (por defecto en @OneToMany) o EAGER</td>
+        <td>LAZY siempre salvo justificación de performance</td>
+      </tr>
+      <tr>
+        <td><code>orphanRemoval</code></td>
+        <td>boolean</td>
+        <td>Si un hijo se quita de la lista, JPA lo elimina de la BD</td>
+        <td>Relaciones padre-hijo fuertes (Turno → Tratamiento)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="sep"></div>
+
+<!-- SECCIÓN 5: BIDIRECCIONAL COMPLETA -->
+<div class="sec" id="s5">
+  <div class="sec-hdr"><div class="sec-num">5</div><div class="sec-titulo">Relación bidireccional completa</div></div>
+
+  <div class="dn">DIAPOSITIVA 9 — Las 3 entidades juntas</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Turno.java — @ManyToOne con Mascota</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"turno"</span>)
+<span class="kw">public class</span> <span class="cn">Turno</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="an">@Id</span> <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    <span class="kw">private</span> <span class="cn">Long</span> id;
+
+    <span class="kw">private</span> <span class="cn">LocalDateTime</span> fechaHora;
+    <span class="kw">private</span> <span class="cn">String</span> motivo;
+    <span class="kw">private</span> <span class="cn">String</span> estado = <span class="st">"PENDIENTE"</span>;
+
+    <span class="cm">// FK en tabla turno → mascota_id</span>
+    <span class="an">@ManyToOne</span>(fetch = FetchType.LAZY, optional = <span class="kw">false</span>)
+    <span class="an">@JoinColumn</span>(name = <span class="st">"mascota_id"</span>, nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> <span class="cn">Mascota</span> mascota;
+
+    <span class="cm">// Getters / Setters</span>
+    <span class="kw">public</span> <span class="cn">Mascota</span> <span class="mt">getMascota</span>()           { <span class="kw">return</span> mascota; }
+    <span class="kw">public void</span>    <span class="mt">setMascota</span>(<span class="cn">Mascota</span> m)   { <span class="kw">this</span>.mascota = m; }
+
+    <span class="cm">// Navegación de 3 niveles: turno → mascota → cliente</span>
+    <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getNombreDueno</span>() {
+        <span class="kw">return</span> mascota.<span class="mt">getCliente</span>().<span class="mt">getNombreCompleto</span>();
+    }
+}<span class="cl">Turno.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Mascota.java — Actualizada con @OneToMany hacia Turno</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="kw">public class</span> <span class="cn">Mascota</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="cm">// ... campos id, nombre, especie, raza ...</span>
+
+    <span class="cm">// Relación hacia arriba: Mascota → Cliente (tiene FK)</span>
+    <span class="an">@ManyToOne</span>(fetch = FetchType.LAZY, optional = <span class="kw">false</span>)
+    <span class="an">@JoinColumn</span>(name = <span class="st">"cliente_id"</span>, nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> <span class="cn">Cliente</span> cliente;
+
+    <span class="cm">// Relación hacia abajo: Mascota → Turnos (inversa, sin FK)</span>
+    <span class="an">@OneToMany</span>(
+        mappedBy      = <span class="st">"mascota"</span>,       <span class="cm">// campo en Turno</span>
+        cascade       = CascadeType.ALL,
+        fetch         = FetchType.LAZY,
+        orphanRemoval = <span class="kw">true</span>
+    )
+    <span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Turno</span>&gt; turnos = <span class="kw">new</span> <span class="cn">ArrayList</span>&lt;&gt;();
+    <span class="cm">// Mascota es "nodo intermedio": tiene FK hacia arriba
+    // y lista de hijos hacia abajo</span>
+}<span class="cl">Mascota.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">✅</span>
+    <div><strong>Resumen de quién tiene qué:</strong><br/>
+    • Tabla <code>mascota</code> → columna <code>cliente_id</code> (FK) → anotación <code>@ManyToOne</code> en clase <code>Mascota</code><br/>
+    • Tabla <code>turno</code> → columna <code>mascota_id</code> (FK) → anotación <code>@ManyToOne</code> en clase <code>Turno</code><br/>
+    • Clase <code>Cliente</code> → <code>@OneToMany(mappedBy="cliente")</code> para navegar la colección<br/>
+    • Clase <code>Mascota</code> → <code>@OneToMany(mappedBy="mascota")</code> para navegar los turnos</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 6: FETCHTYPE -->
+<div class="sec" id="s6">
+  <div class="sec-hdr"><div class="sec-num">6</div><div class="sec-titulo">FetchType: LAZY vs EAGER</div></div>
+
+  <div class="dn">DIAPOSITIVA 10 — ¿Cuándo carga JPA los datos relacionados?</div>
+  <div class="fetch-box">
+    <div style="color:#94a3b8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">FetchType.LAZY — Carga bajo demanda</div>
+    <div class="fetch-row">
+      <div class="fetch-label fetch-lazy">LAZY</div>
+      <div class="fetch-query">
+<span class="ok">// Paso 1: solo carga la mascota</span>
+Mascota m = em.find(Mascota.class, 1L);
+<span class="cm">// → SELECT id, nombre, especie FROM mascota WHERE id=1
+//   (cliente NO se carga todavía)</span>
+
+<span class="ok">// Paso 2: acceder al cliente DISPARA un SELECT adicional</span>
+String apellido = m.getCliente().getApellido();
+<span class="cm">// → SELECT id, nombre, apellido, email FROM cliente WHERE id=?
+//   (se ejecuta en este momento, solo si se necesita)</span>
+      </div>
+    </div>
+
+    <div style="color:#94a3b8;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:14px 0 14px">FetchType.EAGER — Carga inmediata con JOIN</div>
+    <div class="fetch-row">
+      <div class="fetch-label fetch-eager">EAGER</div>
+      <div class="fetch-query">
+<span class="bad">// Carga la mascota Y el cliente en una sola query con JOIN:</span>
+Mascota m = em.find(Mascota.class, 1L);
+<span class="cm">// → SELECT m.id, m.nombre, m.especie, c.id, c.nombre, c.apellido
+//   FROM mascota m LEFT JOIN cliente c ON m.cliente_id = c.id
+//   WHERE m.id = 1
+//   (siempre hace el JOIN, lo uses o no)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 11 — FetchType por defecto según anotación</div>
+  <table>
+    <thead><tr><th>Anotación</th><th>FetchType por defecto</th><th>Recomendación</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>@ManyToOne</code></td>
+        <td><span class="badge b-rojo">EAGER</span></td>
+        <td>⚠️ Cambiar a LAZY para mejorar performance</td>
+      </tr>
+      <tr>
+        <td><code>@OneToOne</code></td>
+        <td><span class="badge b-rojo">EAGER</span></td>
+        <td>⚠️ Cambiar a LAZY para mejorar performance</td>
+      </tr>
+      <tr>
+        <td><code>@OneToMany</code></td>
+        <td><span class="badge b-verde">LAZY</span></td>
+        <td>✅ Correcto por defecto</td>
+      </tr>
+      <tr>
+        <td><code>@ManyToMany</code></td>
+        <td><span class="badge b-verde">LAZY</span></td>
+        <td>✅ Correcto por defecto</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="g2">
+    <div class="c-verde card">
+      <div class="card-hdr">✅ Cuándo usar LAZY</div>
+      <div class="card-body" style="font-size:.88rem">
+        <ul style="padding-left:16px;line-height:2">
+          <li>Listados donde no siempre se muestra la relación</li>
+          <li>Entidades con muchas relaciones</li>
+          <li>Aplicaciones con alto volumen de datos</li>
+          <li><strong>Regla general: empezar siempre con LAZY</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="c-naranja card">
+      <div class="card-hdr">⚠️ Cuándo puede convenir EAGER</div>
+      <div class="card-body" style="font-size:.88rem">
+        <ul style="padding-left:16px;line-height:2">
+          <li>Relaciones pequeñas que siempre se usan</li>
+          <li>Entidades que siempre se muestran con su relación</li>
+          <li>Cuando ya se resolvió el N+1 de otra forma</li>
+          <li><strong>Nunca EAGER en colecciones (@OneToMany)</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 7: N+1 y JOIN FETCH -->
+<div class="sec" id="s7">
+  <div class="sec-hdr"><div class="sec-num">7</div><div class="sec-titulo">El problema N+1 y la solución JOIN FETCH</div></div>
+
+  <div class="dn">DIAPOSITIVA 12 — ¿Qué es el problema N+1?</div>
+  <div class="c-rojo card">
+    <div class="card-hdr">❌ Problema N+1: 100 mascotas = 101 consultas SQL</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// Esta consulta JPQL con LAZY carga las mascotas...</span>
+<span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; mascotas =
+    em.<span class="mt">createQuery</span>(<span class="st">"SELECT m FROM Mascota m"</span>, <span class="cn">Mascota</span>.<span class="kw">class</span>)
+      .<span class="mt">getResultList</span>();
+
+<span class="cm">// → SQL #1: SELECT id, nombre, especie, cliente_id FROM mascota
+//   Resultado: 100 mascotas en memoria</span>
+
+<span class="cm">// Ahora en el XHTML se muestra: #{m.cliente.apellido}
+// Por CADA mascota JSF llama m.getCliente() → JPA hace 1 SELECT</span>
+<span class="cm">// → SQL #2:  SELECT * FROM cliente WHERE id=1
+// → SQL #3:  SELECT * FROM cliente WHERE id=3
+// → SQL #4:  SELECT * FROM cliente WHERE id=1  (¡mismo id, repetido!)
+// → SQL #5:  SELECT * FROM cliente WHERE id=7
+// ... 100 SELECT más = 101 consultas en total ❌</span>
+
+<span class="cm">// Con 1000 mascotas → 1001 consultas ❌ Performance desastrosa</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 13 — Solución: JOIN FETCH en JPQL</div>
+  <div class="c-verde card">
+    <div class="card-hdr">✅ JOIN FETCH: una sola consulta con JOIN</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// JOIN FETCH fuerza la carga del cliente en la misma consulta</span>
+<span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; mascotas =
+    em.<span class="mt">createQuery</span>(
+        <span class="st">"SELECT m FROM Mascota m JOIN FETCH m.cliente ORDER BY m.nombre"</span>,
+        <span class="cn">Mascota</span>.<span class="kw">class</span>
+    ).<span class="mt">getResultList</span>();
+
+<span class="cm">// → SQL generado (1 sola consulta):
+// SELECT m.id, m.nombre, m.especie, m.raza,
+//        c.id, c.nombre, c.apellido, c.email
+// FROM mascota m
+// INNER JOIN cliente c ON m.cliente_id = c.id
+// ORDER BY m.nombre
+//
+// 100 mascotas → 1 consulta ✅  1000 mascotas → 1 consulta ✅</span>
+
+<span class="cm">// Para 3 niveles (Turno → Mascota → Cliente):</span>
+em.<span class="mt">createQuery</span>(
+    <span class="st">"SELECT t FROM Turno t "</span>
+  + <span class="st">"JOIN FETCH t.mascota m "</span>
+  + <span class="st">"JOIN FETCH m.cliente "</span>
+  + <span class="st">"ORDER BY t.fechaHora DESC"</span>,
+    <span class="cn">Turno</span>.<span class="kw">class</span>
+).<span class="mt">getResultList</span>();
+<span class="cm">// → 1 query con 2 JOINs: turno → mascota → cliente ✅</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 14 — JOIN FETCH en @NamedQuery</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Turno.java — NamedQueries con JOIN FETCH</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="an">@NamedQueries</span>({
+    <span class="cm">// ✅ JOIN FETCH trae Mascota + Cliente en 1 consulta</span>
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Turno.findAll"</span>,
+        query = <span class="st">"SELECT t FROM Turno t "</span>
+              + <span class="st">"JOIN FETCH t.mascota m "</span>
+              + <span class="st">"JOIN FETCH m.cliente "</span>
+              + <span class="st">"ORDER BY t.fechaHora DESC"</span>),
+
+    <span class="cm">// ✅ Solo turnos vigentes con JOIN FETCH</span>
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Turno.findVigentes"</span>,
+        query = <span class="st">"SELECT t FROM Turno t "</span>
+              + <span class="st">"JOIN FETCH t.mascota m "</span>
+              + <span class="st">"JOIN FETCH m.cliente "</span>
+              + <span class="st">"WHERE t.estado IN ('PENDIENTE','CONFIRMADO') "</span>
+              + <span class="st">"ORDER BY t.fechaHora ASC"</span>),
+
+    <span class="cm">// Para búsqueda por estado (parámetro nombrado)</span>
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Turno.findByEstado"</span>,
+        query = <span class="st">"SELECT t FROM Turno t "</span>
+              + <span class="st">"JOIN FETCH t.mascota m "</span>
+              + <span class="st">"JOIN FETCH m.cliente "</span>
+              + <span class="st">"WHERE t.estado = :estado "</span>
+              + <span class="st">"ORDER BY t.fechaHora ASC"</span>)
+})
+<span class="kw">public class</span> <span class="cn">Turno</span> <span class="kw">implements</span> <span class="cn">Serializable</span> { ... }<span class="cl">Turno.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">⚠️</span>
+    <div><strong>Regla práctica:</strong> Siempre que una lista se muestre en la vista y acceda a propiedades de relaciones LAZY, usar <strong>JOIN FETCH</strong> en la consulta del DAO. Esto evita el problema N+1 y hace la aplicación mucho más eficiente.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 8: CASCADE -->
+<div class="sec" id="s8">
+  <div class="sec-hdr"><div class="sec-num">8</div><div class="sec-titulo">CascadeType: propagar operaciones</div></div>
+
+  <div class="dn">DIAPOSITIVA 15 — Tabla completa de CascadeType</div>
+  <table>
+    <thead><tr><th>CascadeType</th><th>Propaga</th><th>Ejemplo práctico</th><th>¿Cuándo usar?</th></tr></thead>
+    <tbody>
+      <tr><td><code>PERSIST</code></td><td><code>em.persist()</code></td><td>Guardar Cliente guarda sus mascotas nuevas</td><td>Cuando se crean hijos desde el padre</td></tr>
+      <tr><td><code>MERGE</code></td><td><code>em.merge()</code></td><td>Actualizar Cliente actualiza sus mascotas</td><td>Cuando se editan hijos desde el padre</td></tr>
+      <tr><td><code>REMOVE</code></td><td><code>em.remove()</code></td><td>Eliminar Cliente elimina sus mascotas</td><td>⚠️ Solo si los hijos no tienen otras FK</td></tr>
+      <tr><td><code>REFRESH</code></td><td><code>em.refresh()</code></td><td>Recargar Cliente recarga sus mascotas</td><td>Cuando se sincroniza con la BD</td></tr>
+      <tr><td><code>DETACH</code></td><td><code>em.detach()</code></td><td>Desconectar Cliente desconecta sus mascotas</td><td>Raro, uso avanzado</td></tr>
+      <tr><td><code>ALL</code></td><td>Todas</td><td>Propaga todas las operaciones</td><td>Relación fuerte padre-hijo</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 16 — CascadeType en la práctica</div>
+  <div class="g2">
+    <div class="c-verde card">
+      <div class="card-hdr">✅ CascadeType.ALL: relación fuerte</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// Cliente "posee" a sus mascotas
+// Si se elimina el cliente → se eliminan sus mascotas</span>
+<span class="an">@OneToMany</span>(
+    mappedBy      = <span class="st">"cliente"</span>,
+    cascade       = CascadeType.ALL, <span class="cm">// todo en cascada</span>
+    orphanRemoval = <span class="kw">true</span>            <span class="cm">// quitar de lista = DELETE</span>
+)
+<span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; mascotas;
+
+<span class="cm">// Al agregar mascota a la lista y guardar el cliente:
+Cliente c = em.find(Cliente.class, 1L);
+Mascota nueva = new Mascota("Rex", "Perro");
+nueva.setCliente(c);                  // ← siempre setear ambos lados
+c.getMascotas().add(nueva);           // ← agregar a la colección
+// em.persist(nueva) ← NO necesario si hay CascadeType.PERSIST</span></code></pre>
+      </div>
+    </div>
+    <div class="c-naranja card">
+      <div class="card-hdr">⚠️ Sin cascade: relación débil</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// Turno referencia a Mascota,
+// pero NO "posee" a Mascota</span>
+<span class="an">@ManyToOne</span>(
+    fetch    = FetchType.LAZY,
+    optional = <span class="kw">false</span>
+    <span class="cm">// sin cascade: eliminar Turno NO afecta a Mascota</span>
+)
+<span class="an">@JoinColumn</span>(name = <span class="st">"mascota_id"</span>)
+<span class="kw">private</span> <span class="cn">Mascota</span> mascota;
+
+<span class="cm">// ⚠️ Si se intenta eliminar Mascota que tiene Turnos:
+// → ConstraintViolationException
+// Solución: baja lógica (activo=false) en lugar de DELETE</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">⚠️</span>
+    <div><strong>Cuidado con CascadeType.REMOVE:</strong> Si un Cliente tiene mascotas y esas mascotas tienen turnos, eliminar el cliente en cascada intenta borrar las mascotas, pero fallará si los turnos tienen FK restrictiva hacia mascota. <strong>Preferir siempre baja lógica</strong> (<code>activo = false</code>) en sistemas con datos relacionados.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCIÓN 9: @OneToOne -->
+<div class="sec" id="s9">
+  <div class="sec-hdr"><div class="sec-num">9</div><div class="sec-titulo">@OneToOne</div></div>
+
+  <div class="dn">DIAPOSITIVA 17 — Relación uno a uno</div>
+  <div class="c-azul card">
+    <div class="card-hdr">📋 ¿Cuándo usar @OneToOne?</div>
+    <div class="card-body"><p>Cuando exactamente un registro de una tabla se corresponde con exactamente un registro de otra. Ejemplo: un <strong>Usuario</strong> tiene un <strong>Perfil</strong>, un <strong>Pedido</strong> tiene una <strong>Factura</strong>, un <strong>Empleado</strong> tiene un <strong>LegajoMedico</strong>.</p></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Usuario.java — lado dueño (tiene FK)</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="kw">public class</span> <span class="cn">Usuario</span> {
+  <span class="an">@Id</span> <span class="an">@GeneratedValue</span>(...)
+  <span class="kw">private</span> <span class="cn">Long</span> id;
+  <span class="kw">private</span> <span class="cn">String</span> username;
+
+  <span class="cm">// El lado dueño tiene la FK</span>
+  <span class="an">@OneToOne</span>(
+    cascade  = CascadeType.ALL,
+    fetch    = FetchType.LAZY,
+    optional = <span class="kw">false</span>
+  )
+  <span class="an">@JoinColumn</span>(name = <span class="st">"perfil_id"</span>, unique = <span class="kw">true</span>)
+  <span class="kw">private</span> <span class="cn">Perfil</span> perfil;
+  <span class="cm">// tabla usuario → columna perfil_id (FK + UNIQUE)</span>
+}</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Perfil.java — lado inverso</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="kw">public class</span> <span class="cn">Perfil</span> {
+  <span class="an">@Id</span> <span class="an">@GeneratedValue</span>(...)
+  <span class="kw">private</span> <span class="cn">Long</span> id;
+  <span class="kw">private</span> <span class="cn">String</span> bio;
+  <span class="kw">private</span> <span class="cn">String</span> foto;
+
+  <span class="cm">// El lado inverso usa mappedBy</span>
+  <span class="an">@OneToOne</span>(mappedBy = <span class="st">"perfil"</span>)
+  <span class="kw">private</span> <span class="cn">Usuario</span> usuario;
+  <span class="cm">// tabla perfil → NO tiene ninguna FK extra</span>
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 10: @ManyToMany -->
+<div class="sec" id="s10">
+  <div class="sec-hdr"><div class="sec-num">10</div><div class="sec-titulo">@ManyToMany y tabla intermedia</div></div>
+
+  <div class="dn">DIAPOSITIVA 18 — Relación muchos a muchos</div>
+  <div class="c-azul card">
+    <div class="card-hdr">📋 Ejemplo: Veterinario ↔ Especialidad</div>
+    <div class="card-body"><p>Un veterinario puede tener múltiples especialidades y una especialidad puede ser practicada por múltiples veterinarios. JPA crea automáticamente la <strong>tabla intermedia</strong> <code>veterinario_especialidad</code>.</p></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Veterinario.java — lado dueño</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="kw">public class</span> <span class="cn">Veterinario</span> {
+  <span class="an">@Id</span> <span class="an">@GeneratedValue</span>(...)
+  <span class="kw">private</span> <span class="cn">Long</span> id;
+  <span class="kw">private</span> <span class="cn">String</span> nombre;
+
+  <span class="an">@ManyToMany</span>(fetch = FetchType.LAZY)
+  <span class="an">@JoinTable</span>(
+    name               = <span class="st">"veterinario_especialidad"</span>,
+    joinColumns        = <span class="an">@JoinColumn</span>(name = <span class="st">"vet_id"</span>),
+    inverseJoinColumns = <span class="an">@JoinColumn</span>(name = <span class="st">"esp_id"</span>)
+  )
+  <span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Especialidad</span>&gt; especialidades
+    = <span class="kw">new</span> <span class="cn">ArrayList</span>&lt;&gt;();
+  <span class="cm">// tabla: veterinario_especialidad(vet_id, esp_id)</span>
+}</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Especialidad.java — lado inverso</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="kw">public class</span> <span class="cn">Especialidad</span> {
+  <span class="an">@Id</span> <span class="an">@GeneratedValue</span>(...)
+  <span class="kw">private</span> <span class="cn">Long</span> id;
+  <span class="kw">private</span> <span class="cn">String</span> nombre;
+
+  <span class="an">@ManyToMany</span>(
+    mappedBy = <span class="st">"especialidades"</span> <span class="cm">// campo en Veterinario</span>
+  )
+  <span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Veterinario</span>&gt; veterinarios
+    = <span class="kw">new</span> <span class="cn">ArrayList</span>&lt;&gt;();
+  <span class="cm">// NO usa @JoinTable — lo define el lado dueño</span>
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">💡</span>
+    <div><strong>Tabla intermedia con atributos:</strong> Si la tabla intermedia necesita campos propios (ej: <code>fecha_desde</code>), se crea una entidad intermedia (<code>VeterinarioEspecialidad</code>) con sus propias relaciones <code>@ManyToOne</code> a cada lado. Esto se llama <strong>entidad de unión</strong>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCIÓN 11: JPQL CON RELACIONES -->
+<div class="sec" id="s11">
+  <div class="sec-hdr"><div class="sec-num">11</div><div class="sec-titulo">JPQL con relaciones: path expressions</div></div>
+
+  <div class="dn">DIAPOSITIVA 19 — Navegación por relaciones en JPQL</div>
+  <div class="alerta a-viol">
+    <span class="a-ico">💡</span>
+    <div><strong>Path expression:</strong> En JPQL se puede navegar a través de relaciones usando el punto, igual que en Java: <code>m.cliente.apellido</code>. JPA genera automáticamente el JOIN SQL necesario.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">Consultas JPQL con navegación de relaciones</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// 1. Mascotas de un cliente específico (por ID)</span>
+em.<span class="mt">createQuery</span>(
+  <span class="st">"SELECT m FROM Mascota m WHERE m.cliente.id = :clienteId"</span>,
+  <span class="cn">Mascota</span>.<span class="kw">class</span>)
+  .<span class="mt">setParameter</span>(<span class="st">"clienteId"</span>, <span class="nm">1L</span>)
+  .<span class="mt">getResultList</span>();
+<span class="cm">// → SELECT * FROM mascota WHERE cliente_id = 1</span>
+
+<span class="cm">// 2. Mascotas de clientes activos (navegar 2 niveles)</span>
+em.<span class="mt">createQuery</span>(
+  <span class="st">"SELECT m FROM Mascota m WHERE m.cliente.activo = true"</span>,
+  <span class="cn">Mascota</span>.<span class="kw">class</span>)
+  .<span class="mt">getResultList</span>();
+
+<span class="cm">// 3. Turnos de una mascota, con JOIN FETCH del cliente del dueño</span>
+em.<span class="mt">createQuery</span>(
+  <span class="st">"SELECT t FROM Turno t "</span>
++ <span class="st">"JOIN FETCH t.mascota m "</span>
++ <span class="st">"JOIN FETCH m.cliente "</span>
++ <span class="st">"WHERE t.mascota.id = :mascotaId "</span>
++ <span class="st">"ORDER BY t.fechaHora DESC"</span>,
+  <span class="cn">Turno</span>.<span class="kw">class</span>)
+  .<span class="mt">setParameter</span>(<span class="st">"mascotaId"</span>, mascotaId)
+  .<span class="mt">getResultList</span>();
+
+<span class="cm">// 4. Clientes que tienen mascotas activas</span>
+em.<span class="mt">createQuery</span>(
+  <span class="st">"SELECT DISTINCT c FROM Cliente c "</span>
++ <span class="st">"JOIN c.mascotas m WHERE m.activo = true"</span>,
+  <span class="cn">Cliente</span>.<span class="kw">class</span>)
+  .<span class="mt">getResultList</span>();
+
+<span class="cm">// 5. Cantidad de mascotas por cliente</span>
+em.<span class="mt">createQuery</span>(
+  <span class="st">"SELECT c.apellido, COUNT(m) FROM Cliente c "</span>
++ <span class="st">"LEFT JOIN c.mascotas m GROUP BY c.id ORDER BY c.apellido"</span>)
+  .<span class="mt">getResultList</span>();</code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 20 — Tabla: tipos de JOIN en JPQL</div>
+  <table>
+    <thead><tr><th>Tipo</th><th>JPQL</th><th>Resultado</th><th>Cuándo usar</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>JOIN</strong></td>
+        <td><code>JOIN c.mascotas m</code></td>
+        <td>Solo clientes que tienen mascotas (INNER JOIN)</td>
+        <td>Filtrar por atributo del relacionado</td>
+      </tr>
+      <tr>
+        <td><strong>LEFT JOIN</strong></td>
+        <td><code>LEFT JOIN c.mascotas m</code></td>
+        <td>Todos los clientes, mascotas puede ser null</td>
+        <td>Incluir registros sin relación</td>
+      </tr>
+      <tr>
+        <td><strong>JOIN FETCH</strong></td>
+        <td><code>JOIN FETCH m.cliente</code></td>
+        <td>Carga la relación en memoria (evita N+1)</td>
+        <td>Cuando se accede a la relación en la vista</td>
+      </tr>
+      <tr>
+        <td><strong>LEFT JOIN FETCH</strong></td>
+        <td><code>LEFT JOIN FETCH c.mascotas</code></td>
+        <td>Carga la colección, incluso si está vacía</td>
+        <td>Colecciones que pueden estar vacías</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 12: RELACIONES EN LA VISTA JSF -->
+<div class="sec" id="s12">
+  <div class="sec-hdr"><div class="sec-num">12</div><div class="sec-titulo">Relaciones en la vista JSF y el Bean</div></div>
+
+  <div class="dn">DIAPOSITIVA 21 — El problema de mostrar relaciones en selectores</div>
+  <div class="c-azul card">
+    <div class="card-hdr">🖥️ Patrón: selector con ID + resolución en el Servicio</div>
+    <div class="card-body"><p>En un formulario JSF, cuando hay un <code>&lt;h:selectOneMenu&gt;</code> para elegir el cliente de una mascota, el selector retorna un <strong>ID (Long)</strong>. El Bean guarda ese ID y el Servicio resuelve la relación buscando el objeto completo con <code>em.find()</code>.</p></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 mascotas/abm.xhtml — Selector de Cliente</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- El selector devuelve el ID del cliente --&gt;</span>
+&lt;<span class="kw">h:selectOneMenu</span>
+  id=<span class="st">"cliente"</span>
+  value=<span class="st">"#{mascotaBean.clienteIdSeleccionado}"</span>
+  required=<span class="st">"true"</span>&gt;
+
+  &lt;<span class="kw">f:selectItem</span>
+    itemValue=<span class="st">""</span>
+    itemLabel=<span class="st">"— Seleccione un cliente —"</span>
+    noSelectionOption=<span class="st">"true"</span>/&gt;
+
+  &lt;<span class="kw">f:selectItems</span>
+    value=<span class="st">"#{mascotaBean.clientes}"</span>
+    var=<span class="st">"cli"</span>
+    itemValue=<span class="st">"#{cli.id}"</span>           ← ID (Long)
+    itemLabel=<span class="st">"#{cli.apellido}, #{cli.nombre}"</span>/&gt;
+
+  &lt;<span class="kw">f:converter</span> converterId=<span class="st">"jakarta.faces.Long"</span>/&gt;
+  <span class="cm">&lt;!-- Converter necesario: String del HTML → Long de Java --&gt;</span>
+&lt;/<span class="kw">h:selectOneMenu</span>&gt;</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 MascotaBean.java + MascotaServicio.java</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// En el Bean: guarda el ID seleccionado</span>
+<span class="kw">private</span> <span class="cn">Long</span> clienteIdSeleccionado; <span class="cm">// ← solo el ID</span>
+
+<span class="kw">public void</span> <span class="mt">guardar</span>() {
+  <span class="cm">// Le pasa el ID al servicio</span>
+  mascotaServicio.<span class="mt">guardar</span>(
+      mascotaSeleccionada,
+      clienteIdSeleccionado <span class="cm">// ← ID del selector</span>
+  );
+}
+
+<span class="cm">// En el Servicio: resuelve la relación</span>
+<span class="an">@Transactional</span>
+<span class="kw">public void</span> <span class="mt">guardar</span>(<span class="cn">Mascota</span> mascota, <span class="cn">Long</span> clienteId) {
+  <span class="cm">// Busca el objeto Cliente completo en la BD</span>
+  <span class="cn">Cliente</span> cliente = clienteDAO.<span class="mt">buscarPorId</span>(clienteId);
+  <span class="kw">if</span> (cliente == <span class="kw">null</span> || !cliente.<span class="mt">isActivo</span>())
+    <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(<span class="st">"Cliente inválido"</span>);
+
+  mascota.<span class="mt">setCliente</span>(cliente); <span class="cm">// ← setea el objeto, no el ID</span>
+
+  <span class="kw">if</span> (mascota.<span class="mt">getId</span>() == <span class="kw">null</span>) mascotaDAO.<span class="mt">guardar</span>(mascota);
+  <span class="kw">else</span>                         mascotaDAO.<span class="mt">actualizar</span>(mascota);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 22 — Mostrar relaciones en la tabla</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Navegar relaciones desde la vista XHTML</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- En la tabla de turnos, mostramos datos de Mascota y Cliente --&gt;</span>
+&lt;<span class="kw">h:dataTable</span> value=<span class="st">"#{turnoBean.turnos}"</span> var=<span class="st">"t"</span>&gt;
+
+  &lt;<span class="kw">h:column</span>&gt;
+    &lt;<span class="kw">f:facet</span> name=<span class="st">"header"</span>&gt;Fecha&lt;/<span class="kw">f:facet</span>&gt;
+    <span class="cm">&lt;!-- Formatear LocalDateTime --&gt;</span>
+    &lt;<span class="kw">h:outputText</span> value=<span class="st">"#{t.fechaHora}"</span>&gt;
+      &lt;<span class="kw">f:convertDateTime</span> pattern=<span class="st">"dd/MM/yyyy HH:mm"</span>
+                         type=<span class="st">"localDateTime"</span>/&gt;
+    &lt;/<span class="kw">h:outputText</span>&gt;
+  &lt;/<span class="kw">h:column</span>&gt;
+
+  &lt;<span class="kw">h:column</span>&gt;
+    &lt;<span class="kw">f:facet</span> name=<span class="st">"header"</span>&gt;Mascota&lt;/<span class="kw">f:facet</span>&gt;
+    <span class="cm">&lt;!-- Navegar: turno → mascota --&gt;</span>
+    #{t.mascota.nombre} (#{t.mascota.especie})
+  &lt;/<span class="kw">h:column</span>&gt;
+
+  &lt;<span class="kw">h:column</span>&gt;
+    &lt;<span class="kw">f:facet</span> name=<span class="st">"header"</span>&gt;Dueño&lt;/<span class="kw">f:facet</span>&gt;
+    <span class="cm">&lt;!-- Navegar: turno → mascota → cliente --&gt;</span>
+    #{t.mascota.cliente.apellido}, #{t.mascota.cliente.nombre}
+  &lt;/<span class="kw">h:column</span>&gt;
+
+&lt;/<span class="kw">h:dataTable</span>&gt;
+<span class="cm">&lt;!-- IMPORTANTE: para que t.mascota.cliente funcione sin N+1
+     el DAO debe usar JOIN FETCH en la NamedQuery --&gt;</span></code></pre>
+    </div>
+  </div>
+  <div class="alerta a-warn">
+    <span class="a-ico">⚠️</span>
+    <div><strong>Regla crítica:</strong> Si en la vista se navega <code>t.mascota.cliente.apellido</code>, la consulta del DAO <strong>debe</strong> tener <code>JOIN FETCH t.mascota JOIN FETCH m.cliente</code>. Sin eso, cada acceso a <code>cliente</code> genera una consulta extra → problema N+1.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN RESUMEN -->
+<div class="sec" id="res">
+  <div class="sec-hdr"><div class="sec-num">✅</div><div class="sec-titulo">Resumen, errores frecuentes y actividad</div></div>
+
+  <div class="dn">DIAPOSITIVA 23 — Cuadro de decisión: ¿qué anotación usar?</div>
+  <div class="c-azul card">
+    <div class="card-hdr">🤔 ¿Qué anotación necesito?</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">¿Cuántos A tienen cuántos B?
+
+1 A → 1 B                 → @OneToOne   (en el lado con FK)
+1 A → muchos B            → @OneToMany  (en A, mappedBy)  
+Muchos A → 1 B            → @ManyToOne  (en A, tiene FK)  ← más común
+Muchos A → muchos B       → @ManyToMany (en uno, @JoinTable)
+
+¿Quién tiene la clave foránea en la tabla?
+  El lado "Muchos" → @ManyToOne
+
+¿Cuándo poner @OneToMany?
+  En el lado "Uno", con mappedBy apuntando al campo @ManyToOne del lado "Muchos"</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 24 — Tabla resumen completa</div>
+  <table>
+    <thead><tr><th>Concepto</th><th>Qué hace</th><th>Clave para recordar</th></tr></thead>
+    <tbody>
+      <tr><td><code>@ManyToOne</code></td><td>Declara la FK en la entidad "muchos"</td><td>La anotación va donde está la columna FK</td></tr>
+      <tr><td><code>@OneToMany(mappedBy)</code></td><td>Declara la colección en la entidad "uno"</td><td>mappedBy = nombre del campo @ManyToOne del otro lado</td></tr>
+      <tr><td><code>@JoinColumn(name)</code></td><td>Nombre de la columna FK en la BD</td><td>Si no se especifica, JPA genera un nombre automático</td></tr>
+      <tr><td><code>FetchType.LAZY</code></td><td>Carga el relacionado solo cuando se accede</td><td>Por defecto en @OneToMany. Forzarlo en @ManyToOne</td></tr>
+      <tr><td><code>FetchType.EAGER</code></td><td>Carga con JOIN siempre</td><td>Default en @ManyToOne. Puede causar cargas innecesarias</td></tr>
+      <tr><td><code>JOIN FETCH</code></td><td>JPQL: fuerza carga de relación LAZY en esa query</td><td>Solución al problema N+1</td></tr>
+      <tr><td><code>CascadeType.ALL</code></td><td>Propaga todas las operaciones al hijo</td><td>Usar en relaciones fuerte padre-hijo</td></tr>
+      <tr><td><code>orphanRemoval=true</code></td><td>Elimina hijos que se quitan de la colección</td><td>Complemento de CascadeType.ALL</td></tr>
+      <tr><td><code>optional=false</code></td><td>La relación no puede ser null (NOT NULL en BD)</td><td>Equivale a @NotNull en la relación</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 25 — Errores frecuentes con relaciones JPA</div>
+  <table>
+    <thead><tr><th>Error</th><th>Causa</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>LazyInitializationException</code></td>
+        <td>Acceder a colección LAZY fuera del contexto JPA (fuera de la transacción)</td>
+        <td>Usar <code>JOIN FETCH</code> en la consulta DAO, o cargar la relación dentro de la transacción</td>
+      </tr>
+      <tr>
+        <td><code>ConverterException</code> en selectOneMenu</td>
+        <td>El <code>itemValue="#{cli.id}"</code> viene como String y el Bean espera Long</td>
+        <td>Agregar <code>&lt;f:converter converterId="jakarta.faces.Long"/&gt;</code></td>
+      </tr>
+      <tr>
+        <td><code>ConstraintViolationException</code></td>
+        <td>Intentar guardar Mascota sin setear el Cliente (FK null)</td>
+        <td>Llamar <code>mascota.setCliente(cliente)</code> antes de <code>em.persist()</code></td>
+      </tr>
+      <tr>
+        <td><code>StackOverflowError</code></td>
+        <td>toString()/hashCode() con referencia circular A→B→A</td>
+        <td>No incluir la relación inversa en toString(). Usar <code>@EqualsAndHashCode(exclude=...)</code></td>
+      </tr>
+      <tr>
+        <td>N+1 queries sin error visible</td>
+        <td>LAZY + acceso en bucle desde la vista sin JOIN FETCH</td>
+        <td>Activar <code>eclipselink.logging.level.sql=FINE</code> para ver las queries y agregar JOIN FETCH</td>
+      </tr>
+      <tr>
+        <td>mappedBy incorrecto</td>
+        <td><code>mappedBy="clientes"</code> pero el campo en la otra clase se llama <code>"cliente"</code></td>
+        <td>mappedBy debe coincidir exactamente con el nombre del campo Java (case sensitive)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="dn" style="margin-top:24px">DIAPOSITIVA 26 — Actividad práctica</div>
+  <div class="c-azul card">
+    <div class="card-hdr">💻 Actividad: relaciones en VeterinariaApp</div>
+    <div class="card-body">
+      <div class="paso"><div class="paso-n">1</div><div class="paso-body">
+        <h4>Verificar las anotaciones de relación</h4>
+        <p>Abrir <code>Cliente.java</code>, <code>Mascota.java</code> y <code>Turno.java</code>. Identificar todos los <code>@ManyToOne</code>, <code>@OneToMany</code> y sus <code>@JoinColumn</code>. Verificar que <code>mappedBy</code> coincide con el nombre exacto del campo.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">2</div><div class="paso-body">
+        <h4>Activar el log SQL de EclipseLink</h4>
+        <p>En <code>persistence.xml</code>, agregar <code>eclipselink.logging.level.sql=FINE</code>. Navegar a la lista de turnos y contar cuántas queries SQL se generan. ¿Hay problema N+1?</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">3</div><div class="paso-body">
+        <h4>Agregar JOIN FETCH donde falte</h4>
+        <p>En <code>TurnoDAO</code>, asegurarse de que todas las <code>@NamedQuery</code> que devuelven listas tengan <code>JOIN FETCH t.mascota JOIN FETCH m.cliente</code>. Volver a contar las queries.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">4</div><div class="paso-body">
+        <h4>Listar mascotas de un cliente</h4>
+        <p>En <code>MascotaDAO</code>, crear el método <code>listarPorCliente(Long clienteId)</code> usando la <code>@NamedQuery</code> con <code>WHERE m.cliente.id = :clienteId</code>. Probarlo desde un endpoint de prueba.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">5</div><div class="paso-body">
+        <h4>Mostrar el selector de mascotas en el formulario de Turnos</h4>
+        <p>En <code>turnos/abm.xhtml</code>, el selector debe mostrar el nombre de la mascota y el apellido de su dueño: <code>itemLabel="#{m.nombre} — #{m.cliente.apellido}"</code>. Verificar que no genera N+1 usando la NamedQuery <code>Mascota.findActivasConCliente</code> con <code>JOIN FETCH</code>.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="alerta a-ok" style="margin-top:20px">
+    <span class="a-ico">🎓</span>
+    <div>
+      <strong>Logro de la clase:</strong> Dominás los 4 tipos de relaciones JPA, sabés dónde va la FK, cómo navegar en ambas direcciones, cómo evitar el problema N+1 con JOIN FETCH y cómo resolver relaciones desde la vista JSF. Estas herramientas permiten modelar cualquier dominio de negocio en una aplicación empresarial real.
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><strong>Programación Web Avanzada — Backend</strong> &nbsp;|&nbsp; Clase 07: Relaciones entre Entidades con JPA</p>
+  <p style="margin-top:6px;font-size:.75rem">JPA 3.1 · EclipseLink · @OneToMany · @ManyToOne · @OneToOne · @ManyToMany · FetchType · CascadeType · JOIN FETCH</p>
+</footer>
+</body>
+</html>
