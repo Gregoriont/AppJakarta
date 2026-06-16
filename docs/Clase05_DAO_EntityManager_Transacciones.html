@@ -131,6 +131,54 @@ footer{background:var(--azul);color:rgba(255,255,255,.7);text-align:center;
 /* ── SEPARADOR ── */
 .sep{height:2px;background:linear-gradient(90deg,var(--azul2),transparent);
   max-width:860px;margin:0 auto 48px;border-radius:2px}
+
+/* ── DIAGRAMA ARQUITECTURA EN CAPAS ── */
+.arq-wrapper{background:#0f172a;border-radius:16px;padding:32px 28px;margin:20px 0;
+  display:flex;flex-direction:column;align-items:center;gap:0}
+.arq-titulo{color:#94a3b8;font-size:.75rem;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:20px}
+.arq-capa{width:100%;max-width:580px;display:flex;align-items:center;gap:14px;
+  padding:14px 18px;border-radius:10px;border:1px solid;cursor:default;
+  transition:transform .15s,box-shadow .15s}
+.arq-capa:hover{transform:translateX(4px);box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.arq-capa-icono{font-size:1.5rem;width:36px;text-align:center;flex-shrink:0}
+.arq-capa-info{flex:1}
+.arq-capa-nombre{font-weight:700;font-size:.95rem}
+.arq-capa-detalle{font-size:.78rem;opacity:.75;margin-top:2px}
+.arq-capa-badge{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:12px;
+  white-space:nowrap;letter-spacing:.3px;flex-shrink:0}
+
+.arq-vista   {background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe}
+.arq-vista   .arq-capa-badge{background:#3b82d1;color:#fff}
+.arq-bean    {background:#1e3a5f;border-color:#60a5fa;color:#dbeafe}
+.arq-bean    .arq-capa-badge{background:#2563a8;color:#fff}
+.arq-servicio{background:#14532d;border-color:#4ade80;color:#bbf7d0}
+.arq-servicio .arq-capa-badge{background:#16a34a;color:#fff}
+.arq-dao     {background:#312e81;border-color:#a78bfa;color:#ede9fe}
+.arq-dao     .arq-capa-badge{background:#7c3aed;color:#fff}
+.arq-em      {background:#422006;border-color:#fb923c;color:#ffedd5}
+.arq-em      .arq-capa-badge{background:#ea580c;color:#fff}
+.arq-bd      {background:#1c1917;border-color:#a8a29e;color:#e7e5e4}
+.arq-bd      .arq-capa-badge{background:#57534e;color:#fff}
+
+.arq-flecha{color:#475569;font-size:.82rem;padding:6px 0;
+  display:flex;align-items:center;gap:8px}
+.arq-flecha span{color:#64748b;font-family:'Cascadia Code','Consolas',monospace;
+  font-size:.78rem}
+
+/* ── DIAGRAMA ESTADOS DE ENTIDAD ── */
+.estados-entidad{display:flex;align-items:stretch;gap:0;margin-top:16px;
+  flex-wrap:wrap;justify-content:center}
+.est-nodo{padding:14px 16px;border-radius:10px;text-align:center;
+  min-width:140px;flex:1;border:2px solid}
+.est-nombre{font-weight:800;font-size:.95rem;margin-bottom:6px}
+.est-desc{font-size:.77rem;opacity:.85;line-height:1.5}
+.est-new     {background:#1e3a5f;border-color:#60a5fa;color:#bfdbfe}
+.est-managed {background:#14532d;border-color:#4ade80;color:#bbf7d0}
+.est-detached{background:#422006;border-color:#fb923c;color:#ffedd5}
+.est-removed {background:#4c0519;border-color:#f87171;color:#fee2e2}
+.est-flecha{display:flex;align-items:center;padding:0 10px;
+  color:#64748b;font-size:.82rem;white-space:nowrap;font-weight:600}
 </style>
 </head>
 <body>
@@ -216,36 +264,74 @@ footer{background:var(--azul);color:rgba(255,255,255,.7);text-align:center;
     </div>
   </div>
 
-  <div class="diagrama">
-┌─────────────────────────────────────────────────────────────────────┐
-│                    ARQUITECTURA EN CAPAS                            │
-│                                                                     │
-│   Vista (.xhtml)                                                    │
-│       ↕  EL (Expression Language)                                  │
-│   ┌─────────────────┐                                               │
-│   │  Managed Bean   │  @Named @ViewScoped  ← CAPA PRESENTACIÓN     │
-│   │  (Controlador)  │                                               │
-│   └────────┬────────┘                                               │
-│            │  @Inject                                               │
-│   ┌────────▼────────┐                                               │
-│   │    Servicio     │  @ApplicationScoped  ← CAPA DE NEGOCIO       │
-│   │  (Reglas de     │                                               │
-│   │   negocio)      │                                               │
-│   └────────┬────────┘                                               │
-│            │  @Inject                                               │
-│   ┌────────▼────────┐                                               │
-│   │      DAO        │  @ApplicationScoped  ← CAPA DE DATOS         │
-│   │  (Acceso a BD)  │  @PersistenceContext                         │
-│   └────────┬────────┘                                               │
-│            │                                                        │
-│   ┌────────▼────────┐                                               │
-│   │  EntityManager  │  JPA / EclipseLink   ← ORM                   │
-│   └────────┬────────┘                                               │
-│            │  JDBC                                                  │
-│   ┌────────▼────────┐                                               │
-│   │    MySQL 8      │                      ← BASE DE DATOS         │
-│   └─────────────────┘                                               │
-└─────────────────────────────────────────────────────────────────────┘</div>
+  <!-- Diagrama visual de capas -->
+  <div class="arq-wrapper">
+    <div class="arq-titulo">ARQUITECTURA EN CAPAS</div>
+
+    <div class="arq-capa arq-vista">
+      <div class="arq-capa-icono">🌐</div>
+      <div class="arq-capa-info">
+        <div class="arq-capa-nombre">Vista</div>
+        <div class="arq-capa-detalle">clientes/abm.xhtml &nbsp;·&nbsp; Expression Language (EL)</div>
+      </div>
+      <div class="arq-capa-badge">Jakarta Faces 4.0</div>
+    </div>
+
+    <div class="arq-flecha">&#x2195; <span>@Named · EL binding</span></div>
+
+    <div class="arq-capa arq-bean">
+      <div class="arq-capa-icono">🎮</div>
+      <div class="arq-capa-info">
+        <div class="arq-capa-nombre">Managed Bean (Controlador)</div>
+        <div class="arq-capa-detalle">ClienteBean.java &nbsp;·&nbsp; Estado de la vista · Acciones del usuario</div>
+      </div>
+      <div class="arq-capa-badge">@Named @ViewScoped</div>
+    </div>
+
+    <div class="arq-flecha">&#x2193; <span>@Inject</span></div>
+
+    <div class="arq-capa arq-servicio">
+      <div class="arq-capa-icono">⚙️</div>
+      <div class="arq-capa-info">
+        <div class="arq-capa-nombre">Servicio (Negocio)</div>
+        <div class="arq-capa-detalle">ClienteServicio.java &nbsp;·&nbsp; Validaciones · Reglas de negocio</div>
+      </div>
+      <div class="arq-capa-badge">@ApplicationScoped</div>
+    </div>
+
+    <div class="arq-flecha">&#x2193; <span>@Inject</span></div>
+
+    <div class="arq-capa arq-dao">
+      <div class="arq-capa-icono">🗂️</div>
+      <div class="arq-capa-info">
+        <div class="arq-capa-nombre">DAO (Acceso a Datos)</div>
+        <div class="arq-capa-detalle">ClienteDAO.java &nbsp;·&nbsp; CRUD · JPQL · NamedQueries</div>
+      </div>
+      <div class="arq-capa-badge">@ApplicationScoped</div>
+    </div>
+
+    <div class="arq-flecha">&#x2193; <span>@PersistenceContext</span></div>
+
+    <div class="arq-capa arq-em">
+      <div class="arq-capa-icono">🔌</div>
+      <div class="arq-capa-info">
+        <div class="arq-capa-nombre">EntityManager</div>
+        <div class="arq-capa-detalle">persist · merge · remove · find · createNamedQuery</div>
+      </div>
+      <div class="arq-capa-badge">JPA 3.1 · EclipseLink</div>
+    </div>
+
+    <div class="arq-flecha">&#x2193; <span>JDBC · jdbc/VeterinariaDB</span></div>
+
+    <div class="arq-capa arq-bd">
+      <div class="arq-capa-icono">🗄️</div>
+      <div class="arq-capa-info">
+        <div class="arq-capa-nombre">Base de Datos</div>
+        <div class="arq-capa-detalle">tabla: cliente · mascota · turno</div>
+      </div>
+      <div class="arq-capa-badge">MySQL 8</div>
+    </div>
+  </div>
 
   <div class="grid2">
     <div class="card card-verde">
@@ -488,6 +574,28 @@ c.<span class="mt">setTelefono</span>(<span class="st">"11-9999-8888"</span>);
        └──────────────── merge() ────  DETACHED    REMOVED
                                        (fuera del   (marcada
                                         contexto)   para DELETE)</div>
+      <br/>
+      <div class="estados-entidad">
+        <div class="est-nodo est-new">
+          <div class="est-nombre">NEW</div>
+          <div class="est-desc">new Cliente()<br/>No conocida por JPA</div>
+        </div>
+        <div class="est-flecha">persist() →</div>
+        <div class="est-nodo est-managed">
+          <div class="est-nombre">MANAGED</div>
+          <div class="est-desc">JPA rastrea cambios<br/>Cualquier setter = UPDATE</div>
+        </div>
+        <div class="est-flecha">detach() →</div>
+        <div class="est-nodo est-detached">
+          <div class="est-nombre">DETACHED</div>
+          <div class="est-desc">Fuera del contexto<br/>merge() para re-adjuntar</div>
+        </div>
+        <div class="est-flecha">remove() →</div>
+        <div class="est-nodo est-removed">
+          <div class="est-nombre">REMOVED</div>
+          <div class="est-desc">Marcada para DELETE<br/>Se borra al hacer COMMIT</div>
+        </div>
+      </div>
       <ul style="padding-left:20px;margin-top:12px;line-height:2;font-size:.92rem">
         <li><strong>NEW:</strong> objeto Java recién creado, no conocido por JPA</li>
         <li><strong>MANAGED:</strong> JPA rastrea sus cambios — cualquier setter genera un UPDATE al hacer flush/commit</li>
