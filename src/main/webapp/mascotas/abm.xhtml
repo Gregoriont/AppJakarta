@@ -185,13 +185,17 @@
                     <h3 class="card-titulo">&#x1F4CB; Listado de Mascotas</h3>
                 </div>
                 <div class="tabla-wrapper">
+                    <h:panelGroup rendered="#{empty mascotaBean.mascotas}">
+                        <p class="tabla-vacia">No hay mascotas registradas.</p>
+                    </h:panelGroup>
+
                     <h:dataTable id="tablaMascotas"
                                  value="#{mascotaBean.mascotas}"
                                  var="m"
                                  styleClass="tabla"
                                  headerClass="tabla-header"
                                  rowClasses="fila-par,fila-impar"
-                                 emptyDataMessage="No hay mascotas registradas.">
+                                 rendered="#{not empty mascotaBean.mascotas}">
 
                         <h:column>
                             <f:facet name="header">ID</f:facet>

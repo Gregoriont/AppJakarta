@@ -712,3 +712,17 @@ textarea.form-control {
 @media (max-width: 400px) {
     .estados-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ── Mensaje tabla vacía ───────────────────────────────────── */
+.tabla-vacia {
+    text-align: center;
+    padding: 28px 20px;
+    color: var(--gris-400);
+    font-size: var(--fs-sm);
+    font-style: italic;
+    background: var(--gris-50);
+    border: 1px solid var(--gris-200);
+    border-radius: var(--radio);
+    margin: 4px 0;
+}

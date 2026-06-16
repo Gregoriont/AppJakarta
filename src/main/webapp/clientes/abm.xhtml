@@ -174,13 +174,17 @@
                     <h3 class="card-titulo">&#x1F4CB; Listado de Clientes</h3>
                 </div>
                 <div class="tabla-wrapper">
+                    <h:panelGroup rendered="#{empty clienteBean.clientes}">
+                        <p class="tabla-vacia">No hay clientes registrados.</p>
+                    </h:panelGroup>
+
                     <h:dataTable id="tablaClientes"
                                  value="#{clienteBean.clientes}"
                                  var="c"
                                  styleClass="tabla"
                                  headerClass="tabla-header"
                                  rowClasses="fila-par,fila-impar"
-                                 emptyDataMessage="No hay clientes registrados.">
+                                 rendered="#{not empty clienteBean.clientes}">
 
                         <h:column>
                             <f:facet name="header">ID</f:facet>
