@@ -179,6 +179,56 @@ footer{background:var(--azul);color:rgba(255,255,255,.7);text-align:center;
 .est-removed {background:#4c0519;border-color:#f87171;color:#fee2e2}
 .est-flecha{display:flex;align-items:center;padding:0 10px;
   color:#64748b;font-size:.82rem;white-space:nowrap;font-weight:600}
+
+/* ── DIAGRAMA FLUJO DE OPERACIÓN ── */
+.flujo-wrapper{display:flex;flex-direction:column;align-items:center;
+  gap:0;margin:16px 0;background:#0f172a;border-radius:16px;padding:28px 24px}
+
+.flujo-paso{width:100%;max-width:600px;display:flex;align-items:center;gap:14px;
+  padding:14px 18px;border-radius:10px;border:1px solid;
+  transition:transform .15s}
+.flujo-paso:hover{transform:translateX(4px)}
+.flujo-icono{font-size:1.6rem;width:36px;text-align:center;flex-shrink:0}
+.flujo-texto{flex:1}
+.flujo-titulo{font-weight:700;font-size:.92rem;margin-bottom:3px}
+.flujo-desc{font-size:.8rem;opacity:.8;line-height:1.5}
+.flujo-desc code{background:rgba(255,255,255,.1);padding:1px 5px;
+  border-radius:4px;font-size:.78rem}
+.flujo-tag{font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:10px;
+  white-space:nowrap;flex-shrink:0;letter-spacing:.3px}
+.flujo-tag-inline{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:10px;
+  background:rgba(255,255,255,.15);color:#e2e8f0}
+
+.flujo-usuario  {background:#1e293b;border-color:#475569;color:#e2e8f0}
+.flujo-usuario  .flujo-tag{background:#475569;color:#fff}
+.flujo-jsf      {background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe}
+.flujo-jsf      .flujo-tag{background:#2563a8;color:#fff}
+.flujo-jsf code {color:#93c5fd}
+.flujo-bean     {background:#312e81;border-color:#a78bfa;color:#ede9fe}
+.flujo-bean     .flujo-tag{background:#7c3aed;color:#fff}
+.flujo-bean code{color:#c4b5fd}
+.flujo-commit   {background:#14532d;border-color:#4ade80;color:#bbf7d0}
+.flujo-commit   .flujo-tag{background:#16a34a;color:#fff}
+.flujo-recarga  {background:#312e81;border-color:#818cf8;color:#e0e7ff}
+.flujo-recarga code{color:#a5b4fc;font-size:.75rem}
+.flujo-vista    {background:#1e3a5f;border-color:#60a5fa;color:#dbeafe}
+.flujo-vista    .flujo-tag{background:#2563a8;color:#fff}
+
+.flujo-flecha{color:#475569;font-size:1.1rem;padding:3px 0;line-height:1}
+
+.flujo-grupo{width:100%;max-width:600px;border:1px solid #a78bfa;
+  border-radius:10px;background:#1e1b4b;overflow:hidden}
+.flujo-grupo-titulo{background:#312e81;color:#c4b5fd;padding:10px 16px;
+  font-size:.82rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.flujo-grupo-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.flujo-sub{display:flex;gap:12px;align-items:flex-start;
+  color:#ddd6fe;font-size:.82rem;line-height:1.6}
+.flujo-sub-num{width:22px;height:22px;background:#7c3aed;color:#fff;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;flex-shrink:0;margin-top:1px}
+.flujo-chain{display:block;margin-top:3px;color:#a5b4fc;font-size:.78rem}
+.flujo-chain code{background:rgba(255,255,255,.08);padding:1px 5px;
+  border-radius:4px;font-family:'Cascadia Code','Consolas',monospace}
 </style>
 </head>
 <body>
@@ -1203,30 +1253,95 @@ Llamada al método
   </div>
 
   <h3 style="color:var(--azul);margin:24px 0 12px;font-size:1.05rem">▶ Flujo completo de una operación de guardado</h3>
-  <div class="diagrama">
-Usuario llena el formulario y hace click en "Guardar"
-        ↓
-Jakarta Faces ejecuta las 6 fases del ciclo de vida
-        ↓
-Fase 5: Invoke Application → clienteBean.guardar()
-        ↓
-ClienteBean.guardar()
-  └─→ clienteServicio.guardar(cliente)         [CAPA SERVICIO]
-        ├─ Valida: ¿email duplicado?
-        │    └─ clienteDAO.buscarPorEmail()     [CAPA DAO]
-        │         └─ em.createNamedQuery(...)   [EntityManager → MySQL]
-        └─ clienteDAO.guardar(cliente)          [CAPA DAO]  @Transactional
-              └─ em.persist(cliente)            [EntityManager]
-                    └─ INSERT INTO cliente...   [MySQL 8]
-                          ↓
-                       COMMIT ✅
-        ↓
-ClienteBean.cargarClientes()
-  └─→ clienteServicio.listarTodos()
-        └─→ clienteDAO.listarTodos()
-              └─→ SELECT * FROM cliente ORDER BY apellido
-                          ↓
-               Lista actualizada en la vista</div>
+
+  <div class="flujo-wrapper">
+
+    <div class="flujo-paso flujo-usuario">
+      <div class="flujo-icono">👤</div>
+      <div class="flujo-texto">
+        <div class="flujo-titulo">Usuario</div>
+        <div class="flujo-desc">Llena el formulario y hace click en <strong>"Guardar"</strong></div>
+      </div>
+    </div>
+    <div class="flujo-flecha">▼</div>
+
+    <div class="flujo-paso flujo-jsf">
+      <div class="flujo-icono">🌐</div>
+      <div class="flujo-texto">
+        <div class="flujo-titulo">Jakarta Faces</div>
+        <div class="flujo-desc">Ejecuta las <strong>6 fases del ciclo de vida</strong><br/>
+          Fase 5 — Invoke Application → <code>clienteBean.guardar()</code></div>
+      </div>
+      <div class="flujo-tag">Jakarta Faces 4.0</div>
+    </div>
+    <div class="flujo-flecha">▼</div>
+
+    <div class="flujo-paso flujo-bean">
+      <div class="flujo-icono">🎮</div>
+      <div class="flujo-texto">
+        <div class="flujo-titulo">ClienteBean.guardar()</div>
+        <div class="flujo-desc">Llama a <code>clienteServicio.guardar(cliente)</code></div>
+      </div>
+      <div class="flujo-tag">@Named @ViewScoped</div>
+    </div>
+    <div class="flujo-flecha">▼</div>
+
+    <div class="flujo-grupo">
+      <div class="flujo-grupo-titulo">⚙️ ClienteServicio — CAPA DE NEGOCIO &nbsp;<span class="flujo-tag-inline">@ApplicationScoped</span></div>
+      <div class="flujo-grupo-body">
+        <div class="flujo-sub">
+          <div class="flujo-sub-num">1</div>
+          <div>Valida: ¿email duplicado?<br/>
+            <span class="flujo-chain">→ <code>clienteDAO.buscarPorEmail()</code>
+            → <code>em.createNamedQuery(...)</code>
+            → <strong>SELECT en MySQL</strong></span>
+          </div>
+        </div>
+        <div class="flujo-sub">
+          <div class="flujo-sub-num">2</div>
+          <div>Persiste el cliente:<br/>
+            <span class="flujo-chain">→ <code>clienteDAO.guardar(cliente)</code>
+            → <code>em.persist(cliente)</code>
+            → <strong>INSERT INTO cliente...</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flujo-flecha">▼</div>
+
+    <div class="flujo-paso flujo-commit">
+      <div class="flujo-icono">✅</div>
+      <div class="flujo-texto">
+        <div class="flujo-titulo">COMMIT automático</div>
+        <div class="flujo-desc">GlassFish confirma la transacción JTA — los datos quedan persistidos en MySQL</div>
+      </div>
+      <div class="flujo-tag">@Transactional</div>
+    </div>
+    <div class="flujo-flecha">▼</div>
+
+    <div class="flujo-paso flujo-recarga">
+      <div class="flujo-icono">🔄</div>
+      <div class="flujo-texto">
+        <div class="flujo-titulo">ClienteBean.cargarClientes()</div>
+        <div class="flujo-desc">
+          <code>clienteServicio.listarTodos()</code>
+          → <code>clienteDAO.listarTodos()</code>
+          → <code>SELECT * FROM cliente ORDER BY apellido</code>
+        </div>
+      </div>
+    </div>
+    <div class="flujo-flecha">▼</div>
+
+    <div class="flujo-paso flujo-vista">
+      <div class="flujo-icono">🌐</div>
+      <div class="flujo-texto">
+        <div class="flujo-titulo">Vista actualizada</div>
+        <div class="flujo-desc">Jakarta Faces renderiza la tabla con la lista fresca desde la base de datos</div>
+      </div>
+      <div class="flujo-tag">Fase 6 — Render Response</div>
+    </div>
+
+  </div>
 </div>
 <div class="sep"></div>
 
