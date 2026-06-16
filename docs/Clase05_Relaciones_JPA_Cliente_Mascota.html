@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clase 05 — Relaciones JPA: Cliente y Mascota</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1a3a5c;--azul2:#2563a8;--azul3:#3b82d1;--azul-cl:#dbeafe;
+  --verde:#166534;--verde-cl:#dcfce7;--verde2:#16a34a;
+  --naranja:#92400e;--naranja-cl:#fef3c7;--naranja2:#d97706;
+  --rojo:#991b1b;--rojo-cl:#fee2e2;--rojo2:#dc2626;
+  --violeta:#4c1d95;--violeta-cl:#ede9fe;--violeta2:#7c3aed;
+  --gris:#f1f5f9;--gris2:#e2e8f0;--gris3:#94a3b8;--gris4:#475569;--texto:#0f172a;
+  --fuente:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--fuente);background:#f8fafc;color:var(--texto);font-size:15px;line-height:1.6}
+a{color:var(--azul2);text-decoration:none}
+code{font-family:'Cascadia Code','Fira Code','Consolas',monospace;font-size:.92em}
+
+/* ══ PORTADA ══ */
+.portada{background:linear-gradient(135deg,#0f172a 0%,var(--azul) 45%,var(--azul2) 80%,var(--azul3) 100%);
+  color:#fff;padding:70px 40px;text-align:center;border-radius:0 0 28px 28px;
+  box-shadow:0 8px 40px rgba(0,0,0,.35);margin-bottom:40px}
+.portada-badge{display:inline-block;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);padding:6px 20px;border-radius:20px;
+  font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+.portada-num{font-size:5rem;font-weight:900;line-height:1;opacity:.18;margin-bottom:-10px}
+.portada h1{font-size:2.3rem;font-weight:800;margin-bottom:8px;line-height:1.2}
+.portada h2{font-size:1.05rem;font-weight:400;opacity:.8;margin-bottom:24px}
+.portada-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.tag{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:16px;font-size:11px;font-weight:600}
+
+/* ══ ÍNDICE ══ */
+.indice{max-width:880px;margin:0 auto 40px;background:#fff;border-radius:14px;
+  border:1px solid var(--gris2);box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
+.indice-hdr{background:var(--azul);color:#fff;padding:13px 22px;font-size:.95rem;font-weight:700}
+.indice-lista{list-style:none;display:grid;grid-template-columns:1fr 1fr}
+.indice-lista li{border-bottom:1px solid var(--gris2);border-right:1px solid var(--gris2)}
+.indice-lista a{display:flex;align-items:center;gap:11px;padding:11px 17px;
+  color:var(--texto);font-size:.86rem;transition:background .15s}
+.indice-lista a:hover{background:var(--azul-cl)}
+.ind-n{width:26px;height:26px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+@media(max-width:580px){.indice-lista{grid-template-columns:1fr}}
+
+/* ══ SECCIONES ══ */
+.sec{max-width:880px;margin:0 auto 50px;scroll-margin-top:20px;padding:0 20px}
+.sec-hdr{display:flex;align-items:center;gap:13px;margin-bottom:20px;
+  padding-bottom:11px;border-bottom:3px solid var(--azul2)}
+.sec-num{width:44px;height:44px;background:linear-gradient(135deg,var(--azul),var(--azul2));
+  color:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:.97rem;font-weight:800;flex-shrink:0}
+.sec-titulo{font-size:1.38rem;font-weight:800;color:var(--azul)}
+.dn{display:inline-block;background:var(--azul2);color:#fff;
+  font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:10px;
+  margin-bottom:8px;letter-spacing:.5px}
+
+/* ══ CARDS ══ */
+.card{background:#fff;border:1px solid var(--gris2);border-radius:11px;
+  box-shadow:0 1px 5px rgba(0,0,0,.06);margin-bottom:14px;overflow:hidden}
+.card-hdr{padding:11px 17px;font-weight:700;font-size:.88rem;border-bottom:1px solid var(--gris2)}
+.card-body{padding:16px}
+.c-azul   .card-hdr{background:var(--azul-cl);color:var(--azul)}
+.c-verde  .card-hdr{background:var(--verde-cl);color:var(--verde)}
+.c-naranja .card-hdr{background:var(--naranja-cl);color:var(--naranja)}
+.c-rojo   .card-hdr{background:var(--rojo-cl);color:var(--rojo)}
+.c-violeta .card-hdr{background:var(--violeta-cl);color:var(--violeta)}
+
+/* ══ ALERTAS ══ */
+.alerta{display:flex;gap:11px;padding:12px 15px;border-radius:9px;margin:12px 0;font-size:.87rem}
+.a-info {background:var(--azul-cl);border-left:4px solid var(--azul2)}
+.a-ok   {background:var(--verde-cl);border-left:4px solid var(--verde2)}
+.a-warn {background:var(--naranja-cl);border-left:4px solid var(--naranja2)}
+.a-err  {background:var(--rojo-cl);border-left:4px solid var(--rojo2)}
+.a-viol {background:var(--violeta-cl);border-left:4px solid var(--violeta2)}
+.a-ico  {font-size:1.15rem;flex-shrink:0;margin-top:2px}
+
+/* ══ CÓDIGO ══ */
+pre{background:#0f172a;color:#e2e8f0;padding:18px 20px;border-radius:10px;
+  overflow-x:auto;font-size:12.5px;line-height:1.8;margin:10px 0;
+  border:1px solid #1e293b;position:relative}
+.cl{background:#1e293b;border-radius:5px;padding:2px 8px;font-size:10px;
+  color:#94a3b8;font-family:var(--fuente);position:absolute;top:7px;right:9px}
+.kw{color:#93c5fd}.an{color:#86efac}.st{color:#fca5a5}
+.cm{color:#64748b;font-style:italic}.cn{color:#fde68a}.mt{color:#c4b5fd}.nm{color:#fdba74}
+.ok{color:#86efac}.bad{color:#fca5a5}
+
+/* ══ TABLA ══ */
+table{width:100%;border-collapse:collapse;font-size:.87rem;margin:10px 0}
+th{background:var(--azul);color:#fff;padding:8px 12px;text-align:left;
+  font-size:.76rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:8px 12px;border-bottom:1px solid var(--gris2);vertical-align:top}
+tr:nth-child(even) td{background:var(--gris)}
+tr:hover td{background:var(--azul-cl)}
+
+/* ══ GRIDS ══ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:10px 0}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}}
+
+/* ══ BADGES ══ */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-verde  {background:var(--verde-cl);color:var(--verde)}
+.b-rojo   {background:var(--rojo-cl);color:var(--rojo)}
+.b-azul   {background:var(--azul-cl);color:var(--azul2)}
+.b-naranja{background:var(--naranja-cl);color:var(--naranja)}
+.b-violeta{background:var(--violeta-cl);color:var(--violeta2)}
+
+/* ══ DIAGRAMA ER VISUAL ══ */
+.er-box{background:#0f172a;border-radius:14px;padding:28px 24px;
+  margin:14px 0;display:flex;flex-direction:column;align-items:center;gap:0}
+.er-ent{border-radius:11px;border:2px solid;min-width:260px;max-width:320px;overflow:hidden}
+.er-ent-hdr{padding:10px 16px;font-weight:800;font-size:.95rem;text-align:center}
+.er-ent-body{padding:10px 16px;font-size:.78rem;line-height:2}
+.er-pk {color:#fde68a;font-weight:700}
+.er-fk {color:#86efac;font-weight:700}
+.er-att{color:#cbd5e1}
+.er-cli  {border-color:#3b82d1;background:#1e3a5f}
+.er-cli  .er-ent-hdr{background:#1e3a5f;color:#93c5fd}
+.er-masc {border-color:#a855f7;background:#2e1065}
+.er-masc .er-ent-hdr{background:#2e1065;color:#d8b4fe}
+.er-rel-blk{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0}
+.er-linea  {width:2px;height:20px;background:#334155}
+.er-etiq   {background:#1e293b;border:1px solid #334155;color:#94a3b8;
+  padding:3px 14px;border-radius:20px;font-size:.72rem;font-weight:700}
+.er-punta  {color:#475569;font-size:1rem;line-height:1}
+
+/* ══ COMPARATIVA SQL vs JAVA ══ */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:11px;
+  overflow:hidden;margin:12px 0;border:1px solid var(--gris2)}
+.cmp-hdr{padding:9px 15px;font-weight:700;font-size:.84rem;text-align:center}
+.cmp-sql{background:#1e293b;color:#94a3b8}
+.cmp-jpa{background:linear-gradient(90deg,var(--azul),var(--azul2));color:#fff}
+@media(max-width:560px){.cmp{grid-template-columns:1fr}}
+.cmp pre{border-radius:0;margin:0;border:none;border-top:1px solid #1e293b}
+
+/* ══ CAPAS VISUAL ══ */
+.capas{background:#0f172a;border-radius:14px;padding:24px 20px;
+  margin:14px 0;display:flex;flex-direction:column;align-items:center;gap:0}
+.capa{width:100%;max-width:540px;display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-radius:9px;border:1px solid;transition:transform .15s}
+.capa:hover{transform:translateX(4px)}
+.capa-ico{font-size:1.3rem;width:30px;text-align:center;flex-shrink:0}
+.capa-info{flex:1}
+.capa-nom{font-weight:700;font-size:.87rem}
+.capa-det{font-size:.74rem;opacity:.75;margin-top:1px}
+.capa-tag{font-size:.67rem;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.capa-arr{color:#334155;font-size:.72rem;padding:3px 0;
+  display:flex;align-items:center;gap:8px;width:100%;max-width:540px;padding-left:42px}
+.cp-jsf {background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe}
+.cp-jsf .capa-tag{background:#2563a8;color:#fff}
+.cp-bean{background:#312e81;border-color:#818cf8;color:#e0e7ff}
+.cp-bean .capa-tag{background:#4f46e5;color:#fff}
+.cp-serv{background:#14532d;border-color:#4ade80;color:#bbf7d0}
+.cp-serv .capa-tag{background:#16a34a;color:#fff}
+.cp-dao {background:#3b0764;border-color:#a855f7;color:#f3e8ff}
+.cp-dao .capa-tag{background:#9333ea;color:#fff}
+.cp-em  {background:#422006;border-color:#fb923c;color:#ffedd5}
+.cp-em  .capa-tag{background:#ea580c;color:#fff}
+.cp-db  {background:#1c1917;border-color:#78716c;color:#e7e5e4}
+.cp-db  .capa-tag{background:#57534e;color:#fff}
+
+/* ══ OBJETIVOS ══ */
+.obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+@media(max-width:560px){.obj-grid{grid-template-columns:1fr}}
+.obj-item{background:#fff;border:1px solid var(--gris2);
+  border-left:4px solid var(--azul2);border-radius:8px;
+  padding:10px 13px;font-size:.87rem;display:flex;align-items:flex-start;gap:9px}
+
+/* ══ PASOS ══ */
+.paso{display:flex;gap:13px;margin-bottom:13px;align-items:flex-start}
+.paso-n{width:32px;height:32px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.83rem;flex-shrink:0;margin-top:2px}
+.paso-body h4{font-size:.88rem;color:var(--azul);margin-bottom:3px;font-weight:700}
+.paso-body p{font-size:.83rem;color:var(--gris4)}
+
+/* ══ SEP / FOOTER ══ */
+.sep{height:2px;background:linear-gradient(90deg,var(--azul2),transparent);
+  max-width:880px;margin:0 auto 50px;border-radius:2px}
+footer{background:var(--azul);color:rgba(255,255,255,.65);text-align:center;
+  padding:20px;font-size:.79rem;margin-top:56px}
+</style>
+</head>
+<body>
+
+
+<!-- PORTADA -->
+<div class="portada">
+  <div class="portada-badge">Programación Web Avanzada — Backend</div>
+  <div class="portada-num">05</div>
+  <h1>Relaciones entre Entidades con JPA</h1>
+  <h2>Cliente · Mascota · @OneToMany · @ManyToOne · @JoinColumn · mappedBy · Formularios JSF relacionados</h2>
+  <div class="portada-tags">
+    <span class="tag">Jakarta EE 10</span><span class="tag">JPA 3.1</span>
+    <span class="tag">EclipseLink</span><span class="tag">MySQL 8</span>
+    <span class="tag">Jakarta Faces 4.0</span><span class="tag">CDI 4.0</span><span class="tag">JDK 21</span>
+  </div>
+</div>
+
+<!-- ÍNDICE -->
+<div style="max-width:880px;margin:0 auto;padding:0 20px">
+<div class="indice">
+  <div class="indice-hdr">📚 Clase 05 — Índice de contenidos</div>
+  <ul class="indice-lista">
+    <li><a href="#obj"><span class="ind-n">🎯</span>Objetivos</a></li>
+    <li><a href="#s1" ><span class="ind-n">1</span>Relaciones en BD vs Java</a></li>
+    <li><a href="#s2" ><span class="ind-n">2</span>Diseño de tablas y FK</a></li>
+    <li><a href="#s3" ><span class="ind-n">3</span>Entidad Cliente</a></li>
+    <li><a href="#s4" ><span class="ind-n">4</span>Entidad Mascota + @ManyToOne</a></li>
+    <li><a href="#s5" ><span class="ind-n">5</span>@OneToMany y mappedBy</a></li>
+    <li><a href="#s6" ><span class="ind-n">6</span>FetchType y CascadeType</a></li>
+    <li><a href="#s7" ><span class="ind-n">7</span>DAO y JPQL con relaciones</a></li>
+    <li><a href="#s8" ><span class="ind-n">8</span>Servicio: guardar Mascota con Cliente</a></li>
+    <li><a href="#s9" ><span class="ind-n">9</span>Managed Bean: MascotaBean</a></li>
+    <li><a href="#s10"><span class="ind-n">10</span>Vista JSF con selector de Cliente</a></li>
+    <li><a href="#res"><span class="ind-n">✅</span>Resumen y actividad práctica</a></li>
+  </ul>
+</div>
+</div>
+
+
+<!-- OBJETIVOS -->
+<div class="sec" id="obj">
+  <div class="sec-hdr"><div class="sec-num">🎯</div><div class="sec-titulo">Objetivos de la clase</div></div>
+  <div class="obj-grid">
+    <div class="obj-item"><span>🗄️</span>Diseñar tablas con clave foránea (FK): cliente → mascota</div>
+    <div class="obj-item"><span>🔗</span>Modelar relaciones entre objetos Java con anotaciones JPA</div>
+    <div class="obj-item"><span>↔️</span>Implementar @ManyToOne y @OneToMany de forma bidireccional</div>
+    <div class="obj-item"><span>📌</span>Comprender @JoinColumn y mappedBy correctamente</div>
+    <div class="obj-item"><span>🔍</span>Escribir JPQL que navega relaciones entre entidades</div>
+    <div class="obj-item"><span>⚙️</span>Implementar el Servicio que resuelve la relación antes de persistir</div>
+    <div class="obj-item"><span>🎮</span>Construir un MascotaBean que recibe el ID del cliente desde la vista</div>
+    <div class="obj-item"><span>🌐</span>Crear un formulario JSF con &lt;h:selectOneMenu&gt; de clientes</div>
+  </div>
+  <div class="alerta a-info">
+    <span class="a-ico">💡</span>
+    <div><strong>Punto de partida:</strong> En clase anterior completamos el ABM de Cliente. Hoy agregamos Mascota, que <em>depende</em> de Cliente. Cada mascota pertenece a un cliente. Esta es la primera relación real de la aplicación.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 1 -->
+<div class="sec" id="s1">
+  <div class="sec-hdr"><div class="sec-num">1</div><div class="sec-titulo">Relaciones en la BD vs en Java</div></div>
+
+  <div class="dn">DIAPOSITIVA 1 — El puente entre dos mundos</div>
+  <div class="cmp">
+    <div>
+      <div class="cmp-hdr cmp-sql">🗄️ MySQL — clave foránea</div>
+<pre><code>CREATE TABLE cliente (
+  id        BIGINT PRIMARY KEY,
+  documento VARCHAR(20),
+  nombre    VARCHAR(100)
+);
+
+CREATE TABLE mascota (
+  id         BIGINT PRIMARY KEY,
+  nombre     VARCHAR(80),
+  raza       VARCHAR(100),
+  <span style="color:#fde68a">cliente_id BIGINT NOT NULL,</span>
+  FOREIGN KEY (cliente_id)
+    REFERENCES cliente(id)
+);
+
+<span class="cm">-- Para obtener mascota con su dueño:</span>
+SELECT m.nombre, c.nombre AS dueno
+FROM mascota m
+INNER JOIN cliente c
+  ON m.cliente_id = c.id;</code></pre>
+    </div>
+    <div>
+      <div class="cmp-hdr cmp-jpa">☕ JPA — referencia a objeto</div>
+<pre><code><span class="an">@Entity</span>
+<span class="kw">public class</span> <span class="cn">Mascota</span> {
+  <span class="an">@Id</span> <span class="kw">private</span> <span class="cn">Long</span> id;
+  <span class="kw">private</span> <span class="cn">String</span> nombre;
+  <span class="kw">private</span> <span class="cn">String</span> raza;
+
+  <span class="cm">// No hay "cliente_id" — hay un objeto</span>
+  <span class="an">@ManyToOne</span>
+  <span class="an">@JoinColumn</span>(name = <span class="st">"cliente_id"</span>)
+  <span class="kw">private</span> <span class="cn">Cliente</span> cliente;
+}
+
+<span class="cm">// Para obtener mascota con su dueño:</span>
+mascota.<span class="mt">getCliente</span>().<span class="mt">getNombre</span>()</code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 2 — Diagrama de relación</div>
+  <div class="er-box">
+    <div class="er-ent er-cli">
+      <div class="er-ent-hdr">🧑 CLIENTE</div>
+      <div class="er-ent-body">
+        <span class="er-pk">🔑 id : Long (PK)</span><br/>
+        <span class="er-att">documento : String (UNIQUE)</span><br/>
+        <span class="er-att">nombre : String</span>
+      </div>
+    </div>
+    <div class="er-rel-blk">
+      <div class="er-linea"></div>
+      <div class="er-etiq">1 Cliente tiene muchas Mascotas → @OneToMany</div>
+      <div class="er-etiq">Muchas Mascotas tienen 1 Cliente → @ManyToOne</div>
+      <div class="er-linea"></div>
+      <div class="er-punta">▼</div>
+    </div>
+    <div class="er-ent er-masc">
+      <div class="er-ent-hdr">🐶 MASCOTA</div>
+      <div class="er-ent-body">
+        <span class="er-pk">🔑 id : Long (PK)</span><br/>
+        <span class="er-att">nombre : String</span><br/>
+        <span class="er-att">raza : String</span><br/>
+        <span class="er-att">observaciones : String</span><br/>
+        <span class="er-att">fecha : LocalDate</span><br/>
+        <span class="er-fk">🔗 cliente_id : Long (FK → cliente.id)</span>
+      </div>
+    </div>
+  </div>
+  <div class="alerta a-info">
+    <span class="a-ico">📌</span>
+    <div><strong>Regla:</strong> La clave foránea (<code>cliente_id</code>) siempre está en la tabla del lado <strong>"muchos"</strong>. Muchas mascotas pertenecen a un cliente → <code>cliente_id</code> vive en la tabla <code>mascota</code>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 2 -->
+<div class="sec" id="s2">
+  <div class="sec-hdr"><div class="sec-num">2</div><div class="sec-titulo">Diseño de tablas y clave foránea</div></div>
+
+  <div class="dn">DIAPOSITIVA 3 — Script SQL completo</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 veterinariadb.sql</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">CREATE DATABASE IF NOT EXISTS</span> veterinariadb
+  <span class="kw">CHARACTER SET</span> utf8mb4 <span class="kw">COLLATE</span> utf8mb4_unicode_ci;
+<span class="kw">USE</span> veterinariadb;
+
+<span class="cm">-- Tabla cliente: se crea primero (no tiene FK)</span>
+<span class="kw">CREATE TABLE</span> cliente (
+  id        <span class="cn">BIGINT</span>        <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+  documento <span class="cn">VARCHAR</span>(<span class="nm">20</span>)  <span class="kw">NOT NULL</span>,
+  nombre    <span class="cn">VARCHAR</span>(<span class="nm">100</span>) <span class="kw">NOT NULL</span>,
+  <span class="kw">CONSTRAINT</span> pk_cliente     <span class="kw">PRIMARY KEY</span> (id),
+  <span class="kw">CONSTRAINT</span> uq_cli_doc     <span class="kw">UNIQUE</span> (documento)
+) ENGINE=InnoDB;
+
+<span class="cm">-- Tabla mascota: tiene FK a cliente (se crea después)</span>
+<span class="kw">CREATE TABLE</span> mascota (
+  id            <span class="cn">BIGINT</span>        <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+  nombre        <span class="cn">VARCHAR</span>(<span class="nm">80</span>)  <span class="kw">NOT NULL</span>,
+  raza          <span class="cn">VARCHAR</span>(<span class="nm">100</span>),
+  observaciones <span class="cn">TEXT</span>,
+  fecha         <span class="cn">DATE</span>,                      <span class="cm">-- fecha de nacimiento</span>
+  cliente_id    <span class="cn">BIGINT</span>        <span class="kw">NOT NULL</span>,  <span class="cm">-- FK</span>
+  <span class="kw">CONSTRAINT</span> pk_mascota           <span class="kw">PRIMARY KEY</span> (id),
+  <span class="kw">CONSTRAINT</span> fk_mascota_cliente   <span class="kw">FOREIGN KEY</span> (cliente_id)
+      <span class="kw">REFERENCES</span> cliente(id)
+      <span class="kw">ON DELETE RESTRICT</span>  <span class="cm">-- impide eliminar cliente con mascotas</span>
+      <span class="kw">ON UPDATE CASCADE</span>   <span class="cm">-- si cambia el id del cliente, actualiza aquí</span>
+) ENGINE=InnoDB;
+
+<span class="cm">-- Datos de prueba</span>
+<span class="kw">INSERT INTO</span> cliente (documento, nombre) <span class="kw">VALUES</span>
+  (<span class="st">'30111222'</span>, <span class="st">'María González'</span>),
+  (<span class="st">'25333444'</span>, <span class="st">'Carlos Rodríguez'</span>);
+
+<span class="kw">INSERT INTO</span> mascota (nombre, raza, fecha, cliente_id) <span class="kw">VALUES</span>
+  (<span class="st">'Fido'</span>, <span class="st">'Labrador'</span>, <span class="st">'2020-03-15'</span>, <span class="nm">1</span>),  <span class="cm">-- mascota de María</span>
+  (<span class="st">'Luna'</span>, <span class="st">'Siamés'</span>,   <span class="st">'2021-07-22'</span>, <span class="nm">1</span>),  <span class="cm">-- otra mascota de María</span>
+  (<span class="st">'Rex'</span>,  <span class="st">'Alemán'</span>,    <span class="st">'2019-11-05'</span>, <span class="nm">2</span>);  <span class="cm">-- mascota de Carlos</span><span class="cl">veterinariadb.sql</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 4 — ON DELETE: ¿qué pasa si se elimina el cliente?</div>
+  <table>
+    <thead><tr><th>Opción</th><th>¿Qué hace MySQL?</th><th>¿Cuándo usar?</th></tr></thead>
+    <tbody>
+      <tr><td><code>ON DELETE RESTRICT</code></td><td>Impide eliminar el cliente si tiene mascotas → error FK</td><td><span class="badge b-verde">Recomendado en sistemas reales</span></td></tr>
+      <tr><td><code>ON DELETE CASCADE</code></td><td>Elimina automáticamente todas las mascotas del cliente</td><td><span class="badge b-naranja">Solo si es el comportamiento deseado</span></td></tr>
+      <tr><td><code>ON DELETE SET NULL</code></td><td>Pone <code>cliente_id = NULL</code> en todas las mascotas</td><td><span class="badge b-rojo">Requiere nullable=true</span></td></tr>
+      <tr><td><code>ON DELETE NO ACTION</code></td><td>Igual que RESTRICT (comportamiento por defecto)</td><td>Equivalente a RESTRICT</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 3: ENTIDAD CLIENTE -->
+<div class="sec" id="s3">
+  <div class="sec-hdr"><div class="sec-num">3</div><div class="sec-titulo">Entidad Cliente</div></div>
+
+  <div class="dn">DIAPOSITIVA 5 — Cliente.java con @OneToMany</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Cliente.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.modelo;
+
+<span class="kw">import</span> jakarta.persistence.*;
+<span class="kw">import</span> jakarta.validation.constraints.*;
+<span class="kw">import</span> java.io.Serializable;
+<span class="kw">import</span> java.util.ArrayList;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"cliente"</span>)
+<span class="an">@NamedQueries</span>({
+  <span class="an">@NamedQuery</span>(name = <span class="st">"Cliente.findAll"</span>,
+    query = <span class="st">"SELECT c FROM Cliente c ORDER BY c.nombre"</span>),
+  <span class="an">@NamedQuery</span>(name = <span class="st">"Cliente.findByDocumento"</span>,
+    query = <span class="st">"SELECT c FROM Cliente c WHERE c.documento = :doc"</span>)
+})
+<span class="kw">public class</span> <span class="cn">Cliente</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+  <span class="an">@Id</span>
+  <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+  <span class="kw">private</span> <span class="cn">Long</span> id;
+
+  <span class="an">@NotBlank</span>(message = <span class="st">"El documento es obligatorio"</span>)
+  <span class="an">@Size</span>(max = <span class="nm">20</span>)
+  <span class="an">@Column</span>(nullable = <span class="kw">false</span>, unique = <span class="kw">true</span>, length = <span class="nm">20</span>)
+  <span class="kw">private</span> <span class="cn">String</span> documento;
+
+  <span class="an">@NotBlank</span>(message = <span class="st">"El nombre es obligatorio"</span>)
+  <span class="an">@Size</span>(max = <span class="nm">100</span>)
+  <span class="an">@Column</span>(nullable = <span class="kw">false</span>, length = <span class="nm">100</span>)
+  <span class="kw">private</span> <span class="cn">String</span> nombre;
+
+  <span class="cm">// ═══ @OneToMany: el lado "uno" de la relación ═══════════
+  // mappedBy: nombre del campo en Mascota que tiene la FK
+  // cascade ALL: guardar/eliminar cliente propaga a sus mascotas
+  // orphanRemoval: si quito una mascota de la lista, se elimina en BD</span>
+  <span class="an">@OneToMany</span>(
+    mappedBy      = <span class="st">"cliente"</span>,   <span class="cm">// ← campo en Mascota.java</span>
+    cascade       = CascadeType.ALL,
+    fetch         = FetchType.LAZY,
+    orphanRemoval = <span class="kw">true</span>
+  )
+  <span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; mascotas = <span class="kw">new</span> <span class="cn">ArrayList</span>&lt;&gt;();
+  <span class="cm">// NO genera columna en tabla cliente
+  // La FK ya está en tabla mascota (cliente_id)</span>
+
+  <span class="cm">// ── Getters y Setters ──────────────────────────────────</span>
+  <span class="kw">public</span> <span class="cn">Long</span>   <span class="mt">getId</span>()               { <span class="kw">return</span> id; }
+  <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getDocumento</span>()         { <span class="kw">return</span> documento; }
+  <span class="kw">public void</span>   <span class="mt">setDocumento</span>(<span class="cn">String</span> d) { <span class="kw">this</span>.documento = d; }
+  <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getNombre</span>()            { <span class="kw">return</span> nombre; }
+  <span class="kw">public void</span>   <span class="mt">setNombre</span>(<span class="cn">String</span> n)    { <span class="kw">this</span>.nombre = n; }
+  <span class="kw">public</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; <span class="mt">getMascotas</span>()  { <span class="kw">return</span> mascotas; }
+  <span class="kw">public void</span> <span class="mt">setMascotas</span>(<span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; m){ <span class="kw">this</span>.mascotas = m; }
+}<span class="cl">Cliente.java</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 4: ENTIDAD MASCOTA -->
+<div class="sec" id="s4">
+  <div class="sec-hdr"><div class="sec-num">4</div><div class="sec-titulo">Entidad Mascota y @ManyToOne</div></div>
+
+  <div class="dn">DIAPOSITIVA 6 — Mascota.java con @ManyToOne y @JoinColumn</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Mascota.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.modelo;
+
+<span class="kw">import</span> jakarta.persistence.*;
+<span class="kw">import</span> jakarta.validation.constraints.*;
+<span class="kw">import</span> java.io.Serializable;
+<span class="kw">import</span> java.time.LocalDate;
+
+<span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"mascota"</span>)
+<span class="an">@NamedQueries</span>({
+  <span class="an">@NamedQuery</span>(name = <span class="st">"Mascota.findAll"</span>,
+    query = <span class="st">"SELECT m FROM Mascota m JOIN FETCH m.cliente ORDER BY m.nombre"</span>),
+  <span class="an">@NamedQuery</span>(name = <span class="st">"Mascota.findByCliente"</span>,
+    query = <span class="st">"SELECT m FROM Mascota m WHERE m.cliente.id = :clienteId ORDER BY m.nombre"</span>)
+})
+<span class="kw">public class</span> <span class="cn">Mascota</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+  <span class="an">@Id</span>
+  <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+  <span class="kw">private</span> <span class="cn">Long</span> id;
+
+  <span class="an">@NotBlank</span>(message = <span class="st">"El nombre es obligatorio"</span>)
+  <span class="an">@Size</span>(max = <span class="nm">80</span>)
+  <span class="an">@Column</span>(nullable = <span class="kw">false</span>, length = <span class="nm">80</span>)
+  <span class="kw">private</span> <span class="cn">String</span> nombre;
+
+  <span class="an">@Size</span>(max = <span class="nm">100</span>)
+  <span class="an">@Column</span>(length = <span class="nm">100</span>)
+  <span class="kw">private</span> <span class="cn">String</span> raza;
+
+  <span class="an">@Column</span>(columnDefinition = <span class="st">"TEXT"</span>)
+  <span class="kw">private</span> <span class="cn">String</span> observaciones;
+
+  <span class="an">@Column</span>
+  <span class="kw">private</span> <span class="cn">LocalDate</span> fecha;  <span class="cm">// fecha de nacimiento</span>
+
+  <span class="cm">// ═══ @ManyToOne: el lado "muchos" — tiene la FK ══════════
+  //
+  // @ManyToOne: muchas mascotas → un cliente
+  // fetch=LAZY: NO carga cliente hasta que se llame getCliente()
+  // optional=false: la mascota DEBE tener un cliente (NOT NULL)
+  //
+  // @JoinColumn: define el nombre de la columna FK en tabla mascota
+  // name="cliente_id" → columna cliente_id en la tabla mascota</span>
+  <span class="an">@ManyToOne</span>(fetch = FetchType.LAZY, optional = <span class="kw">false</span>)
+  <span class="an">@JoinColumn</span>(name = <span class="st">"cliente_id"</span>, nullable = <span class="kw">false</span>)
+  <span class="kw">private</span> <span class="cn">Cliente</span> cliente;
+  <span class="cm">// EclipseLink genera: FOREIGN KEY (cliente_id) REFERENCES cliente(id)</span>
+
+  <span class="cm">// ── Getters y Setters ──────────────────────────────────</span>
+  <span class="kw">public</span> <span class="cn">Long</span>      <span class="mt">getId</span>()                 { <span class="kw">return</span> id; }
+  <span class="kw">public</span> <span class="cn">String</span>    <span class="mt">getNombre</span>()             { <span class="kw">return</span> nombre; }
+  <span class="kw">public void</span>      <span class="mt">setNombre</span>(<span class="cn">String</span> n)      { <span class="kw">this</span>.nombre = n; }
+  <span class="kw">public</span> <span class="cn">String</span>    <span class="mt">getRaza</span>()               { <span class="kw">return</span> raza; }
+  <span class="kw">public void</span>      <span class="mt">setRaza</span>(<span class="cn">String</span> r)        { <span class="kw">this</span>.raza = r; }
+  <span class="kw">public</span> <span class="cn">String</span>    <span class="mt">getObservaciones</span>()      { <span class="kw">return</span> observaciones; }
+  <span class="kw">public void</span>      <span class="mt">setObservaciones</span>(<span class="cn">String</span> o){ <span class="kw">this</span>.observaciones = o; }
+  <span class="kw">public</span> <span class="cn">LocalDate</span> <span class="mt">getFecha</span>()              { <span class="kw">return</span> fecha; }
+  <span class="kw">public void</span>      <span class="mt">setFecha</span>(<span class="cn">LocalDate</span> f)   { <span class="kw">this</span>.fecha = f; }
+  <span class="kw">public</span> <span class="cn">Cliente</span>   <span class="mt">getCliente</span>()            { <span class="kw">return</span> cliente; }
+  <span class="kw">public void</span>      <span class="mt">setCliente</span>(<span class="cn">Cliente</span> c)   { <span class="kw">this</span>.cliente = c; }
+
+  <span class="cm">// Helper para mostrar en la vista</span>
+  <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getNombreConDueno</span>() {
+    <span class="kw">return</span> nombre + <span class="st">" (Dueño: "</span> + cliente.<span class="mt">getNombre</span>() + <span class="st">")"</span>;
+  }
+}<span class="cl">Mascota.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 7 — Atributos clave de @ManyToOne y @JoinColumn</div>
+  <table>
+    <thead><tr><th>Atributo</th><th>Anotación</th><th>Valor</th><th>Significado</th></tr></thead>
+    <tbody>
+      <tr><td><code>fetch</code></td><td><code>@ManyToOne</code></td><td><code>LAZY</code></td><td>No carga el Cliente hasta que se llame <code>getCliente()</code></td></tr>
+      <tr><td><code>optional</code></td><td><code>@ManyToOne</code></td><td><code>false</code></td><td>La mascota SIEMPRE tiene un cliente (equivale a NOT NULL)</td></tr>
+      <tr><td><code>name</code></td><td><code>@JoinColumn</code></td><td><code>"cliente_id"</code></td><td>Nombre de la columna FK en la tabla <code>mascota</code></td></tr>
+      <tr><td><code>nullable</code></td><td><code>@JoinColumn</code></td><td><code>false</code></td><td>Restricción en la BD: FK no puede ser NULL</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 5: @OneToMany y mappedBy -->
+<div class="sec" id="s5">
+  <div class="sec-hdr"><div class="sec-num">5</div><div class="sec-titulo">@OneToMany y mappedBy</div></div>
+
+  <div class="dn">DIAPOSITIVA 8 — ¿Qué es mappedBy?</div>
+  <div class="alerta a-viol">
+    <span class="a-ico">📌</span>
+    <div><strong>mappedBy</strong> le dice a JPA: <em>"La FK no está en mi tabla. El campo que la gestiona está en la otra clase, y se llama exactamente como dice mappedBy."</em><br/>
+    En nuestro caso: <code>mappedBy = "cliente"</code> porque en <code>Mascota.java</code> el campo se llama <code>cliente</code>.</div>
+  </div>
+
+  <div class="g2">
+    <div class="c-rojo card">
+      <div class="card-hdr">❌ Sin mappedBy — ERROR</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// ❌ Esto crea una SEGUNDA tabla intermedia
+// llamada "cliente_mascotas" — no es lo que queremos</span>
+<span class="an">@OneToMany</span>   <span class="cm">// sin mappedBy</span>
+<span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; mascotas;
+
+<span class="cm">// JPA genera:
+// CREATE TABLE cliente_mascotas (
+//   cliente_id BIGINT,
+//   mascotas_id BIGINT
+// )   ← tabla extra no deseada</span></code></pre>
+      </div>
+    </div>
+    <div class="c-verde card">
+      <div class="card-hdr">✅ Con mappedBy — CORRECTO</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// ✅ Le dice a JPA que la FK ya está en mascota
+// No crea ninguna columna extra en tabla cliente</span>
+<span class="an">@OneToMany</span>(mappedBy = <span class="st">"cliente"</span>)
+<span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; mascotas;
+
+<span class="cm">// "cliente" = nombre exacto del campo
+// en Mascota.java que tiene @ManyToOne
+//
+// JPA no genera nada nuevo en tabla cliente
+// La FK cliente_id ya existe en tabla mascota ✅</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 9 — Resumen: ¿quién tiene qué?</div>
+  <table>
+    <thead><tr><th>Clase Java</th><th>Anotación</th><th>Tabla MySQL</th><th>Genera</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>Mascota</code></td>
+        <td><code>@ManyToOne + @JoinColumn(name="cliente_id")</code></td>
+        <td><code>mascota</code></td>
+        <td>Columna <strong>cliente_id</strong> (FK) en tabla mascota</td>
+      </tr>
+      <tr>
+        <td><code>Cliente</code></td>
+        <td><code>@OneToMany(mappedBy="cliente")</code></td>
+        <td><code>cliente</code></td>
+        <td><strong>Nada</strong> — solo permite navegar <code>cliente.getMascotas()</code></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 6: FETCH Y CASCADE -->
+<div class="sec" id="s6">
+  <div class="sec-hdr"><div class="sec-num">6</div><div class="sec-titulo">FetchType y CascadeType</div></div>
+
+  <div class="dn">DIAPOSITIVA 10 — LAZY vs EAGER</div>
+  <div class="g2">
+    <div class="c-verde card">
+      <div class="card-hdr">✅ LAZY — carga bajo demanda</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@ManyToOne</span>(fetch = FetchType.LAZY)
+<span class="kw">private</span> <span class="cn">Cliente</span> cliente;
+
+<span class="cm">// Paso 1: solo carga la mascota</span>
+<span class="cn">Mascota</span> m = em.<span class="mt">find</span>(<span class="cn">Mascota</span>.<span class="kw">class</span>, <span class="nm">1L</span>);
+<span class="cm">// → SELECT id, nombre, raza FROM mascota WHERE id=1
+//   (cliente NO se carga todavía)</span>
+
+<span class="cm">// Paso 2: al acceder al cliente → carga ahora</span>
+<span class="cn">String</span> nombreDueno = m.<span class="mt">getCliente</span>().<span class="mt">getNombre</span>();
+<span class="cm">// → SELECT id, documento, nombre FROM cliente WHERE id=?</span></code></pre>
+      </div>
+    </div>
+    <div class="c-naranja card">
+      <div class="card-hdr">⚠️ EAGER — carga siempre con JOIN</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@ManyToOne</span>(fetch = FetchType.EAGER)
+<span class="kw">private</span> <span class="cn">Cliente</span> cliente;
+
+<span class="cm">// Carga mascota Y cliente juntos, siempre</span>
+<span class="cn">Mascota</span> m = em.<span class="mt">find</span>(<span class="cn">Mascota</span>.<span class="kw">class</span>, <span class="nm">1L</span>);
+<span class="cm">// → SELECT m.id, m.nombre, m.raza,
+//          c.id, c.documento, c.nombre
+//   FROM mascota m
+//   LEFT JOIN cliente c ON m.cliente_id = c.id
+//   WHERE m.id = 1
+//
+// Lo uses o no, siempre carga el cliente ⚠️</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 11 — CascadeType en @OneToMany</div>
+  <table>
+    <thead><tr><th>Valor</th><th>Qué propaga</th><th>Ejemplo práctico</th></tr></thead>
+    <tbody>
+      <tr><td><code>PERSIST</code></td><td><code>em.persist()</code></td><td>Al guardar un Cliente nuevo, guarda también sus mascotas nuevas</td></tr>
+      <tr><td><code>MERGE</code></td><td><code>em.merge()</code></td><td>Al actualizar un Cliente, actualiza sus mascotas</td></tr>
+      <tr><td><code>REMOVE</code></td><td><code>em.remove()</code></td><td>Al eliminar un Cliente, elimina todas sus mascotas</td></tr>
+      <tr><td><code>ALL</code></td><td>Todas las anteriores</td><td>Todo se propaga del padre al hijo</td></tr>
+    </tbody>
+  </table>
+  <div class="alerta a-warn">
+    <span class="a-ico">⚠️</span>
+    <div><strong>Cuidado con CascadeType.REMOVE:</strong> Si una mascota tiene turnos, eliminar el cliente en cascada intentará eliminar las mascotas, pero fallará si los turnos tienen FK restrictiva. <strong>En sistemas reales preferir baja lógica</strong> (campo <code>activo=false</code>) en lugar de DELETE físico.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 7: DAO Y JPQL -->
+<div class="sec" id="s7">
+  <div class="sec-hdr"><div class="sec-num">7</div><div class="sec-titulo">DAO y JPQL con relaciones</div></div>
+
+  <div class="dn">DIAPOSITIVA 12 — MascotaDAO.java</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 MascotaDAO.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.dao;
+<span class="kw">import</span> com.veterinaria.modelo.Mascota;
+<span class="kw">import</span> jakarta.enterprise.context.ApplicationScoped;
+<span class="kw">import</span> jakarta.transaction.Transactional;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cn">MascotaDAO</span> <span class="kw">extends</span> <span class="cn">GenericDAO</span>&lt;<span class="cn">Mascota</span>, <span class="cn">Long</span>&gt; {
+
+  <span class="an">@Override</span>
+  <span class="kw">protected</span> <span class="cn">Class</span>&lt;<span class="cn">Mascota</span>&gt; <span class="mt">getEntityClass</span>() { <span class="kw">return</span> <span class="cn">Mascota</span>.<span class="kw">class</span>; }
+
+  <span class="cm">// JOIN FETCH evita el problema N+1:
+  // trae mascota + cliente en 1 sola consulta SQL</span>
+  <span class="kw">public</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; <span class="mt">listarTodas</span>() {
+    <span class="kw">return</span> em.<span class="mt">createNamedQuery</span>(<span class="st">"Mascota.findAll"</span>, <span class="cn">Mascota</span>.<span class="kw">class</span>)
+             .<span class="mt">getResultList</span>();
+  }
+
+  <span class="cm">// Mascotas de un cliente específico</span>
+  <span class="kw">public</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; <span class="mt">listarPorCliente</span>(<span class="cn">Long</span> clienteId) {
+    <span class="kw">return</span> em.<span class="mt">createNamedQuery</span>(<span class="st">"Mascota.findByCliente"</span>, <span class="cn">Mascota</span>.<span class="kw">class</span>)
+             .<span class="mt">setParameter</span>(<span class="st">"clienteId"</span>, clienteId)
+             .<span class="mt">getResultList</span>();
+  }
+}<span class="cl">MascotaDAO.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 13 — JPQL con navegación de relaciones</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">Consultas JPQL usando la relación</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// 1. JOIN FETCH: trae mascotas con su cliente en 1 query (evita N+1)</span>
+<span class="st">"SELECT m FROM Mascota m JOIN FETCH m.cliente ORDER BY m.nombre"</span>
+<span class="cm">// SQL: SELECT m.*, c.* FROM mascota m INNER JOIN cliente c ON m.cliente_id=c.id</span>
+
+<span class="cm">// 2. Filtrar mascotas por cliente (path expression: m.cliente.id)</span>
+<span class="st">"SELECT m FROM Mascota m WHERE m.cliente.id = :clienteId"</span>
+<span class="cm">// SQL: SELECT * FROM mascota WHERE cliente_id = ?</span>
+
+<span class="cm">// 3. Filtrar por nombre del dueño (navegación de 2 niveles)</span>
+<span class="st">"SELECT m FROM Mascota m WHERE LOWER(m.cliente.nombre) LIKE :patron"</span>
+
+<span class="cm">// 4. Contar mascotas por cliente</span>
+<span class="st">"SELECT c.nombre, COUNT(m) FROM Cliente c LEFT JOIN c.mascotas m GROUP BY c.id"</span>
+
+<span class="cm">// ❌ SIN JOIN FETCH — problema N+1</span>
+<span class="st">"SELECT m FROM Mascota m"</span>
+<span class="cm">// Si hay 100 mascotas → 1 query para mascotas
+//                     + 100 queries para cargar cada cliente
+//                     = 101 queries ❌
+
+// ✅ CON JOIN FETCH → 1 sola query con INNER JOIN ✅</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 8 + 9: SERVICIO Y BEAN -->
+<div class="sec" id="s8">
+  <div class="sec-hdr"><div class="sec-num">8</div><div class="sec-titulo">Servicio: guardar Mascota con su Cliente</div></div>
+
+  <div class="dn">DIAPOSITIVA 14 — El problema: el formulario envía un ID, no un objeto</div>
+  <div class="alerta a-warn">
+    <span class="a-ico">⚠️</span>
+    <div>El <code>&lt;h:selectOneMenu&gt;</code> del formulario devuelve el <strong>ID del cliente</strong> (un <code>Long</code>). Pero <code>Mascota.setCliente()</code> espera un objeto <code>Cliente</code>. El Servicio es quien resuelve esta diferencia consultando la BD con el ID.</div>
+  </div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 MascotaServicio.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cn">MascotaServicio</span> {
+
+  <span class="an">@Inject</span> <span class="kw">private</span> <span class="cn">MascotaDAO</span>  mascotaDAO;
+  <span class="an">@Inject</span> <span class="kw">private</span> <span class="cn">ClienteDAO</span>  clienteDAO;
+
+  <span class="kw">public</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; <span class="mt">listarTodas</span>()  { <span class="kw">return</span> mascotaDAO.<span class="mt">listarTodas</span>(); }
+  <span class="kw">public</span> <span class="cn">Mascota</span> <span class="mt">buscarPorId</span>(<span class="cn">Long</span> id) { <span class="kw">return</span> mascotaDAO.<span class="mt">buscarPorId</span>(id); }
+
+  <span class="an">@Transactional</span>
+  <span class="kw">public void</span> <span class="mt">guardar</span>(<span class="cn">Mascota</span> mascota, <span class="cn">Long</span> clienteId) {
+
+    <span class="cm">// Validar que llegó un clienteId</span>
+    <span class="kw">if</span> (clienteId == <span class="kw">null</span>)
+      <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(<span class="st">"Debe seleccionar un dueño."</span>);
+
+    <span class="cm">// Buscar el objeto Cliente en la BD usando el ID</span>
+    <span class="cn">Cliente</span> cliente = clienteDAO.<span class="mt">buscarPorId</span>(clienteId);
+    <span class="kw">if</span> (cliente == <span class="kw">null</span>)
+      <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(<span class="st">"El cliente seleccionado no existe."</span>);
+
+    <span class="cm">// Setear el objeto Cliente en la entidad Mascota</span>
+    mascota.<span class="mt">setCliente</span>(cliente);  <span class="cm">// ← clave: setear el objeto, no el ID</span>
+
+    <span class="kw">if</span> (mascota.<span class="mt">getId</span>() == <span class="kw">null</span>)
+      mascotaDAO.<span class="mt">guardar</span>(mascota);    <span class="cm">// INSERT</span>
+    <span class="kw">else</span>
+      mascotaDAO.<span class="mt">actualizar</span>(mascota); <span class="cm">// UPDATE</span>
+  }
+
+  <span class="an">@Transactional</span>
+  <span class="kw">public void</span> <span class="mt">eliminar</span>(<span class="cn">Long</span> id) { mascotaDAO.<span class="mt">eliminar</span>(id); }
+}<span class="cl">MascotaServicio.java</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<div class="sec" id="s9">
+  <div class="sec-hdr"><div class="sec-num">9</div><div class="sec-titulo">Managed Bean: MascotaBean</div></div>
+
+  <div class="dn">DIAPOSITIVA 15 — MascotaBean.java</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 MascotaBean.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Named</span>(<span class="st">"mascotaBean"</span>) <span class="an">@ViewScoped</span>
+<span class="kw">public class</span> <span class="cn">MascotaBean</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+  <span class="an">@Inject</span> <span class="kw">private</span> <span class="cn">MascotaServicio</span> mascotaServicio;
+  <span class="an">@Inject</span> <span class="kw">private</span> <span class="cn">ClienteServicio</span>  clienteServicio;
+
+  <span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; mascotas;
+  <span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Cliente</span>&gt; clientes;     <span class="cm">// para el selector</span>
+  <span class="kw">private</span> <span class="cn">Mascota</span>        mascotaSeleccionada;
+  <span class="kw">private</span> <span class="cn">Long</span>            clienteIdSeleccionado; <span class="cm">// ID del selector</span>
+  <span class="kw">private boolean</span>         modoEdicion = <span class="kw">false</span>;
+
+  <span class="an">@PostConstruct</span>
+  <span class="kw">public void</span> <span class="mt">init</span>() {
+    mascotaSeleccionada   = <span class="kw">new</span> <span class="cn">Mascota</span>();
+    clientes              = clienteServicio.<span class="mt">listarTodos</span>();
+    <span class="mt">cargarMascotas</span>();
+  }
+
+  <span class="kw">public void</span> <span class="mt">cargarMascotas</span>() {
+    mascotas = mascotaServicio.<span class="mt">listarTodas</span>();
+  }
+
+  <span class="kw">public void</span> <span class="mt">prepararEdicion</span>(<span class="cn">Mascota</span> m) {
+    mascotaSeleccionada   = mascotaServicio.<span class="mt">buscarPorId</span>(m.<span class="mt">getId</span>());
+    clienteIdSeleccionado = mascotaSeleccionada.<span class="mt">getCliente</span>().<span class="mt">getId</span>();
+    modoEdicion           = <span class="kw">true</span>;
+  }
+
+  <span class="kw">public void</span> <span class="mt">guardar</span>() {
+    <span class="kw">try</span> {
+      <span class="cm">// Pasa el ID del selector al Servicio</span>
+      mascotaServicio.<span class="mt">guardar</span>(mascotaSeleccionada, clienteIdSeleccionado);
+      <span class="mt">cargarMascotas</span>();
+      mascotaSeleccionada   = <span class="kw">new</span> <span class="cn">Mascota</span>();
+      clienteIdSeleccionado = <span class="kw">null</span>;
+      modoEdicion           = <span class="kw">false</span>;
+      <span class="mt">addMsg</span>(SEVERITY_INFO, <span class="st">"Éxito"</span>, <span class="st">"Mascota guardada."</span>);
+    } <span class="kw">catch</span> (<span class="cn">IllegalArgumentException</span> e) {
+      <span class="mt">addMsg</span>(SEVERITY_WARN, <span class="st">"Atención"</span>, e.<span class="mt">getMessage</span>());
+    } <span class="kw">catch</span> (<span class="cn">Exception</span> e) {
+      <span class="mt">addMsg</span>(SEVERITY_ERROR, <span class="st">"Error"</span>, <span class="st">"No se pudo guardar."</span>);
+    }
+  }
+
+  <span class="kw">public void</span> <span class="mt">eliminar</span>(<span class="cn">Mascota</span> m) {
+    mascotaServicio.<span class="mt">eliminar</span>(m.<span class="mt">getId</span>());
+    <span class="mt">cargarMascotas</span>();
+    <span class="mt">addMsg</span>(SEVERITY_INFO, <span class="st">"Eliminada"</span>, m.<span class="mt">getNombre</span>() + <span class="st">" eliminada."</span>);
+  }
+
+  <span class="kw">public void</span> <span class="mt">cancelar</span>() {
+    mascotaSeleccionada   = <span class="kw">new</span> <span class="cn">Mascota</span>();
+    clienteIdSeleccionado = <span class="kw">null</span>;
+    modoEdicion           = <span class="kw">false</span>;
+    <span class="mt">cargarMascotas</span>();
+  }
+
+  <span class="kw">private void</span> <span class="mt">addMsg</span>(<span class="cn">FacesMessage</span>.<span class="cn">Severity</span> s, <span class="cn">String</span> r, <span class="cn">String</span> d) {
+    <span class="cn">FacesContext</span>.<span class="mt">getCurrentInstance</span>()
+        .<span class="mt">addMessage</span>(<span class="kw">null</span>, <span class="kw">new</span> <span class="cn">FacesMessage</span>(s, r, d));
+  }
+
+  <span class="cm">// Getters y Setters</span>
+  <span class="kw">public</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; <span class="mt">getMascotas</span>()         { <span class="kw">return</span> mascotas; }
+  <span class="kw">public</span> <span class="cn">List</span>&lt;<span class="cn">Cliente</span>&gt; <span class="mt">getClientes</span>()          { <span class="kw">return</span> clientes; }
+  <span class="kw">public</span> <span class="cn">Mascota</span> <span class="mt">getMascotaSeleccionada</span>()      { <span class="kw">return</span> mascotaSeleccionada; }
+  <span class="kw">public void</span> <span class="mt">setMascotaSeleccionada</span>(<span class="cn">Mascota</span> m){ mascotaSeleccionada = m; }
+  <span class="kw">public</span> <span class="cn">Long</span> <span class="mt">getClienteIdSeleccionado</span>()       { <span class="kw">return</span> clienteIdSeleccionado; }
+  <span class="kw">public void</span> <span class="mt">setClienteIdSeleccionado</span>(<span class="cn">Long</span> id){ clienteIdSeleccionado = id; }
+  <span class="kw">public boolean</span> <span class="mt">isModoEdicion</span>()               { <span class="kw">return</span> modoEdicion; }
+}<span class="cl">MascotaBean.java</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 10: VISTA JSF -->
+<div class="sec" id="s10">
+  <div class="sec-hdr"><div class="sec-num">10</div><div class="sec-titulo">Vista JSF con selector de Cliente</div></div>
+
+  <div class="dn">DIAPOSITIVA 16 — mascotas/abm.xhtml — formulario completo</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 mascotas/abm.xhtml</div>
+    <div class="card-body" style="padding:0">
+<pre><code>&lt;<span class="kw">ui:composition</span> template=<span class="st">"/plantilla.xhtml"</span>
+  xmlns:ui=<span class="st">"jakarta.faces.facelets"</span>
+  xmlns:h=<span class="st">"jakarta.faces.html"</span>
+  xmlns:f=<span class="st">"jakarta.faces.core"</span>
+  xmlns:pt=<span class="st">"jakarta.faces.passthrough"</span>&gt;
+
+&lt;<span class="kw">ui:define</span> name=<span class="st">"contenido"</span>&gt;
+
+  &lt;<span class="kw">h:messages</span> globalOnly=<span class="st">"true"</span> showDetail=<span class="st">"true"</span>
+              infoClass=<span class="st">"msg msg-info"</span> warnClass=<span class="st">"msg msg-warn"</span>
+              errorClass=<span class="st">"msg msg-error"</span>/&gt;
+
+  &lt;<span class="kw">h:form</span> id=<span class="st">"frmMascota"</span>&gt;
+
+    <span class="cm">&lt;!-- SELECTOR DE CLIENTE (dueño) --&gt;</span>
+    &lt;<span class="kw">h:outputLabel</span> for=<span class="st">"cliente"</span> value=<span class="st">"Dueño *"</span>/&gt;
+    &lt;<span class="kw">h:selectOneMenu</span> id=<span class="st">"cliente"</span>
+                     value=<span class="st">"#{mascotaBean.clienteIdSeleccionado}"</span>
+                     required=<span class="st">"true"</span>
+                     requiredMessage=<span class="st">"Debe seleccionar el dueño"</span>&gt;
+      <span class="cm">&lt;!-- Opción vacía inicial --&gt;</span>
+      &lt;<span class="kw">f:selectItem</span> itemValue=<span class="st">""</span> itemLabel=<span class="st">"— Seleccione un cliente —"</span>
+                    noSelectionOption=<span class="st">"true"</span>/&gt;
+      <span class="cm">&lt;!-- Lista de clientes del Bean --&gt;</span>
+      &lt;<span class="kw">f:selectItems</span> value=<span class="st">"#{mascotaBean.clientes}"</span> var=<span class="st">"c"</span>
+                     itemValue=<span class="st">"#{c.id}"</span>
+                     itemLabel=<span class="st">"#{c.documento} — #{c.nombre}"</span>/&gt;
+      <span class="cm">&lt;!-- Convierte String HTML → Long Java --&gt;</span>
+      &lt;<span class="kw">f:converter</span> converterId=<span class="st">"jakarta.faces.Long"</span>/&gt;
+    &lt;/<span class="kw">h:selectOneMenu</span>&gt;
+    &lt;<span class="kw">h:message</span> for=<span class="st">"cliente"</span> styleClass=<span class="st">"form-error"</span>/&gt;
+
+    <span class="cm">&lt;!-- Nombre de la mascota --&gt;</span>
+    &lt;<span class="kw">h:outputLabel</span> for=<span class="st">"nombre"</span> value=<span class="st">"Nombre *"</span>/&gt;
+    &lt;<span class="kw">h:inputText</span> id=<span class="st">"nombre"</span>
+                 value=<span class="st">"#{mascotaBean.mascotaSeleccionada.nombre}"</span>
+                 required=<span class="st">"true"</span> requiredMessage=<span class="st">"El nombre es obligatorio"</span>
+                 maxlength=<span class="st">"80"</span> pt:placeholder=<span class="st">"Nombre de la mascota"</span>/&gt;
+    &lt;<span class="kw">h:message</span> for=<span class="st">"nombre"</span> styleClass=<span class="st">"form-error"</span>/&gt;
+
+    <span class="cm">&lt;!-- Raza (opcional) --&gt;</span>
+    &lt;<span class="kw">h:outputLabel</span> for=<span class="st">"raza"</span> value=<span class="st">"Raza"</span>/&gt;
+    &lt;<span class="kw">h:inputText</span> id=<span class="st">"raza"</span>
+                 value=<span class="st">"#{mascotaBean.mascotaSeleccionada.raza}"</span>
+                 maxlength=<span class="st">"100"</span> pt:placeholder=<span class="st">"Raza (opcional)"</span>/&gt;
+
+    <span class="cm">&lt;!-- Observaciones --&gt;</span>
+    &lt;<span class="kw">h:outputLabel</span> for=<span class="st">"obs"</span> value=<span class="st">"Observaciones"</span>/&gt;
+    &lt;<span class="kw">h:inputTextarea</span> id=<span class="st">"obs"</span>
+                     value=<span class="st">"#{mascotaBean.mascotaSeleccionada.observaciones}"</span>
+                     rows=<span class="st">"3"</span>
+                     pt:maxlength=<span class="st">"500"</span>/&gt;
+
+    <span class="cm">&lt;!-- Fecha de nacimiento --&gt;</span>
+    &lt;<span class="kw">h:outputLabel</span> for=<span class="st">"fecha"</span> value=<span class="st">"Fecha de nacimiento"</span>/&gt;
+    &lt;<span class="kw">h:inputText</span> id=<span class="st">"fecha"</span>
+                 value=<span class="st">"#{mascotaBean.mascotaSeleccionada.fecha}"</span>
+                 pt:placeholder=<span class="st">"dd/MM/yyyy"</span>&gt;
+      &lt;<span class="kw">f:convertDateTime</span> pattern=<span class="st">"dd/MM/yyyy"</span> type=<span class="st">"localDate"</span>/&gt;
+    &lt;/<span class="kw">h:inputText</span>&gt;
+    &lt;<span class="kw">h:message</span> for=<span class="st">"fecha"</span> styleClass=<span class="st">"form-error"</span>/&gt;
+
+    <span class="cm">&lt;!-- Botones --&gt;</span>
+    &lt;<span class="kw">h:commandButton</span>
+        value=<span class="st">"#{mascotaBean.modoEdicion ? 'Actualizar' : 'Guardar'}"</span>
+        action=<span class="st">"#{mascotaBean.guardar}"</span>/&gt;
+    &lt;<span class="kw">h:commandButton</span>
+        value=<span class="st">"Cancelar"</span>
+        action=<span class="st">"#{mascotaBean.cancelar}"</span>
+        immediate=<span class="st">"true"</span>/&gt;
+
+  &lt;/<span class="kw">h:form</span>&gt;
+
+  <span class="cm">&lt;!-- TABLA DE MASCOTAS --&gt;</span>
+  &lt;<span class="kw">h:form</span> id=<span class="st">"frmListado"</span>&gt;
+
+    <span class="cm">&lt;!-- Mensaje cuando no hay mascotas --&gt;</span>
+    &lt;<span class="kw">h:panelGroup</span> rendered=<span class="st">"#{empty mascotaBean.mascotas}"</span>&gt;
+      &lt;<span class="kw">p</span>&gt;No hay mascotas registradas.&lt;/<span class="kw">p</span>&gt;
+    &lt;/<span class="kw">h:panelGroup</span>&gt;
+
+    &lt;<span class="kw">h:dataTable</span> value=<span class="st">"#{mascotaBean.mascotas}"</span> var=<span class="st">"m"</span>
+                 rendered=<span class="st">"#{not empty mascotaBean.mascotas}"</span>&gt;
+      &lt;<span class="kw">h:column</span>&gt;&lt;<span class="kw">f:facet</span> name=<span class="st">"header"</span>&gt;Nombre&lt;/<span class="kw">f:facet</span>&gt;#{m.nombre}&lt;/<span class="kw">h:column</span>&gt;
+      &lt;<span class="kw">h:column</span>&gt;&lt;<span class="kw">f:facet</span> name=<span class="st">"header"</span>&gt;Raza&lt;/<span class="kw">f:facet</span>&gt;#{m.raza}&lt;/<span class="kw">h:column</span>&gt;
+      &lt;<span class="kw">h:column</span>&gt;&lt;<span class="kw">f:facet</span> name=<span class="st">"header"</span>&gt;Dueño&lt;/<span class="kw">f:facet</span>&gt;
+        <span class="cm">&lt;!-- Navegar: m.cliente.nombre --&gt;</span>
+        #{m.cliente.documento} — #{m.cliente.nombre}
+      &lt;/<span class="kw">h:column</span>&gt;
+      &lt;<span class="kw">h:column</span>&gt;
+        &lt;<span class="kw">f:facet</span> name=<span class="st">"header"</span>&gt;Acciones&lt;/<span class="kw">f:facet</span>&gt;
+        &lt;<span class="kw">h:commandButton</span> value=<span class="st">"Editar"</span>
+                         action=<span class="st">"#{mascotaBean.prepararEdicion(m)}"</span>/&gt;
+        &lt;<span class="kw">h:commandButton</span> value=<span class="st">"Eliminar"</span>
+                         action=<span class="st">"#{mascotaBean.eliminar(m)}"</span>
+                         onclick=<span class="st">"return confirm('¿Eliminar?')"</span>/&gt;
+      &lt;/<span class="kw">h:column</span>&gt;
+    &lt;/<span class="kw">h:dataTable</span>&gt;
+  &lt;/<span class="kw">h:form</span>&gt;
+
+&lt;/<span class="kw">ui:define</span>&gt;
+&lt;/<span class="kw">ui:composition</span>&gt;<span class="cl">mascotas/abm.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 17 — Por qué necesitamos &lt;f:converter&gt;</div>
+  <div class="g2">
+    <div class="c-rojo card">
+      <div class="card-hdr">❌ Sin f:converter — ConverterException</div>
+      <div class="card-body" style="font-size:.87rem">
+        <p>El <code>&lt;h:selectOneMenu&gt;</code> envía el valor como <strong>String</strong> (HTML solo maneja texto). El Bean espera un <strong>Long</strong>. Sin converter → <code>ConverterException: Cannot convert 'null' of type class java.lang.String</code></p>
+      </div>
+    </div>
+    <div class="c-verde card">
+      <div class="card-hdr">✅ Con f:converter — correcto</div>
+      <div class="card-body" style="font-size:.87rem">
+        <p>El converter <code>"jakarta.faces.Long"</code> convierte automáticamente el String <code>"3"</code> al Long <code>3L</code> antes de setear el Bean. Es obligatorio en selectores que usan IDs numéricos.</p>
+        <pre style="margin-top:8px;font-size:12px"><code>&lt;<span class="kw">f:converter</span> converterId=<span class="st">"jakarta.faces.Long"</span>/&gt;
+<span class="cm">// "3" (String HTML) → 3L (Long Java)</span></code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- RESUMEN -->
+<div class="sec" id="res">
+  <div class="sec-hdr"><div class="sec-num">✅</div><div class="sec-titulo">Resumen y actividad práctica</div></div>
+
+  <div class="dn">DIAPOSITIVA 18 — Lo que aprendimos hoy</div>
+  <table>
+    <thead><tr><th>Concepto</th><th>Qué es / qué hace</th><th>Clave para recordar</th></tr></thead>
+    <tbody>
+      <tr><td><code>@ManyToOne</code></td><td>La clase que tiene la FK en su tabla</td><td>Siempre en la clase del lado "muchos" (Mascota)</td></tr>
+      <tr><td><code>@JoinColumn(name="...")</code></td><td>Define el nombre de la columna FK en la tabla</td><td>Va junto a @ManyToOne en Mascota</td></tr>
+      <tr><td><code>@OneToMany(mappedBy="...")</code></td><td>El lado "uno" navega la colección</td><td>mappedBy = nombre exacto del campo @ManyToOne en Mascota</td></tr>
+      <tr><td><code>FetchType.LAZY</code></td><td>No carga el relacionado hasta que se accede</td><td>Siempre preferir LAZY; usar JOIN FETCH en JPQL cuando se necesite</td></tr>
+      <tr><td><code>JOIN FETCH</code></td><td>Carga la relación en 1 sola query SQL</td><td>Obligatorio cuando la vista accede a <code>m.cliente.nombre</code></td></tr>
+      <tr><td><code>f:converter Long</code></td><td>Convierte String → Long en selectOneMenu</td><td>Sin esto → ConverterException</td></tr>
+      <tr><td>Servicio resuelve el ID</td><td>El form envía ID, el Servicio busca el objeto</td><td><code>clienteDAO.buscarPorId(clienteId)</code> → <code>mascota.setCliente(cliente)</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn" style="margin-top:20px">DIAPOSITIVA 19 — Actividad práctica</div>
+  <div class="c-azul card">
+    <div class="card-hdr">💻 Actividad paso a paso</div>
+    <div class="card-body">
+      <div class="paso"><div class="paso-n">1</div><div class="paso-body">
+        <h4>Ejecutar el SQL</h4>
+        <p>Correr el script <code>veterinariadb.sql</code>. Verificar en MySQL Workbench que las tablas <code>cliente</code> y <code>mascota</code> están creadas con la FK correcta.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">2</div><div class="paso-body">
+        <h4>Crear las entidades</h4>
+        <p>Crear <code>Cliente.java</code> con <code>@OneToMany(mappedBy="cliente")</code> y <code>Mascota.java</code> con <code>@ManyToOne + @JoinColumn(name="cliente_id")</code>. Verificar que compila sin errores.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">3</div><div class="paso-body">
+        <h4>Crear los DAOs</h4>
+        <p>Crear <code>ClienteDAO</code> y <code>MascotaDAO</code> extendiendo <code>GenericDAO</code>. Agregar el método <code>listarTodas()</code> con la NamedQuery <code>JOIN FETCH m.cliente</code>.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">4</div><div class="paso-body">
+        <h4>Crear el Servicio</h4>
+        <p>Crear <code>MascotaServicio</code> con el método <code>guardar(Mascota mascota, Long clienteId)</code>. Probar que resuelve el cliente correctamente.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">5</div><div class="paso-body">
+        <h4>Crear el Bean y la Vista</h4>
+        <p>Crear <code>MascotaBean</code> con <code>clienteIdSeleccionado</code> y <code>mascotas/abm.xhtml</code> con el <code>h:selectOneMenu</code> + <code>f:converter</code>. Probar el formulario completo.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">6</div><div class="paso-body">
+        <h4>Verificar la navegación en la tabla</h4>
+        <p>En la tabla de mascotas, mostrar <code>#{m.cliente.documento} — #{m.cliente.nombre}</code>. Activar logging SQL de EclipseLink y verificar que se genera un solo SELECT con INNER JOIN (sin N+1).</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="alerta a-ok" style="margin-top:16px">
+    <span class="a-ico">🎓</span>
+    <div><strong>Logro de la clase:</strong> Implementamos la primera relación real de la aplicación: Cliente → Mascota. A partir de ahora cada Mascota "conoce" a su dueño a través de <code>mascota.getCliente()</code>. Este patrón es el mismo que se usa para Mascota → Turno en la clase siguiente.</div>
+  </div>
+</div>
+
+<footer>
+  <p><strong>Programación Web Avanzada — Backend</strong> &nbsp;|&nbsp; Clase 05: Relaciones JPA — Cliente y Mascota</p>
+  <p style="margin-top:5px;font-size:.75rem">JPA 3.1 · @ManyToOne · @OneToMany · @JoinColumn · mappedBy · FetchType · JPQL JOIN FETCH</p>
+</footer>
+</body>
+</html>
