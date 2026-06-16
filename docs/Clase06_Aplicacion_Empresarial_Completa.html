@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clase 06 — Aplicación Empresarial Completa | Jakarta EE 10</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1a3a5c;--azul2:#2563a8;--azul3:#3b82d1;--azul-cl:#dbeafe;--azul-50:#eff6ff;
+  --verde:#166534;--verde-cl:#dcfce7;--verde2:#16a34a;
+  --naranja:#92400e;--naranja-cl:#fef3c7;--naranja2:#d97706;
+  --rojo:#991b1b;--rojo-cl:#fee2e2;--rojo2:#dc2626;
+  --violeta:#4c1d95;--violeta-cl:#ede9fe;--violeta2:#7c3aed;
+  --celeste:#0c4a6e;--celeste-cl:#e0f2fe;--celeste2:#0284c7;
+  --rosa:#831843;--rosa-cl:#fce7f3;
+  --gris:#f1f5f9;--gris2:#e2e8f0;--gris3:#94a3b8;--gris4:#475569;--texto:#0f172a;
+  --fuente:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--fuente);background:#f8fafc;color:var(--texto);font-size:15px;line-height:1.6}
+a{color:var(--azul2);text-decoration:none}
+code{font-family:'Cascadia Code','Fira Code','Consolas',monospace}
+
+/* ══ PORTADA ══ */
+.portada{background:linear-gradient(135deg,#0f172a 0%,var(--azul) 40%,var(--azul2) 75%,var(--azul3) 100%);
+  color:#fff;padding:72px 40px;text-align:center;border-radius:0 0 28px 28px;
+  box-shadow:0 8px 40px rgba(0,0,0,.35);margin-bottom:44px}
+.portada-badge{display:inline-block;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);padding:6px 20px;border-radius:20px;
+  font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px}
+.portada-num{font-size:5rem;font-weight:900;line-height:1;opacity:.25;
+  position:relative;top:0;margin-bottom:-10px}
+.portada h1{font-size:2.4rem;font-weight:800;margin-bottom:8px;line-height:1.2}
+.portada h2{font-size:1.15rem;font-weight:400;opacity:.8;margin-bottom:28px}
+.portada-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px}
+.tag{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);
+  padding:4px 13px;border-radius:16px;font-size:11px;font-weight:600}
+
+/* ══ ÍNDICE ══ */
+.indice{max-width:880px;margin:0 auto 44px;background:#fff;border-radius:16px;
+  border:1px solid var(--gris2);box-shadow:0 2px 10px rgba(0,0,0,.07);overflow:hidden}
+.indice-header{background:var(--azul);color:#fff;padding:15px 24px;font-size:.97rem;font-weight:700}
+.indice-lista{list-style:none;display:grid;grid-template-columns:1fr 1fr}
+.indice-lista li{border-bottom:1px solid var(--gris2);border-right:1px solid var(--gris2)}
+.indice-lista a{display:flex;align-items:center;gap:12px;padding:12px 20px;
+  color:var(--texto);font-size:.88rem;transition:background .15s}
+.indice-lista a:hover{background:var(--azul-cl)}
+.indice-num{width:28px;height:28px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+@media(max-width:600px){.indice-lista{grid-template-columns:1fr}}
+
+/* ══ SECCIONES ══ */
+.sec{max-width:880px;margin:0 auto 52px;scroll-margin-top:20px;padding:0 20px}
+.sec-hdr{display:flex;align-items:center;gap:14px;margin-bottom:22px;
+  padding-bottom:12px;border-bottom:3px solid var(--azul2)}
+.sec-num{width:46px;height:46px;background:var(--azul);color:#fff;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;flex-shrink:0}
+.sec-titulo{font-size:1.45rem;font-weight:800;color:var(--azul)}
+
+/* ══ CARDS ══ */
+.card{background:#fff;border:1px solid var(--gris2);border-radius:12px;
+  box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:18px;overflow:hidden}
+.card-hdr{padding:11px 18px;font-weight:700;font-size:.9rem;border-bottom:1px solid var(--gris2)}
+.card-body{padding:18px}
+.c-azul   .card-hdr{background:var(--azul-cl);color:var(--azul)}
+.c-verde  .card-hdr{background:var(--verde-cl);color:var(--verde)}
+.c-naranja .card-hdr{background:var(--naranja-cl);color:var(--naranja)}
+.c-rojo   .card-hdr{background:var(--rojo-cl);color:var(--rojo)}
+.c-violeta .card-hdr{background:var(--violeta-cl);color:var(--violeta)}
+.c-celeste .card-hdr{background:var(--celeste-cl);color:var(--celeste)}
+
+/* ══ ALERTAS ══ */
+.alerta{display:flex;gap:12px;padding:13px 16px;border-radius:10px;margin:14px 0;font-size:.88rem}
+.a-info  {background:var(--azul-cl);border-left:4px solid var(--azul2)}
+.a-ok    {background:var(--verde-cl);border-left:4px solid var(--verde2)}
+.a-warn  {background:var(--naranja-cl);border-left:4px solid var(--naranja2)}
+.a-err   {background:var(--rojo-cl);border-left:4px solid var(--rojo2)}
+.a-ico   {font-size:1.2rem;flex-shrink:0;margin-top:1px}
+
+/* ══ CÓDIGO ══ */
+pre{background:#0f172a;color:#e2e8f0;padding:20px 22px;border-radius:10px;
+  overflow-x:auto;font-size:13px;line-height:1.75;margin:12px 0;
+  border:1px solid #1e293b;position:relative}
+.cl{background:#1e293b;border-color:#334155;border-radius:6px;padding:2px 8px;
+  font-size:11px;color:#94a3b8;font-family:var(--fuente);position:absolute;top:8px;right:10px}
+.kw{color:#93c5fd}.an{color:#86efac}.st{color:#fca5a5}
+.cm{color:#64748b;font-style:italic}.cn{color:#fde68a}.mt{color:#c4b5fd}.nm{color:#fdba74}
+
+/* ══ TABLA ══ */
+table{width:100%;border-collapse:collapse;font-size:.88rem;margin:12px 0}
+th{background:var(--azul);color:#fff;padding:9px 13px;text-align:left;
+  font-size:.78rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:8px 13px;border-bottom:1px solid var(--gris2);vertical-align:top}
+tr:nth-child(even) td{background:var(--gris)}
+tr:hover td{background:var(--azul-cl)}
+
+/* ══ GRIDS ══ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:12px 0}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}}
+
+/* ══ BADGES ══ */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-verde  {background:var(--verde-cl);color:var(--verde)}
+.b-rojo   {background:var(--rojo-cl);color:var(--rojo)}
+.b-azul   {background:var(--azul-cl);color:var(--azul2)}
+.b-naranja{background:var(--naranja-cl);color:var(--naranja)}
+.b-violeta{background:var(--violeta-cl);color:var(--violeta2)}
+
+/* ══ OBJETIVOS ══ */
+.obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+@media(max-width:600px){.obj-grid{grid-template-columns:1fr}}
+.obj-item{background:#fff;border:1px solid var(--gris2);border-left:4px solid var(--azul2);
+  border-radius:8px;padding:11px 14px;font-size:.88rem;display:flex;align-items:flex-start;gap:10px}
+.obj-item span{font-size:1rem;flex-shrink:0}
+
+/* ══ DIAPOSITIVA / SLIDE ══ */
+.slide{background:#fff;border:2px solid var(--gris2);border-radius:16px;
+  overflow:hidden;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.slide-hdr{background:linear-gradient(90deg,var(--azul),var(--azul2));
+  color:#fff;padding:14px 22px;display:flex;align-items:center;gap:12px}
+.slide-n{background:rgba(255,255,255,.2);width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0}
+.slide-titulo{font-weight:700;font-size:.97rem}
+.slide-body{padding:20px 22px}
+
+/* ══ DIAGRAMA CAPAS VISUAL ══ */
+.capa-stack{display:flex;flex-direction:column;align-items:center;gap:0;
+  background:#0f172a;border-radius:14px;padding:28px 22px;margin:14px 0}
+.capa-item{width:100%;max-width:560px;display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-radius:9px;border:1px solid;margin:0;cursor:default;
+  transition:transform .15s}
+.capa-item:hover{transform:translateX(4px)}
+.capa-ico{font-size:1.4rem;width:32px;text-align:center;flex-shrink:0}
+.capa-info{flex:1}
+.capa-nombre{font-weight:700;font-size:.88rem}
+.capa-det{font-size:.75rem;opacity:.75;margin-top:1px}
+.capa-badge{font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:10px;
+  white-space:nowrap;flex-shrink:0}
+.capa-arr{color:#334155;font-size:.75rem;padding:4px 0;
+  display:flex;align-items:center;gap:8px;width:100%;max-width:560px;padding-left:44px}
+.capa-arr span{color:#475569;font-family:'Cascadia Code','Consolas',monospace;font-size:.72rem}
+
+.cp-vista   {background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe}
+.cp-vista   .capa-badge{background:#2563a8;color:#fff}
+.cp-bean    {background:#312e81;border-color:#818cf8;color:#e0e7ff}
+.cp-bean    .capa-badge{background:#4f46e5;color:#fff}
+.cp-serv    {background:#14532d;border-color:#4ade80;color:#bbf7d0}
+.cp-serv    .capa-badge{background:#16a34a;color:#fff}
+.cp-dao     {background:#3b0764;border-color:#a855f7;color:#f3e8ff}
+.cp-dao     .capa-badge{background:#9333ea;color:#fff}
+.cp-em      {background:#422006;border-color:#fb923c;color:#ffedd5}
+.cp-em      .capa-badge{background:#ea580c;color:#fff}
+.cp-db      {background:#1c1917;border-color:#78716c;color:#e7e5e4}
+.cp-db      .capa-badge{background:#57534e;color:#fff}
+
+/* ══ RELACIONES JPA ══ */
+.rel-modelo{display:flex;flex-direction:column;align-items:center;gap:0;
+  padding:20px;background:#0f172a;border-radius:14px;margin:14px 0}
+.rel-entidad{background:#1e293b;border:2px solid var(--azul3);border-radius:10px;
+  padding:14px 20px;width:240px;text-align:center;color:#e2e8f0}
+.rel-entidad-nombre{font-weight:800;font-size:1rem;color:#93c5fd;margin-bottom:6px}
+.rel-campo{font-size:.75rem;color:#94a3b8;line-height:1.8;text-align:left}
+.rel-campo strong{color:#bfdbfe}
+.rel-flecha-bloque{display:flex;flex-direction:column;align-items:center;padding:6px 0}
+.rel-flecha-linea{width:2px;height:20px;background:#3b82d1}
+.rel-flecha-etiq{background:#1e3a5f;border:1px solid #3b82d1;color:#93c5fd;
+  padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:700;margin:2px 0}
+.rel-flecha-punta{color:#3b82d1;font-size:1.1rem;line-height:1}
+
+/* ══ FLUJO VISUAL ══ */
+.flujo{display:flex;flex-direction:column;align-items:center;gap:0;
+  background:#0f172a;border-radius:14px;padding:24px 20px;margin:14px 0}
+.flujo-paso{width:100%;max-width:580px;display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-radius:9px;border:1px solid;transition:transform .15s}
+.flujo-paso:hover{transform:translateX(4px)}
+.flujo-ico{font-size:1.4rem;width:30px;text-align:center;flex-shrink:0}
+.flujo-txt{flex:1}
+.flujo-tit{font-weight:700;font-size:.88rem;margin-bottom:2px}
+.flujo-det{font-size:.77rem;opacity:.8;line-height:1.5}
+.flujo-det code{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;font-size:.72rem}
+.flujo-tag{font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:10px;
+  white-space:nowrap;flex-shrink:0}
+.flujo-arr{color:#334155;font-size:1rem;padding:3px 0;line-height:1}
+
+.fp-usuario {background:#1e293b;border-color:#475569;color:#e2e8f0}
+.fp-jsf     {background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe}
+.fp-jsf  .flujo-tag{background:#2563a8;color:#fff}
+.fp-bean    {background:#312e81;border-color:#818cf8;color:#e0e7ff}
+.fp-bean .flujo-tag{background:#4f46e5;color:#fff}
+.fp-val     {background:#422006;border-color:#fb923c;color:#ffedd5}
+.fp-val  .flujo-tag{background:#ea580c;color:#fff}
+.fp-serv    {background:#14532d;border-color:#4ade80;color:#bbf7d0}
+.fp-serv .flujo-tag{background:#16a34a;color:#fff}
+.fp-dao     {background:#3b0764;border-color:#a855f7;color:#f3e8ff}
+.fp-dao  .flujo-tag{background:#9333ea;color:#fff}
+.fp-ok      {background:#14532d;border-color:#86efac;color:#bbf7d0}
+.fp-ok   .flujo-tag{background:#16a34a;color:#fff}
+
+/* ══ PASOS ACTIVIDAD ══ */
+.paso{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start}
+.paso-n{width:34px;height:34px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0;margin-top:2px}
+.paso-body h4{font-size:.9rem;color:var(--azul);margin-bottom:3px;font-weight:700}
+.paso-body p{font-size:.84rem;color:var(--gris4)}
+
+/* ══ SEP ══ */
+.sep{height:2px;background:linear-gradient(90deg,var(--azul2),transparent);
+  max-width:880px;margin:0 auto 52px;border-radius:2px}
+
+/* ══ FOOTER ══ */
+footer{background:var(--azul);color:rgba(255,255,255,.65);text-align:center;
+  padding:22px;font-size:.8rem;margin-top:60px}
+
+/* ══ NUMERO DIAPOSITIVA ══ */
+.diap-num{display:inline-block;background:var(--azul2);color:#fff;
+  font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:10px;
+  margin-bottom:6px;letter-spacing:.5px}
+</style>
+</head>
+<body>
+
+
+<!-- PORTADA -->
+<div class="portada">
+  <div class="portada-badge">Programación Web Avanzada — Backend</div>
+  <div class="portada-num">06</div>
+  <h1>Aplicación Empresarial Completa</h1>
+  <h2>Integración de capas · Validaciones · Relaciones JPA · Buenas Prácticas</h2>
+  <div class="portada-tags">
+    <span class="tag">Jakarta EE 10</span><span class="tag">JPA 3.1</span>
+    <span class="tag">CDI 4.0</span><span class="tag">Bean Validation 3.0</span>
+    <span class="tag">GlassFish 7</span><span class="tag">MySQL 8</span>
+    <span class="tag">JDK 21</span><span class="tag">EclipseLink</span>
+  </div>
+</div>
+
+
+<!-- ÍNDICE -->
+<div class="indice" style="padding:0 20px;max-width:880px;margin:0 auto 44px">
+  <div class="indice-header">📚 Clase 06 — Índice de contenidos</div>
+  <ul class="indice-lista">
+    <li><a href="#obj"><span class="indice-num">🎯</span>Objetivos de la clase</a></li>
+    <li><a href="#s1"><span class="indice-num">1</span>Integración de todas las capas</a></li>
+    <li><a href="#s2"><span class="indice-num">2</span>Flujo completo de una petición</a></li>
+    <li><a href="#s3"><span class="indice-num">3</span>Validaciones en Jakarta EE</a></li>
+    <li><a href="#s4"><span class="indice-num">4</span>Bean Validation</a></li>
+    <li><a href="#s5"><span class="indice-num">5</span>Manejo de excepciones</a></li>
+    <li><a href="#s6"><span class="indice-num">6</span>Buenas prácticas</a></li>
+    <li><a href="#s7"><span class="indice-num">7</span>Organización de paquetes</a></li>
+    <li><a href="#s8"><span class="indice-num">8</span>Relaciones JPA</a></li>
+    <li><a href="#s9"><span class="indice-num">9</span>Modelo completo Veterinaria</a></li>
+    <li><a href="#s10"><span class="indice-num">10</span>Práctica: CRUD completo</a></li>
+    <li><a href="#res"><span class="indice-num">✅</span>Resumen y actividad</a></li>
+  </ul>
+</div>
+
+
+<!-- OBJETIVOS -->
+<div class="sec" id="obj">
+  <div class="sec-hdr">
+    <div class="sec-num">🎯</div>
+    <div class="sec-titulo">Objetivos de la clase</div>
+  </div>
+  <div class="obj-grid">
+    <div class="obj-item"><span>🏗️</span>Integrar todas las capas en una aplicación Jakarta EE completa y funcional</div>
+    <div class="obj-item"><span>🔄</span>Comprender el flujo completo de una petición HTTP desde la vista hasta MySQL</div>
+    <div class="obj-item"><span>✅</span>Implementar validaciones con Bean Validation (@NotBlank, @Email, @Size)</div>
+    <div class="obj-item"><span>🛡️</span>Manejar excepciones correctamente en cada capa de la arquitectura</div>
+    <div class="obj-item"><span>🔗</span>Modelar relaciones @OneToMany y @ManyToOne con JPA</div>
+    <div class="obj-item"><span>📦</span>Organizar paquetes siguiendo convenciones empresariales</div>
+    <div class="obj-item"><span>⚡</span>Aplicar buenas prácticas: escalabilidad, cohesión y bajo acoplamiento</div>
+    <div class="obj-item"><span>🐾</span>Tener el sistema Veterinaria funcionando con Cliente → Mascota → Turno</div>
+  </div>
+  <div class="alerta a-info">
+    <span class="a-ico">💡</span>
+    <div><strong>Cierre del ciclo:</strong> Esta es la clase de integración. Unimos todo lo aprendido — JSF, CDI, JPA, DAO, Transacciones — en una aplicación empresarial real y completa, lista para producción.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 1: INTEGRACIÓN DE CAPAS -->
+<div class="sec" id="s1">
+  <div class="sec-hdr">
+    <div class="sec-num">1</div>
+    <div class="sec-titulo">Integración de todas las capas</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 1 — Arquitectura integrada</div>
+  <div class="card c-azul">
+    <div class="card-hdr">🏗️ La arquitectura de 4 capas en Jakarta EE</div>
+    <div class="card-body">
+      <p>Una aplicación empresarial Jakarta EE organiza su código en <strong>capas con responsabilidades bien definidas</strong>. Cada capa solo conoce a la inmediatamente inferior. Nunca se salta capas.</p>
+    </div>
+  </div>
+
+  <div class="capa-stack">
+    <div class="capa-item cp-vista">
+      <div class="capa-ico">🌐</div>
+      <div class="capa-info">
+        <div class="capa-nombre">CAPA DE PRESENTACIÓN — Vista</div>
+        <div class="capa-det">clientes/abm.xhtml · mascotas/abm.xhtml · turnos/abm.xhtml</div>
+      </div>
+      <div class="capa-badge">Jakarta Faces 4.0</div>
+    </div>
+    <div class="capa-arr">▼ <span>EL: #{clienteBean.guardar()}</span></div>
+    <div class="capa-item cp-bean">
+      <div class="capa-ico">🎮</div>
+      <div class="capa-info">
+        <div class="capa-nombre">CAPA DE PRESENTACIÓN — Managed Bean</div>
+        <div class="capa-det">ClienteBean · MascotaBean · TurnoBean</div>
+      </div>
+      <div class="capa-badge">@Named @ViewScoped</div>
+    </div>
+    <div class="capa-arr">▼ <span>@Inject ClienteServicio</span></div>
+    <div class="capa-item cp-serv">
+      <div class="capa-ico">⚙️</div>
+      <div class="capa-info">
+        <div class="capa-nombre">CAPA DE NEGOCIO — Servicio</div>
+        <div class="capa-det">ClienteServicio · MascotaServicio · TurnoServicio</div>
+      </div>
+      <div class="capa-badge">@ApplicationScoped @Transactional</div>
+    </div>
+    <div class="capa-arr">▼ <span>@Inject ClienteDAO</span></div>
+    <div class="capa-item cp-dao">
+      <div class="capa-ico">🗂️</div>
+      <div class="capa-info">
+        <div class="capa-nombre">CAPA DE DATOS — DAO</div>
+        <div class="capa-det">ClienteDAO · MascotaDAO · TurnoDAO extends GenericDAO</div>
+      </div>
+      <div class="capa-badge">@ApplicationScoped</div>
+    </div>
+    <div class="capa-arr">▼ <span>@PersistenceContext EntityManager</span></div>
+    <div class="capa-item cp-em">
+      <div class="capa-ico">🔌</div>
+      <div class="capa-info">
+        <div class="capa-nombre">ORM — EntityManager + Entidades</div>
+        <div class="capa-det">Cliente.java · Mascota.java · Turno.java · @NamedQueries</div>
+      </div>
+      <div class="capa-badge">JPA 3.1 · EclipseLink</div>
+    </div>
+    <div class="capa-arr">▼ <span>JDBC · jdbc/VeterinariaDB</span></div>
+    <div class="capa-item cp-db">
+      <div class="capa-ico">🗄️</div>
+      <div class="capa-info">
+        <div class="capa-nombre">BASE DE DATOS — MySQL 8</div>
+        <div class="capa-det">tabla cliente · tabla mascota · tabla turno</div>
+      </div>
+      <div class="capa-badge">MySQL 8 · GlassFish DataSource</div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 2 — Responsabilidad de cada capa</div>
+  <table>
+    <thead><tr><th>Capa</th><th>Clase</th><th>Responsabilidad</th><th>Conoce a</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Vista</strong></td><td><code>.xhtml</code></td><td>Mostrar datos, recibir input del usuario</td><td>Managed Bean (via EL)</td></tr>
+      <tr><td><strong>Managed Bean</strong></td><td><code>ClienteBean</code></td><td>Estado de la vista, manejo de eventos UI</td><td>Servicio</td></tr>
+      <tr><td><strong>Servicio</strong></td><td><code>ClienteServicio</code></td><td>Reglas de negocio, validaciones, transacciones</td><td>DAO</td></tr>
+      <tr><td><strong>DAO</strong></td><td><code>ClienteDAO</code></td><td>CRUD sobre la entidad, consultas JPQL</td><td>EntityManager</td></tr>
+      <tr><td><strong>Entidad</strong></td><td><code>Cliente</code></td><td>Mapeo objeto-relacional, NamedQueries</td><td>Tabla MySQL</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">⚠️</span>
+    <div><strong>Principio de separación:</strong> El Bean nunca debe inyectar un DAO directamente. El Bean llama al Servicio, el Servicio llama al DAO. Esta separación permite cambiar la implementación de persistencia sin tocar la vista ni el negocio.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 2: FLUJO COMPLETO -->
+<div class="sec" id="s2">
+  <div class="sec-hdr">
+    <div class="sec-num">2</div>
+    <div class="sec-titulo">Flujo completo de una petición</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 3 — Las 6 fases de Jakarta Faces</div>
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">🔄 Ciclo de vida de una petición JSF</div>
+      <div class="card-body" style="padding:0">
+        <table style="margin:0">
+          <thead><tr><th>#</th><th>Fase</th><th>Qué hace</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge b-azul">1</span></td><td><strong>Restore View</strong></td><td>Reconstruye el árbol de componentes</td></tr>
+            <tr><td><span class="badge b-azul">2</span></td><td><strong>Apply Request Values</strong></td><td>Copia valores del request a los componentes</td></tr>
+            <tr><td><span class="badge b-naranja">3</span></td><td><strong>Process Validations</strong></td><td>Ejecuta validadores y conversores</td></tr>
+            <tr><td><span class="badge b-naranja">4</span></td><td><strong>Update Model Values</strong></td><td>Llama los setters del Bean</td></tr>
+            <tr><td><span class="badge b-verde">5</span></td><td><strong>Invoke Application</strong></td><td>Ejecuta el método de acción</td></tr>
+            <tr><td><span class="badge b-verde">6</span></td><td><strong>Render Response</strong></td><td>Genera el HTML de respuesta</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">💡 Shortcuts importantes</div>
+      <div class="card-body">
+        <p style="font-size:.88rem;margin-bottom:12px"><code>immediate="true"</code> — salta las fases 2 a 4. Se usa en el botón "Cancelar" para no validar el formulario.</p>
+        <pre style="margin:0;font-size:12px"><code><span class="cm">&lt;!-- Cancela sin validar --&gt;</span>
+&lt;<span class="kw">h:commandButton</span>
+  value=<span class="st">"Cancelar"</span>
+  action=<span class="st">"#{bean.cancelar}"</span>
+  immediate=<span class="st">"true"</span>/&gt;</code></pre>
+        <p style="font-size:.85rem;margin-top:12px;color:var(--gris4)">Si hay un error de validación en la fase 3, JSF salta directamente a la fase 6 sin ejecutar el método de acción.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 4 — Flujo completo: Alta de Cliente</div>
+  <div class="flujo">
+    <div class="flujo-paso fp-usuario">
+      <div class="flujo-ico">👤</div>
+      <div class="flujo-txt">
+        <div class="flujo-tit">Usuario completa el formulario</div>
+        <div class="flujo-det">Ingresa documento, nombre, apellido, email, teléfono y hace click en <strong>"Guardar"</strong></div>
+      </div>
+    </div>
+    <div class="flujo-arr">▼</div>
+    <div class="flujo-paso fp-jsf">
+      <div class="flujo-ico">🌐</div>
+      <div class="flujo-txt">
+        <div class="flujo-tit">Jakarta Faces — Fases 1 a 4</div>
+        <div class="flujo-det">Restaura la vista · Copia valores · Convierte tipos · Llama setters del Bean</div>
+      </div>
+      <div class="flujo-tag">Jakarta Faces 4.0</div>
+    </div>
+    <div class="flujo-arr">▼</div>
+    <div class="flujo-paso fp-val">
+      <div class="flujo-ico">✅</div>
+      <div class="flujo-txt">
+        <div class="flujo-tit">Fase 3 — Process Validations</div>
+        <div class="flujo-det">Ejecuta <code>@NotBlank</code>, <code>@Email</code>, <code>f:validateRegex</code> · Si falla → salta a Render Response con errores</div>
+      </div>
+      <div class="flujo-tag">Bean Validation</div>
+    </div>
+    <div class="flujo-arr">▼</div>
+    <div class="flujo-paso fp-bean">
+      <div class="flujo-ico">🎮</div>
+      <div class="flujo-txt">
+        <div class="flujo-tit">Fase 5 — ClienteBean.guardar()</div>
+        <div class="flujo-det">Llama a <code>clienteServicio.guardar(clienteSeleccionado)</code></div>
+      </div>
+      <div class="flujo-tag">@Named @ViewScoped</div>
+    </div>
+    <div class="flujo-arr">▼</div>
+    <div class="flujo-paso fp-serv">
+      <div class="flujo-ico">⚙️</div>
+      <div class="flujo-txt">
+        <div class="flujo-tit">ClienteServicio.guardar() — @Transactional</div>
+        <div class="flujo-det">Valida unicidad de documento y email · Llama <code>clienteDAO.guardar()</code> o <code>clienteDAO.actualizar()</code></div>
+      </div>
+      <div class="flujo-tag">@Transactional</div>
+    </div>
+    <div class="flujo-arr">▼</div>
+    <div class="flujo-paso fp-dao">
+      <div class="flujo-ico">🗂️</div>
+      <div class="flujo-txt">
+        <div class="flujo-tit">ClienteDAO → EntityManager</div>
+        <div class="flujo-det"><code>em.persist(cliente)</code> → EclipseLink genera → <code>INSERT INTO cliente (...) VALUES (...)</code></div>
+      </div>
+      <div class="flujo-tag">JPA · MySQL</div>
+    </div>
+    <div class="flujo-arr">▼</div>
+    <div class="flujo-paso fp-ok">
+      <div class="flujo-ico">✅</div>
+      <div class="flujo-txt">
+        <div class="flujo-tit">COMMIT + Recarga + Render Response</div>
+        <div class="flujo-det">GlassFish hace COMMIT · Bean recarga la lista · JSF renderiza la tabla actualizada con mensaje de éxito</div>
+      </div>
+      <div class="flujo-tag">Fase 6</div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 3: VALIDACIONES -->
+<div class="sec" id="s3">
+  <div class="sec-hdr">
+    <div class="sec-num">3</div>
+    <div class="sec-titulo">Validaciones en Jakarta EE</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 5 — Los 3 niveles de validación</div>
+  <div class="g3">
+    <div class="card c-azul">
+      <div class="card-hdr">1️⃣ Vista (JSF)</div>
+      <div class="card-body" style="font-size:.85rem">
+        <p><strong>Dónde:</strong> Archivo .xhtml</p>
+        <p style="margin-top:6px"><strong>Qué valida:</strong></p>
+        <ul style="padding-left:16px;margin-top:4px;line-height:1.9">
+          <li><code>required="true"</code></li>
+          <li><code>f:validateRegex</code></li>
+          <li><code>f:validateLength</code></li>
+          <li>Conversores de tipo</li>
+        </ul>
+        <p style="margin-top:8px;color:var(--gris4)">Se ejecuta en Fase 3 del ciclo JSF</p>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">2️⃣ Entidad (Bean Validation)</div>
+      <div class="card-body" style="font-size:.85rem">
+        <p><strong>Dónde:</strong> Clase Java con anotaciones</p>
+        <p style="margin-top:6px"><strong>Qué valida:</strong></p>
+        <ul style="padding-left:16px;margin-top:4px;line-height:1.9">
+          <li><code>@NotBlank</code></li>
+          <li><code>@Email</code></li>
+          <li><code>@Size(max=100)</code></li>
+          <li><code>@NotNull</code></li>
+        </ul>
+        <p style="margin-top:8px;color:var(--gris4)">Integrado con JPA y JSF</p>
+      </div>
+    </div>
+    <div class="card c-naranja">
+      <div class="card-hdr">3️⃣ Negocio (Servicio)</div>
+      <div class="card-body" style="font-size:.85rem">
+        <p><strong>Dónde:</strong> Clase Servicio (@ApplicationScoped)</p>
+        <p style="margin-top:6px"><strong>Qué valida:</strong></p>
+        <ul style="padding-left:16px;margin-top:4px;line-height:1.9">
+          <li>Email único en BD</li>
+          <li>Documento único en BD</li>
+          <li>Reglas de negocio complejas</li>
+          <li>Consistencia de datos</li>
+        </ul>
+        <p style="margin-top:8px;color:var(--gris4)">Consulta la BD para validar</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 6 — Validaciones en la Vista (.xhtml)</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 clientes/abm.xhtml — Validaciones JSF</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- required: campo obligatorio --&gt;</span>
+&lt;<span class="kw">h:inputText</span> id=<span class="st">"documento"</span>
+             value=<span class="st">"#{clienteBean.clienteSeleccionado.documento}"</span>
+             required=<span class="st">"true"</span>
+             requiredMessage=<span class="st">"El documento es obligatorio"</span>
+             maxlength=<span class="st">"20"</span>
+             styleClass=<span class="st">"form-control"</span>
+             pt:placeholder=<span class="st">"Ej: 30111222"</span>/&gt;
+&lt;<span class="kw">h:message</span> for=<span class="st">"documento"</span> styleClass=<span class="st">"form-error"</span>/&gt;
+
+<span class="cm">&lt;!-- f:validateRegex: formato de email --&gt;</span>
+&lt;<span class="kw">h:inputText</span> id=<span class="st">"email"</span>
+             value=<span class="st">"#{clienteBean.clienteSeleccionado.email}"</span>
+             required=<span class="st">"true"</span>
+             requiredMessage=<span class="st">"El email es obligatorio"</span>
+             validatorMessage=<span class="st">"Formato de email inválido"</span>&gt;
+    &lt;<span class="kw">f:validateRegex</span> pattern=<span class="st">"^[^@]+@[^@]+\.[^@]+$"</span>/&gt;
+&lt;/<span class="kw">h:inputText</span>&gt;
+&lt;<span class="kw">h:message</span> for=<span class="st">"email"</span> styleClass=<span class="st">"form-error"</span>/&gt;
+
+<span class="cm">&lt;!-- f:convertDateTime: fecha con formato específico --&gt;</span>
+&lt;<span class="kw">h:inputText</span> id=<span class="st">"fechaNac"</span>
+             value=<span class="st">"#{mascotaBean.mascotaSeleccionada.fechaNac}"</span>
+             pt:placeholder=<span class="st">"dd/MM/yyyy"</span>&gt;
+    &lt;<span class="kw">f:convertDateTime</span> pattern=<span class="st">"dd/MM/yyyy"</span> type=<span class="st">"localDate"</span>/&gt;
+&lt;/<span class="kw">h:inputText</span>&gt;
+
+<span class="cm">&lt;!-- Mostrar todos los mensajes globales --&gt;</span>
+&lt;<span class="kw">h:messages</span> globalOnly=<span class="st">"true"</span> showDetail=<span class="st">"true"</span>
+            infoClass=<span class="st">"msg msg-info"</span>
+            warnClass=<span class="st">"msg msg-warn"</span>
+            errorClass=<span class="st">"msg msg-error"</span>/&gt;<span class="cl">abm.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">💡</span>
+    <div><strong>pt: (passthrough):</strong> Atributos HTML5 como <code>placeholder</code>, <code>maxlength</code> en textarea y <code>autofocus</code> que JSF no reconoce de forma nativa deben pasarse con el prefijo <code>pt:</code>. Requiere <code>xmlns:pt="jakarta.faces.passthrough"</code> en el <code>&lt;html&gt;</code>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 4: BEAN VALIDATION -->
+<div class="sec" id="s4">
+  <div class="sec-hdr">
+    <div class="sec-num">4</div>
+    <div class="sec-titulo">Bean Validation 3.0</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 7 — Anotaciones de Bean Validation</div>
+  <div class="card c-verde">
+    <div class="card-hdr">✅ ¿Qué es Bean Validation?</div>
+    <div class="card-body">
+      <p>Bean Validation es el estándar Jakarta EE para declarar restricciones sobre los campos de una clase Java usando <strong>anotaciones directamente en la entidad</strong>. Se integra automáticamente con JPA (valida antes del INSERT/UPDATE) y con JSF (valida en Fase 3).</p>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Anotación</th><th>Aplica a</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><code>@NotNull</code></td><td>Cualquier tipo</td><td>El valor no puede ser null</td><td><code>@NotNull LocalDateTime fechaHora</code></td></tr>
+      <tr><td><code>@NotBlank</code></td><td>String</td><td>No null, no vacío, no solo espacios</td><td><code>@NotBlank String nombre</code></td></tr>
+      <tr><td><code>@NotEmpty</code></td><td>String, Collection</td><td>No null y no vacío</td><td><code>@NotEmpty List&lt;?&gt; items</code></td></tr>
+      <tr><td><code>@Size</code></td><td>String, Collection</td><td>Longitud mínima y/o máxima</td><td><code>@Size(min=2, max=100)</code></td></tr>
+      <tr><td><code>@Email</code></td><td>String</td><td>Formato de email válido</td><td><code>@Email String email</code></td></tr>
+      <tr><td><code>@Min</code> / <code>@Max</code></td><td>Numérico</td><td>Valor mínimo / máximo</td><td><code>@Min(1) @Max(480) Integer duracion</code></td></tr>
+      <tr><td><code>@DecimalMin</code></td><td>Decimal</td><td>Valor mínimo decimal</td><td><code>@DecimalMin("0.00") BigDecimal precio</code></td></tr>
+      <tr><td><code>@Pattern</code></td><td>String</td><td>Debe cumplir expresión regular</td><td><code>@Pattern(regexp="[MH]") String sexo</code></td></tr>
+      <tr><td><code>@Past</code> / <code>@Future</code></td><td>Fecha/Hora</td><td>Debe ser pasado / futuro</td><td><code>@Past LocalDate fechaNac</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="diap-num">DIAPOSITIVA 8 — Bean Validation en Cliente.java</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Cliente.java — Anotaciones de validación</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"cliente"</span>)
+<span class="kw">public class</span> <span class="cn">Cliente</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="an">@Id</span>
+    <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    <span class="kw">private</span> <span class="cn">Long</span> id;
+
+    <span class="cm">// @NotBlank garantiza que no sea null, vacío ni solo espacios</span>
+    <span class="an">@NotBlank</span>(message = <span class="st">"El documento es obligatorio"</span>)
+    <span class="an">@Size</span>(max = <span class="nm">20</span>, message = <span class="st">"Máximo 20 caracteres"</span>)
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, unique = <span class="kw">true</span>, length = <span class="nm">20</span>)
+    <span class="kw">private</span> <span class="cn">String</span> documento;
+
+    <span class="an">@NotBlank</span>(message = <span class="st">"El nombre es obligatorio"</span>)
+    <span class="an">@Size</span>(max = <span class="nm">100</span>, message = <span class="st">"Máximo 100 caracteres"</span>)
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, length = <span class="nm">100</span>)
+    <span class="kw">private</span> <span class="cn">String</span> nombre;
+
+    <span class="cm">// @Email valida el formato de correo electrónico</span>
+    <span class="an">@NotBlank</span>(message = <span class="st">"El email es obligatorio"</span>)
+    <span class="an">@Email</span>(message = <span class="st">"El formato del email no es válido"</span>)
+    <span class="an">@Size</span>(max = <span class="nm">150</span>)
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, unique = <span class="kw">true</span>, length = <span class="nm">150</span>)
+    <span class="kw">private</span> <span class="cn">String</span> email;
+
+    <span class="cm">// @Column(nullable=false) + @NotBlank → doble protección</span>
+    <span class="cm">// Bean Validation actúa ANTES que la BD (más eficiente)</span>
+}<span class="cl">Cliente.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 9 — Bean Validation en Turno.java</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Turno.java — Validaciones de fecha y relaciones</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"turno"</span>)
+<span class="kw">public class</span> <span class="cn">Turno</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="cm">// @NotNull: fecha obligatoria (no aplica @NotBlank en LocalDateTime)</span>
+    <span class="an">@NotNull</span>(message = <span class="st">"La fecha y hora son obligatorias"</span>)
+    <span class="an">@Column</span>(name = <span class="st">"fecha_hora"</span>, nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> <span class="cn">LocalDateTime</span> fechaHora;
+
+    <span class="cm">// @Size en String de texto libre</span>
+    <span class="an">@Size</span>(max = <span class="nm">200</span>, message = <span class="st">"El motivo no puede superar 200 caracteres"</span>)
+    <span class="an">@Column</span>(length = <span class="nm">200</span>)
+    <span class="kw">private</span> <span class="cn">String</span> motivo;
+
+    <span class="cm">// En relaciones: @ManyToOne con optional=false actúa como @NotNull</span>
+    <span class="cm">// JPA valida que mascota no sea null antes de hacer persist</span>
+    <span class="an">@ManyToOne</span>(fetch = FetchType.LAZY, optional = <span class="kw">false</span>)
+    <span class="an">@JoinColumn</span>(name = <span class="st">"mascota_id"</span>, nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> <span class="cn">Mascota</span> mascota;
+}<span class="cl">Turno.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">✅</span>
+    <div><strong>Doble protección:</strong> Usar <strong>Bean Validation + restricciones de columna</strong> (<code>nullable=false</code>, <code>unique=true</code>) da doble capa de seguridad. Bean Validation actúa en Java (más rápido), y las restricciones SQL son la última barrera a nivel de base de datos.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 5: MANEJO DE EXCEPCIONES -->
+<div class="sec" id="s5">
+  <div class="sec-hdr">
+    <div class="sec-num">5</div>
+    <div class="sec-titulo">Manejo de excepciones</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 10 — Estrategia por capas</div>
+  <div class="card c-rojo">
+    <div class="card-hdr">🛡️ ¿Dónde se maneja cada excepción?</div>
+    <div class="card-body">
+      <p>En una arquitectura de capas, cada nivel tiene su responsabilidad ante los errores. El objetivo: <strong>que el usuario siempre reciba un mensaje claro</strong>, y que los detalles técnicos queden en los logs del servidor.</p>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Capa</th><th>Tipo de excepción</th><th>Acción</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Servicio</strong></td>
+        <td><code>IllegalArgumentException</code></td>
+        <td>Lanzar con mensaje de negocio claro. Ej: "Email duplicado"</td>
+      </tr>
+      <tr>
+        <td><strong>Servicio</strong></td>
+        <td><code>IllegalStateException</code></td>
+        <td>Lanzar cuando una transición de estado no es válida. Ej: "Turno ya cancelado"</td>
+      </tr>
+      <tr>
+        <td><strong>DAO</strong></td>
+        <td><code>PersistenceException</code></td>
+        <td>Dejar que suba. El contenedor hace ROLLBACK automático</td>
+      </tr>
+      <tr>
+        <td><strong>Bean</strong></td>
+        <td><code>IllegalArgumentException</code></td>
+        <td>Capturar y mostrar como <code>SEVERITY_WARN</code> en la vista</td>
+      </tr>
+      <tr>
+        <td><strong>Bean</strong></td>
+        <td><code>Exception</code> (genérica)</td>
+        <td>Capturar y mostrar como <code>SEVERITY_ERROR</code> con mensaje genérico</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="diap-num">DIAPOSITIVA 11 — Patrón try-catch en el Bean</div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 ClienteBean.java — Manejo correcto</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="kw">public void</span> <span class="mt">guardar</span>() {
+  <span class="kw">try</span> {
+    <span class="cm">// El servicio valida y persiste</span>
+    clienteServicio.<span class="mt">guardar</span>(clienteSeleccionado);
+    <span class="mt">cargarClientes</span>();
+    clienteSeleccionado = <span class="kw">new</span> <span class="cn">Cliente</span>();
+    modoEdicion = <span class="kw">false</span>;
+    <span class="mt">addMsg</span>(SEVERITY_INFO,
+      <span class="st">"Éxito"</span>, <span class="st">"Cliente guardado."</span>);
+
+  } <span class="kw">catch</span> (<span class="cn">IllegalArgumentException</span> e) {
+    <span class="cm">// Error de negocio — mensaje claro al usuario</span>
+    <span class="mt">addMsg</span>(SEVERITY_WARN,
+      <span class="st">"Atención"</span>, e.<span class="mt">getMessage</span>());
+
+  } <span class="kw">catch</span> (<span class="cn">Exception</span> e) {
+    <span class="cm">// Error técnico — mensaje genérico</span>
+    <span class="mt">addMsg</span>(SEVERITY_ERROR,
+      <span class="st">"Error"</span>,
+      <span class="st">"No se pudo guardar. Intente nuevamente."</span>);
+  }
+}</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 ClienteServicio.java — Lanzar excepción</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Transactional</span>
+<span class="kw">public void</span> <span class="mt">guardar</span>(<span class="cn">Cliente</span> cliente) {
+
+  <span class="cm">// Validación de negocio → lanza excepción</span>
+  clienteDAO.<span class="mt">buscarPorEmail</span>(cliente.<span class="mt">getEmail</span>())
+    .<span class="mt">ifPresent</span>(existente -> {
+      <span class="kw">boolean</span> mismo = existente.<span class="mt">getId</span>()
+        .<span class="mt">equals</span>(cliente.<span class="mt">getId</span>());
+      <span class="kw">if</span> (!mismo)
+        <span class="cm">// @Transactional hace ROLLBACK automático</span>
+        <span class="cm">// cuando se lanza RuntimeException</span>
+        <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+          <span class="st">"Email duplicado: "</span> + cliente.<span class="mt">getEmail</span>()
+        );
+    });
+
+  <span class="kw">if</span> (cliente.<span class="mt">getId</span>() == <span class="kw">null</span>)
+    clienteDAO.<span class="mt">guardar</span>(cliente);
+  <span class="kw">else</span>
+    clienteDAO.<span class="mt">actualizar</span>(cliente);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 12 — Errores frecuentes y soluciones</div>
+  <table>
+    <thead><tr><th>Error en runtime</th><th>Causa más común</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>TransactionRequiredException</code></td>
+        <td>Llamar a persist/merge/remove sin <code>@Transactional</code></td>
+        <td>Agregar <code>@Transactional</code> al método del DAO o Servicio</td>
+      </tr>
+      <tr>
+        <td><code>LazyInitializationException</code></td>
+        <td>Acceder a colección LAZY fuera del contexto JPA</td>
+        <td>Usar <code>JOIN FETCH</code> en el JPQL o cambiar a <code>EAGER</code></td>
+      </tr>
+      <tr>
+        <td><code>ConstraintViolationException</code></td>
+        <td>Violar una restricción UNIQUE o NOT NULL en MySQL</td>
+        <td>Validar antes en el Servicio con una consulta previa</td>
+      </tr>
+      <tr>
+        <td><code>ELException: null</code></td>
+        <td>Bean no inyectado o nombre incorrecto en EL</td>
+        <td>Verificar <code>@Named</code>, <code>beans.xml</code> y nombre del bean</td>
+      </tr>
+      <tr>
+        <td><code>ConverterException</code></td>
+        <td>El valor del <code>selectOneMenu</code> no se puede convertir al tipo esperado</td>
+        <td>Agregar <code>&lt;f:converter converterId="jakarta.faces.Long"/&gt;</code></td>
+      </tr>
+      <tr>
+        <td><code>ViewExpiredException</code></td>
+        <td>La vista JSF expiró (recarga después de POST)</td>
+        <td>Usar <code>&lt;h:link&gt;</code> en lugar de <code>&lt;a href&gt;</code> para navegar</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">⚠️</span>
+    <div><strong>Nunca mostrar el stack trace al usuario.</strong> El catch genérico (<code>catch(Exception e)</code>) muestra un mensaje amigable. Los detalles técnicos deben ir al log del servidor: <code>Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error", e)</code></div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 6: BUENAS PRÁCTICAS -->
+<div class="sec" id="s6">
+  <div class="sec-hdr">
+    <div class="sec-num">6</div>
+    <div class="sec-titulo">Buenas prácticas</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 13 — Principios SOLID aplicados</div>
+  <table>
+    <thead><tr><th>Principio</th><th>Qué dice</th><th>Cómo lo aplicamos</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge b-azul">S</span> <strong>Single Responsibility</strong></td>
+        <td>Una clase, una responsabilidad</td>
+        <td><code>ClienteBean</code> solo maneja la vista. <code>ClienteServicio</code> solo el negocio. <code>ClienteDAO</code> solo la BD.</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-verde">O</span> <strong>Open/Closed</strong></td>
+        <td>Abierto para extensión, cerrado para modificación</td>
+        <td><code>GenericDAO</code> se extiende sin modificarse. Se agregan nuevos DAOs sin tocar los existentes.</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-naranja">L</span> <strong>Liskov Substitution</strong></td>
+        <td>Las subclases deben poder reemplazar a sus padres</td>
+        <td><code>ClienteDAO extends GenericDAO</code>. Donde se use <code>GenericDAO</code> puede usarse <code>ClienteDAO</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-violeta">I</span> <strong>Interface Segregation</strong></td>
+        <td>Interfaces específicas en lugar de generales</td>
+        <td>Servicios separados por entidad. <code>ClienteServicio</code> no conoce <code>MascotaDAO</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-rojo">D</span> <strong>Dependency Inversion</strong></td>
+        <td>Depender de abstracciones, no implementaciones</td>
+        <td><code>@Inject</code> (CDI) gestiona las dependencias. Bajo acoplamiento entre capas.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="diap-num">DIAPOSITIVA 14 — Buenas prácticas en código</div>
+  <div class="g2">
+    <div class="card c-verde">
+      <div class="card-hdr">✅ Hacer</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// ✅ @ViewScoped para formularios con tabla</span>
+<span class="an">@Named</span> <span class="an">@ViewScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteBean</span>
+  <span class="kw">implements</span> <span class="cn">Serializable</span> { }
+
+<span class="cm">// ✅ @ApplicationScoped para servicios</span>
+<span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteServicio</span> { }
+
+<span class="cm">// ✅ @PostConstruct para cargar datos</span>
+<span class="an">@PostConstruct</span>
+<span class="kw">public void</span> <span class="mt">init</span>() {
+  clientes = clienteServicio.<span class="mt">listarTodos</span>();
+}
+
+<span class="cm">// ✅ JOIN FETCH para evitar N+1</span>
+<span class="st">"SELECT m FROM Mascota m "</span>
++ <span class="st">"JOIN FETCH m.cliente ORDER BY m.nombre"</span></code></pre>
+      </div>
+    </div>
+    <div class="card c-rojo">
+      <div class="card-hdr">❌ Evitar</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// ❌ @SessionScoped para formularios simples</span>
+<span class="an">@Named</span> <span class="an">@SessionScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteBean</span> { }
+<span class="cm">// Ocupa memoria toda la sesión del usuario</span>
+
+<span class="cm">// ❌ Inyectar DAO directamente en el Bean</span>
+<span class="an">@Inject</span>
+<span class="kw">private</span> <span class="cn">ClienteDAO</span> dao; <span class="cm">// rompe la arquitectura</span>
+
+<span class="cm">// ❌ Lógica de negocio en el Bean</span>
+<span class="kw">public void</span> <span class="mt">guardar</span>() {
+  <span class="kw">if</span> (email.<span class="mt">contains</span>(<span class="st">"@"</span>)) { <span class="cm">// ❌ en Bean</span>
+    dao.<span class="mt">guardar</span>(cliente);    <span class="cm">// ❌ en Bean</span>
+  }
+}
+
+<span class="cm">// ❌ SQL nativo cuando JPQL alcanza</span>
+em.<span class="mt">createNativeQuery</span>(<span class="st">"SELECT * FROM cliente"</span>)</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 15 — Scopes CDI: cuándo usar cada uno</div>
+  <table>
+    <thead><tr><th>Scope</th><th>Duración</th><th>Uso recomendado</th><th>Serializable</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>@RequestScoped</code></td>
+        <td>Una sola petición HTTP</td>
+        <td>Beans sin estado que solo procesan y redirigen</td>
+        <td><span class="badge b-naranja">Opcional</span></td>
+      </tr>
+      <tr>
+        <td><code>@ViewScoped</code></td>
+        <td>Mientras el usuario está en la misma vista</td>
+        <td><strong>Formularios con tabla en la misma página (ABM)</strong></td>
+        <td><span class="badge b-rojo">Sí, obligatorio</span></td>
+      </tr>
+      <tr>
+        <td><code>@SessionScoped</code></td>
+        <td>Toda la sesión del usuario</td>
+        <td>Datos de sesión: usuario logueado, carrito de compras</td>
+        <td><span class="badge b-rojo">Sí, obligatorio</span></td>
+      </tr>
+      <tr>
+        <td><code>@ApplicationScoped</code></td>
+        <td>Toda la vida de la aplicación</td>
+        <td><strong>Servicios, DAOs, catálogos estáticos</strong></td>
+        <td><span class="badge b-verde">No necesario</span></td>
+      </tr>
+      <tr>
+        <td><code>@Dependent</code></td>
+        <td>El del componente que lo inyecta</td>
+        <td>Beans auxiliares sin estado propio</td>
+        <td><span class="badge b-verde">No necesario</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-info">
+    <span class="a-ico">💡</span>
+    <div><strong>Regla de oro para los scopes:</strong> Si el Bean tiene un formulario más una tabla en la misma página → <code>@ViewScoped</code>. Si guarda datos del usuario entre páginas → <code>@SessionScoped</code>. Si es un servicio sin estado → <code>@ApplicationScoped</code>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 7: ORGANIZACIÓN DE PAQUETES -->
+<div class="sec" id="s7">
+  <div class="sec-hdr">
+    <div class="sec-num">7</div>
+    <div class="sec-titulo">Organización de paquetes y escalabilidad</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 16 — Estructura de paquetes profesional</div>
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">📦 Estructura actual — VeterinariaApp</div>
+      <div class="card-body" style="padding:0">
+<pre><code>src/main/java/com/veterinaria/
+│
+├── modelo/            ← Entidades JPA
+│   ├── Cliente.java
+│   ├── Mascota.java
+│   └── Turno.java
+│
+├── dao/               ← Acceso a datos
+│   ├── GenericDAO.java
+│   ├── ClienteDAO.java
+│   ├── MascotaDAO.java
+│   └── TurnoDAO.java
+│
+├── servicio/          ← Lógica de negocio
+│   ├── ClienteServicio.java
+│   ├── MascotaServicio.java
+│   └── TurnoServicio.java
+│
+└── controlador/       ← Managed Beans JSF
+    ├── ClienteBean.java
+    ├── MascotaBean.java
+    └── TurnoBean.java</code></pre>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">📦 Estructura escalable — Sistema grande</div>
+      <div class="card-body" style="padding:0">
+<pre><code>src/main/java/com/veterinaria/
+│
+├── modelo/            ← Entidades JPA
+├── dao/               ← Acceso a datos
+├── servicio/          ← Lógica de negocio
+├── controlador/       ← Managed Beans
+│
+├── excepcion/         ← Excepciones propias
+│   ├── NegocioException.java
+│   └── DatosDuplicadosException.java
+│
+├── util/              ← Clases utilitarias
+│   ├── FechaUtil.java
+│   └── MensajeUtil.java
+│
+├── seguridad/         ← Autenticación
+│   └── LoginBean.java
+│
+└── reporte/           ← Reportes PDF/Excel
+    └── TurnoReporteBean.java</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 17 — Escalabilidad: agregar una entidad nueva</div>
+  <div class="card c-azul">
+    <div class="card-hdr">🔧 ¿Cómo escala la arquitectura? — Agregar "Veterinario"</div>
+    <div class="card-body">
+      <p>Gracias al patrón DAO genérico y la separación de capas, agregar una nueva entidad sigue siempre el mismo proceso sin romper nada existente:</p>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:10px;margin:14px 0">
+    <div class="paso">
+      <div class="paso-n">1</div>
+      <div class="paso-body">
+        <h4>Crear tabla en MySQL</h4>
+        <p>Agregar <code>CREATE TABLE veterinario (...)</code> al script SQL</p>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-n">2</div>
+      <div class="paso-body">
+        <h4>Crear entidad <code>Veterinario.java</code></h4>
+        <p>Paquete <code>modelo/</code> — anotaciones <code>@Entity</code>, <code>@Table</code>, <code>@NamedQueries</code>, Bean Validation</p>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-n">3</div>
+      <div class="paso-body">
+        <h4>Crear <code>VeterinarioDAO.java</code></h4>
+        <p>Paquete <code>dao/</code> — <code>extends GenericDAO&lt;Veterinario, Long&gt;</code> — hereda los 5 métodos base automáticamente</p>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-n">4</div>
+      <div class="paso-body">
+        <h4>Crear <code>VeterinarioServicio.java</code></h4>
+        <p>Paquete <code>servicio/</code> — <code>@ApplicationScoped</code> — reglas de negocio específicas de veterinario</p>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-n">5</div>
+      <div class="paso-body">
+        <h4>Crear <code>VeterinarioBean.java</code></h4>
+        <p>Paquete <code>controlador/</code> — <code>@Named @ViewScoped</code> — mismo patrón que ClienteBean</p>
+      </div>
+    </div>
+    <div class="paso">
+      <div class="paso-n">6</div>
+      <div class="paso-body">
+        <h4>Crear <code>veterinarios/abm.xhtml</code></h4>
+        <p>Vista con el mismo patrón de formulario + tabla. Agrego link en el menú de <code>plantilla.xhtml</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">✅</span>
+    <div><strong>Zero cambios en el código existente.</strong> Agregar Veterinario no modifica Cliente, Mascota ni Turno. Esto es lo que significa una arquitectura escalable con bajo acoplamiento.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 8: RELACIONES JPA -->
+<div class="sec" id="s8">
+  <div class="sec-hdr">
+    <div class="sec-num">8</div>
+    <div class="sec-titulo">Relaciones JPA: @OneToMany y @ManyToOne</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 18 — Tipos de relaciones JPA</div>
+  <table>
+    <thead><tr><th>Anotación</th><th>Cardinalidad</th><th>FK en tabla</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>@OneToMany</code></td>
+        <td>Un registro → muchos</td>
+        <td>En la tabla del "muchos"</td>
+        <td>Un Cliente → muchas Mascotas</td>
+      </tr>
+      <tr>
+        <td><code>@ManyToOne</code></td>
+        <td>Muchos registros → uno</td>
+        <td>En la tabla del "muchos" (FK)</td>
+        <td>Muchas Mascotas → un Cliente</td>
+      </tr>
+      <tr>
+        <td><code>@OneToOne</code></td>
+        <td>Un registro → uno</td>
+        <td>En cualquiera de las dos</td>
+        <td>Un Usuario → un Perfil</td>
+      </tr>
+      <tr>
+        <td><code>@ManyToMany</code></td>
+        <td>Muchos → muchos</td>
+        <td>Tabla intermedia</td>
+        <td>Muchos Médicos → muchos Pacientes</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="diap-num">DIAPOSITIVA 19 — @ManyToOne en Mascota</div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Mascota.java — lado "muchos" (tiene la FK)</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"mascota"</span>)
+<span class="kw">public class</span> <span class="cn">Mascota</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="cm">// @ManyToOne: muchas mascotas → un cliente</span>
+    <span class="cm">// FetchType.LAZY: NO carga el cliente</span>
+    <span class="cm">// hasta que se acceda a mascota.getCliente()</span>
+    <span class="an">@ManyToOne</span>(
+        fetch    = FetchType.LAZY,
+        optional = <span class="kw">false</span>  <span class="cm">// = NOT NULL</span>
+    )
+    <span class="an">@JoinColumn</span>(
+        name     = <span class="st">"cliente_id"</span>, <span class="cm">// nombre de la FK</span>
+        nullable = <span class="kw">false</span>
+    )
+    <span class="kw">private</span> <span class="cn">Cliente</span> cliente;
+    <span class="cm">// EclipseLink genera:</span>
+    <span class="cm">// FOREIGN KEY (cliente_id) REFERENCES cliente(id)</span>
+}</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Cliente.java — lado "uno" (referencia inversa)</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"cliente"</span>)
+<span class="kw">public class</span> <span class="cn">Cliente</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="cm">// @OneToMany: un cliente → muchas mascotas</span>
+    <span class="cm">// mappedBy: el campo en Mascota que tiene la FK</span>
+    <span class="cm">// cascade=ALL: si elimino cliente, elimina mascotas</span>
+    <span class="cm">// orphanRemoval: elimina mascotas sin cliente</span>
+    <span class="an">@OneToMany</span>(
+        mappedBy      = <span class="st">"cliente"</span>,
+        cascade       = CascadeType.ALL,
+        fetch         = FetchType.LAZY,
+        orphanRemoval = <span class="kw">true</span>
+    )
+    <span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Mascota</span>&gt; mascotas
+        = <span class="kw">new</span> <span class="cn">ArrayList</span>&lt;&gt;();
+    <span class="cm">// NO genera columna extra en tabla cliente</span>
+    <span class="cm">// La FK ya está en tabla mascota</span>
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 20 — FetchType: LAZY vs EAGER</div>
+  <div class="g2">
+    <div class="card c-verde">
+      <div class="card-hdr">✅ LAZY (recomendado) — Carga bajo demanda</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@ManyToOne</span>(fetch = FetchType.<span class="cn">LAZY</span>)
+<span class="kw">private</span> <span class="cn">Cliente</span> cliente;
+
+<span class="cm">// JPA genera UNA sola consulta al buscar mascotas:
+// SELECT * FROM mascota WHERE id = 1
+//
+// El cliente se carga SOLO si se llama:
+// mascota.getCliente().getNombre()
+// → en ese momento genera:
+// SELECT * FROM cliente WHERE id = ?</span></code></pre>
+        <p style="padding:12px;font-size:.83rem;color:var(--verde)"><strong>Ventaja:</strong> Menos datos en memoria. Solo carga lo que se necesita.</p>
+      </div>
+    </div>
+    <div class="card c-rojo">
+      <div class="card-hdr">⚠️ EAGER — Carga inmediata con JOIN</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@ManyToOne</span>(fetch = FetchType.<span class="cn">EAGER</span>)
+<span class="kw">private</span> <span class="cn">Cliente</span> cliente;
+
+<span class="cm">// JPA genera JOIN automático al buscar mascotas:
+// SELECT m.*, c.* FROM mascota m
+// INNER JOIN cliente c ON m.cliente_id = c.id
+// WHERE m.id = 1
+//
+// El cliente SIEMPRE se carga, lo uses o no</span></code></pre>
+        <p style="padding:12px;font-size:.83rem;color:var(--rojo)"><strong>Cuidado:</strong> Si hay muchos niveles de relaciones EAGER puede cargar demasiados datos.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 21 — El problema N+1 y JOIN FETCH</div>
+  <div class="card c-rojo">
+    <div class="card-hdr">❌ Problema N+1 — Sin JOIN FETCH</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// Esta query trae 100 mascotas con LAZY cliente:</span>
+<span class="st">"SELECT m FROM Mascota m"</span>
+<span class="cm">// → 1 SELECT para las mascotas
+// → 100 SELECT más (uno por cada mascota para cargar su cliente)
+// → 101 consultas en total = problema N+1 ❌</span></code></pre>
+    </div>
+  </div>
+  <div class="card c-verde" style="margin-top:10px">
+    <div class="card-hdr">✅ Solución — JOIN FETCH en JPQL</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// JOIN FETCH fuerza la carga en UNA sola consulta SQL:</span>
+<span class="st">"SELECT m FROM Mascota m JOIN FETCH m.cliente ORDER BY m.nombre"</span>
+<span class="cm">// → genera: SELECT m.*, c.* FROM mascota m
+//           INNER JOIN cliente c ON m.cliente_id = c.id
+//           ORDER BY m.nombre
+// → 1 sola consulta, sin importar cuántas mascotas haya ✅</span>
+
+<span class="cm">// Para 3 niveles (Turno → Mascota → Cliente):</span>
+<span class="st">"SELECT t FROM Turno t "</span>
++ <span class="st">"JOIN FETCH t.mascota m "</span>
++ <span class="st">"JOIN FETCH m.cliente "</span>
++ <span class="st">"ORDER BY t.fechaHora DESC"</span></code></pre>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 22 — CascadeType: operaciones en cascada</div>
+  <table>
+    <thead><tr><th>CascadeType</th><th>Qué propaga</th><th>Ejemplo práctico</th></tr></thead>
+    <tbody>
+      <tr><td><code>PERSIST</code></td><td>persist()</td><td>Al guardar un Cliente, guarda sus mascotas nuevas</td></tr>
+      <tr><td><code>MERGE</code></td><td>merge()</td><td>Al actualizar un Cliente, actualiza sus mascotas</td></tr>
+      <tr><td><code>REMOVE</code></td><td>remove()</td><td>Al eliminar un Cliente, elimina sus mascotas</td></tr>
+      <tr><td><code>REFRESH</code></td><td>refresh()</td><td>Al recargar un Cliente, recarga sus mascotas</td></tr>
+      <tr><td><code>ALL</code></td><td>Todas las anteriores</td><td>El más usado en relaciones padre-hijo fuertes</td></tr>
+      <tr><td><code>DETACH</code></td><td>detach()</td><td>Al desconectar un Cliente, desconecta sus mascotas</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">⚠️</span>
+    <div><strong>Cuidado con CascadeType.REMOVE:</strong> Si un Cliente tiene mascotas que tienen turnos, eliminar el cliente en cascada intenta eliminar las mascotas, que a su vez tienen turnos. Si los turnos tienen FK restrictiva → <code>ConstraintViolationException</code>. Preferir baja lógica (<code>activo = false</code>) en lugar de DELETE físico cuando hay relaciones.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 9: MODELO COMPLETO VETERINARIA -->
+<div class="sec" id="s9">
+  <div class="sec-hdr">
+    <div class="sec-num">9</div>
+    <div class="sec-titulo">Modelo completo: Cliente → Mascota → Turno</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 23 — Diagrama del modelo de dominio</div>
+
+  <div class="rel-modelo">
+    <div class="rel-entidad">
+      <div class="rel-entidad-nombre">🧑 Cliente</div>
+      <div class="rel-campo">
+        <strong>id</strong>: Long (PK)<br/>
+        <strong>documento</strong>: String (UNIQUE)<br/>
+        <strong>nombre</strong>: String<br/>
+        <strong>apellido</strong>: String<br/>
+        <strong>email</strong>: String (UNIQUE)<br/>
+        <strong>telefono</strong>: String<br/>
+        <strong>activo</strong>: boolean<br/>
+        <strong>mascotas</strong>: List&lt;Mascota&gt; @OneToMany
+      </div>
+    </div>
+
+    <div class="rel-flecha-bloque">
+      <div class="rel-flecha-linea"></div>
+      <div class="rel-flecha-etiq">1 Cliente tiene muchas Mascotas</div>
+      <div class="rel-flecha-etiq">@OneToMany / @ManyToOne</div>
+      <div class="rel-flecha-linea"></div>
+      <div class="rel-flecha-punta">▼</div>
+    </div>
+
+    <div class="rel-entidad">
+      <div class="rel-entidad-nombre">🐶 Mascota</div>
+      <div class="rel-campo">
+        <strong>id</strong>: Long (PK)<br/>
+        <strong>nombre</strong>: String<br/>
+        <strong>especie</strong>: String<br/>
+        <strong>raza</strong>: String<br/>
+        <strong>fechaNac</strong>: LocalDate<br/>
+        <strong>sexo</strong>: String (M/H)<br/>
+        <strong>activo</strong>: boolean<br/>
+        <strong>cliente</strong>: Cliente @ManyToOne (FK: cliente_id)<br/>
+        <strong>turnos</strong>: List&lt;Turno&gt; @OneToMany
+      </div>
+    </div>
+
+    <div class="rel-flecha-bloque">
+      <div class="rel-flecha-linea"></div>
+      <div class="rel-flecha-etiq">1 Mascota tiene muchos Turnos</div>
+      <div class="rel-flecha-etiq">@OneToMany / @ManyToOne</div>
+      <div class="rel-flecha-linea"></div>
+      <div class="rel-flecha-punta">▼</div>
+    </div>
+
+    <div class="rel-entidad">
+      <div class="rel-entidad-nombre">📅 Turno</div>
+      <div class="rel-campo">
+        <strong>id</strong>: Long (PK)<br/>
+        <strong>fechaHora</strong>: LocalDateTime<br/>
+        <strong>motivo</strong>: String<br/>
+        <strong>estado</strong>: String (PENDIENTE/CONFIRMADO/CANCELADO/REALIZADO)<br/>
+        <strong>observaciones</strong>: String<br/>
+        <strong>mascota</strong>: Mascota @ManyToOne (FK: mascota_id)
+      </div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 24 — Script SQL completo</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 veterinariadb.sql</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">-- Base de datos</span>
+<span class="kw">CREATE DATABASE IF NOT EXISTS</span> veterinariadb
+    <span class="kw">CHARACTER SET</span> utf8mb4 <span class="kw">COLLATE</span> utf8mb4_unicode_ci;
+<span class="kw">USE</span> veterinariadb;
+
+<span class="cm">-- Tabla cliente (sin FK, se crea primero)</span>
+<span class="kw">CREATE TABLE</span> cliente (
+    id         <span class="cn">BIGINT</span>       <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+    documento  <span class="cn">VARCHAR</span>(20)  <span class="kw">NOT NULL UNIQUE</span>,
+    nombre     <span class="cn">VARCHAR</span>(100) <span class="kw">NOT NULL</span>,
+    apellido   <span class="cn">VARCHAR</span>(100) <span class="kw">NOT NULL</span>,
+    email      <span class="cn">VARCHAR</span>(150) <span class="kw">NOT NULL UNIQUE</span>,
+    telefono   <span class="cn">VARCHAR</span>(20),
+    activo     <span class="cn">TINYINT</span>(1)   <span class="kw">NOT NULL DEFAULT</span> <span class="nm">1</span>,
+    fecha_alta <span class="cn">DATETIME</span>     <span class="kw">NOT NULL DEFAULT</span> CURRENT_TIMESTAMP,
+    <span class="kw">PRIMARY KEY</span> (id)
+) ENGINE=InnoDB;
+
+<span class="cm">-- Tabla mascota (FK a cliente)</span>
+<span class="kw">CREATE TABLE</span> mascota (
+    id         <span class="cn">BIGINT</span>       <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+    nombre     <span class="cn">VARCHAR</span>(80)  <span class="kw">NOT NULL</span>,
+    especie    <span class="cn">VARCHAR</span>(50)  <span class="kw">NOT NULL</span>,
+    raza       <span class="cn">VARCHAR</span>(100),
+    fecha_nac  <span class="cn">DATE</span>,
+    sexo       <span class="cn">CHAR</span>(1),
+    activo     <span class="cn">TINYINT</span>(1)   <span class="kw">NOT NULL DEFAULT</span> <span class="nm">1</span>,
+    cliente_id <span class="cn">BIGINT</span>       <span class="kw">NOT NULL</span>,
+    <span class="kw">PRIMARY KEY</span> (id),
+    <span class="kw">FOREIGN KEY</span> (cliente_id) <span class="kw">REFERENCES</span> cliente(id)
+        <span class="kw">ON DELETE RESTRICT ON UPDATE CASCADE</span>
+) ENGINE=InnoDB;
+
+<span class="cm">-- Tabla turno (FK a mascota)</span>
+<span class="kw">CREATE TABLE</span> turno (
+    id            <span class="cn">BIGINT</span>       <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+    fecha_hora    <span class="cn">DATETIME</span>     <span class="kw">NOT NULL</span>,
+    motivo        <span class="cn">VARCHAR</span>(200),
+    estado        <span class="cn">VARCHAR</span>(20)  <span class="kw">NOT NULL DEFAULT</span> <span class="st">'PENDIENTE'</span>,
+    observaciones <span class="cn">TEXT</span>,
+    mascota_id    <span class="cn">BIGINT</span>       <span class="kw">NOT NULL</span>,
+    <span class="kw">PRIMARY KEY</span> (id),
+    <span class="kw">FOREIGN KEY</span> (mascota_id) <span class="kw">REFERENCES</span> mascota(id)
+        <span class="kw">ON DELETE RESTRICT ON UPDATE CASCADE</span>
+) ENGINE=InnoDB;<span class="cl">veterinariadb.sql</span></code></pre>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 25 — Resolver relaciones en el Bean</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 MascotaBean.java — Cómo relacionar Mascota con Cliente desde el formulario</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Named</span>(<span class="st">"mascotaBean"</span>) <span class="an">@ViewScoped</span>
+<span class="kw">public class</span> <span class="cn">MascotaBean</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="an">@Inject</span> <span class="kw">private</span> <span class="cn">MascotaServicio</span> mascotaServicio;
+    <span class="an">@Inject</span> <span class="kw">private</span> <span class="cn">ClienteServicio</span>  clienteServicio;
+
+    <span class="kw">private</span> <span class="cn">Mascota</span>       mascotaSeleccionada;
+    <span class="kw">private</span> <span class="cn">List</span>&lt;<span class="cn">Cliente</span>&gt; clientes;  <span class="cm">// para el selector</span>
+    <span class="kw">private</span> <span class="cn">Long</span>          clienteIdSeleccionado; <span class="cm">// ID del selector</span>
+
+    <span class="an">@PostConstruct</span>
+    <span class="kw">public void</span> <span class="mt">init</span>() {
+        mascotaSeleccionada = <span class="kw">new</span> <span class="cn">Mascota</span>();
+        clientes = clienteServicio.<span class="mt">listarActivos</span>();
+    }
+
+    <span class="kw">public void</span> <span class="mt">guardar</span>() {
+        <span class="kw">try</span> {
+            <span class="cm">// Le pasamos el ID al servicio — él resuelve la relación</span>
+            mascotaServicio.<span class="mt">guardar</span>(mascotaSeleccionada,
+                                     clienteIdSeleccionado);
+            <span class="mt">addMsg</span>(SEVERITY_INFO, <span class="st">"Éxito"</span>, <span class="st">"Mascota guardada."</span>);
+        } <span class="kw">catch</span> (<span class="cn">IllegalArgumentException</span> e) {
+            <span class="mt">addMsg</span>(SEVERITY_WARN, <span class="st">"Atención"</span>, e.<span class="mt">getMessage</span>());
+        }
+    }
+}
+<span class="cm">// En el XHTML: el selector usa itemValue="#{cli.id}"
+// El Bean recibe el ID y el Servicio hace em.find(Cliente, id)</span><span class="cl">MascotaBean.java</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 10: PRÁCTICA CRUD COMPLETO -->
+<div class="sec" id="s10">
+  <div class="sec-hdr">
+    <div class="sec-num">10</div>
+    <div class="sec-titulo">Práctica: CRUD completo con persistencia en MySQL</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 26 — Ciclo de vida del estado del Turno</div>
+  <div class="card c-azul">
+    <div class="card-hdr">📅 Máquina de estados del Turno</div>
+    <div class="card-body">
+      <p>El Turno tiene 4 estados. Las transiciones están controladas por el <code>TurnoServicio</code>, que valida que cada cambio sea permitido antes de ejecutarlo.</p>
+    </div>
+  </div>
+
+  <div style="background:#0f172a;border-radius:14px;padding:28px;margin:14px 0">
+    <div style="display:flex;justify-content:center;align-items:flex-start;gap:20px;flex-wrap:wrap">
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div style="background:#1e3a5f;border:2px solid #3b82d1;border-radius:10px;
+             padding:14px 20px;text-align:center;color:#bfdbfe;min-width:130px">
+          <div style="font-weight:800;font-size:1rem">PENDIENTE</div>
+          <div style="font-size:.75rem;opacity:.75;margin-top:4px">Estado inicial<br/>al reservar</div>
+        </div>
+        <div style="color:#475569;font-size:.75rem;text-align:center">reservar()</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-top:20px">
+        <div style="color:#3b82d1;font-size:.8rem;font-weight:600">confirmar() →</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div style="background:#14532d;border:2px solid #4ade80;border-radius:10px;
+             padding:14px 20px;text-align:center;color:#bbf7d0;min-width:130px">
+          <div style="font-weight:800;font-size:1rem">CONFIRMADO</div>
+          <div style="font-size:.75rem;opacity:.75;margin-top:4px">Aprobado por<br/>la veterinaria</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-top:20px">
+        <div style="color:#4ade80;font-size:.8rem;font-weight:600">marcarRealizado() →</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div style="background:#164e63;border:2px solid #38bdf8;border-radius:10px;
+             padding:14px 20px;text-align:center;color:#bae6fd;min-width:130px">
+          <div style="font-weight:800;font-size:1rem">REALIZADO</div>
+          <div style="font-size:.75rem;opacity:.75;margin-top:4px">Atención<br/>concretada</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:center;margin-top:20px">
+      <div style="background:#4c0519;border:2px solid #f87171;border-radius:10px;
+           padding:12px 24px;text-align:center;color:#fecaca;min-width:130px">
+        <div style="font-weight:800;font-size:1rem">CANCELADO</div>
+        <div style="font-size:.75rem;opacity:.75;margin-top:4px">cancelar() desde PENDIENTE o CONFIRMADO</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 27 — TurnoServicio: control de transiciones</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 TurnoServicio.java — Validación de estados</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cn">TurnoServicio</span> {
+
+    <span class="an">@Inject</span> <span class="kw">private</span> <span class="cn">TurnoDAO</span>   turnoDAO;
+    <span class="an">@Inject</span> <span class="kw">private</span> <span class="cn">MascotaDAO</span> mascotaDAO;
+
+    <span class="cm">/** Reserva un nuevo turno. Valida fecha futura y mascota activa */</span>
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">reservar</span>(<span class="cn">Turno</span> turno, <span class="cn">Long</span> mascotaId) {
+        <span class="kw">if</span> (turno.<span class="mt">getFechaHora</span>().<span class="mt">isBefore</span>(<span class="cn">LocalDateTime</span>.<span class="mt">now</span>()))
+            <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+                <span class="st">"No se puede reservar un turno en el pasado."</span>);
+        <span class="cn">Mascota</span> mascota = mascotaDAO.<span class="mt">buscarPorId</span>(mascotaId);
+        <span class="kw">if</span> (mascota == <span class="kw">null</span> || !mascota.<span class="mt">isActivo</span>())
+            <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+                <span class="st">"La mascota no existe o está inactiva."</span>);
+        turno.<span class="mt">setMascota</span>(mascota);
+        turno.<span class="mt">setEstado</span>(<span class="cn">Turno</span>.PENDIENTE);
+        turnoDAO.<span class="mt">guardar</span>(turno);
+    }
+
+    <span class="cm">/** PENDIENTE → CONFIRMADO */</span>
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">confirmar</span>(<span class="cn">Long</span> id) {
+        <span class="cn">Turno</span> t = <span class="mt">obtenerYValidar</span>(id);
+        <span class="mt">validarTransicion</span>(t, <span class="cn">Turno</span>.PENDIENTE, <span class="cn">Turno</span>.CONFIRMADO);
+        turnoDAO.<span class="mt">cambiarEstado</span>(id, <span class="cn">Turno</span>.CONFIRMADO);
+    }
+
+    <span class="cm">/** CONFIRMADO → REALIZADO */</span>
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">marcarRealizado</span>(<span class="cn">Long</span> id) {
+        <span class="cn">Turno</span> t = <span class="mt">obtenerYValidar</span>(id);
+        <span class="mt">validarTransicion</span>(t, <span class="cn">Turno</span>.CONFIRMADO, <span class="cn">Turno</span>.REALIZADO);
+        turnoDAO.<span class="mt">cambiarEstado</span>(id, <span class="cn">Turno</span>.REALIZADO);
+    }
+
+    <span class="kw">private void</span> <span class="mt">validarTransicion</span>(<span class="cn">Turno</span> t,
+                                      <span class="cn">String</span> estadoOrigen,
+                                      <span class="cn">String</span> estadoDestino) {
+        <span class="kw">if</span> (!estadoOrigen.<span class="mt">equals</span>(t.<span class="mt">getEstado</span>()))
+            <span class="kw">throw new</span> <span class="cn">IllegalStateException</span>(
+                <span class="st">"El turno debe estar en "</span> + estadoOrigen
+                + <span class="st">" para pasar a "</span> + estadoDestino);
+    }
+}<span class="cl">TurnoServicio.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 28 — Navegación entre páginas con Facelets</div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 plantilla.xhtml — Menú de navegación</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- h:link genera un GET limpio sin POST --&gt;</span>
+&lt;<span class="kw">nav</span> class=<span class="st">"navbar"</span>&gt;
+  &lt;<span class="kw">ul</span>&gt;
+    &lt;<span class="kw">li</span>&gt;
+      &lt;<span class="kw">h:link</span> outcome=<span class="st">"/index"</span>
+               value=<span class="st">"🏠 Inicio"</span>/&gt;
+    &lt;/<span class="kw">li</span>&gt;
+    &lt;<span class="kw">li</span>&gt;
+      &lt;<span class="kw">h:link</span> outcome=<span class="st">"/clientes/abm"</span>
+               value=<span class="st">"👤 Clientes"</span>/&gt;
+    &lt;/<span class="kw">li</span>&gt;
+    &lt;<span class="kw">li</span>&gt;
+      &lt;<span class="kw">h:link</span> outcome=<span class="st">"/mascotas/abm"</span>
+               value=<span class="st">"🐶 Mascotas"</span>/&gt;
+    &lt;/<span class="kw">li</span>&gt;
+    &lt;<span class="kw">li</span>&gt;
+      &lt;<span class="kw">h:link</span> outcome=<span class="st">"/turnos/abm"</span>
+               value=<span class="st">"📅 Turnos"</span>/&gt;
+    &lt;/<span class="kw">li</span>&gt;
+  &lt;/<span class="kw">ul</span>&gt;
+&lt;/<span class="kw">nav</span>&gt;</code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 clientes/abm.xhtml — Usa la plantilla</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- ui:composition hereda toda la plantilla --&gt;</span>
+&lt;<span class="kw">ui:composition</span>
+  template=<span class="st">"/plantilla.xhtml"</span>
+  xmlns:ui=<span class="st">"jakarta.faces.facelets"</span>
+  xmlns:h=<span class="st">"jakarta.faces.html"</span>
+  xmlns:f=<span class="st">"jakarta.faces.core"</span>
+  xmlns:pt=<span class="st">"jakarta.faces.passthrough"</span>&gt;
+
+  &lt;<span class="kw">ui:define</span> name=<span class="st">"titulo"</span>&gt;
+    Clientes — VetSystem
+  &lt;/<span class="kw">ui:define</span>&gt;
+
+  &lt;<span class="kw">ui:define</span> name=<span class="st">"contenido"</span>&gt;
+    <span class="cm">&lt;!-- Formulario + Tabla ABM --&gt;</span>
+    &lt;<span class="kw">h:form</span>&gt; ... &lt;/<span class="kw">h:form</span>&gt;
+  &lt;/<span class="kw">ui:define</span>&gt;
+
+&lt;/<span class="kw">ui:composition</span>&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- RESUMEN FINAL -->
+<div class="sec" id="res">
+  <div class="sec-hdr">
+    <div class="sec-num">✅</div>
+    <div class="sec-titulo">Resumen de la clase y puntos clave</div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 29 — Resumen: lo que aprendimos hoy</div>
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">🏗️ Arquitectura integrada</div>
+      <div class="card-body" style="font-size:.88rem">
+        <ul style="padding-left:16px;line-height:2">
+          <li>4 capas: Vista → Bean → Servicio → DAO</li>
+          <li>Cada capa tiene una sola responsabilidad</li>
+          <li>El Bean nunca habla directamente al DAO</li>
+          <li>CDI gestiona todas las dependencias con @Inject</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">✅ Validaciones</div>
+      <div class="card-body" style="font-size:.88rem">
+        <ul style="padding-left:16px;line-height:2">
+          <li>3 niveles: Vista → Entidad → Negocio</li>
+          <li>@NotBlank, @Email, @Size en la entidad</li>
+          <li>required, f:validateRegex en la vista</li>
+          <li>Unicidad (email/doc) validada en el Servicio</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-naranja">
+      <div class="card-hdr">🛡️ Excepciones y estado</div>
+      <div class="card-body" style="font-size:.88rem">
+        <ul style="padding-left:16px;line-height:2">
+          <li>IllegalArgumentException para errores de negocio</li>
+          <li>try/catch en el Bean con mensaje al usuario</li>
+          <li>@Transactional hace ROLLBACK en RuntimeException</li>
+          <li>Nunca mostrar stack trace al usuario final</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-violeta">
+      <div class="card-hdr">🔗 Relaciones JPA</div>
+      <div class="card-body" style="font-size:.88rem">
+        <ul style="padding-left:16px;line-height:2">
+          <li>@ManyToOne en el lado "muchos" (tiene la FK)</li>
+          <li>@OneToMany con mappedBy en el lado "uno"</li>
+          <li>FetchType.LAZY por defecto (performance)</li>
+          <li>JOIN FETCH en JPQL para evitar N+1</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="diap-num">DIAPOSITIVA 30 — Tabla comparativa: antes vs ahora</div>
+  <table>
+    <thead><tr><th>Aspecto</th><th>❌ Clase 01 — Sin DAO</th><th>✅ Clase 06 — Arquitectura completa</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Datos</strong></td>
+        <td>ArrayList en memoria — se pierde al reiniciar</td>
+        <td>MySQL 8 con JPA — persistente y relacional</td>
+      </tr>
+      <tr>
+        <td><strong>Acceso BD</strong></td>
+        <td>No había acceso a BD</td>
+        <td>DAO con EntityManager y JPQL tipado</td>
+      </tr>
+      <tr>
+        <td><strong>Validaciones</strong></td>
+        <td>Manual con if en el Bean</td>
+        <td>Bean Validation + JSF validators + Servicio</td>
+      </tr>
+      <tr>
+        <td><strong>Transacciones</strong></td>
+        <td>Sin transacciones</td>
+        <td>JTA con @Transactional + ROLLBACK automático</td>
+      </tr>
+      <tr>
+        <td><strong>Relaciones</strong></td>
+        <td>Sin relaciones entre objetos</td>
+        <td>@OneToMany / @ManyToOne con JOIN FETCH</td>
+      </tr>
+      <tr>
+        <td><strong>Manejo errores</strong></td>
+        <td>Sin manejo de errores</td>
+        <td>try/catch por capa + FacesMessage al usuario</td>
+      </tr>
+      <tr>
+        <td><strong>Escalabilidad</strong></td>
+        <td>Difícil de extender</td>
+        <td>Agregar entidad = 6 pasos sin tocar lo existente</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ACTIVIDAD PRÁCTICA -->
+  <div class="diap-num" style="margin-top:28px">DIAPOSITIVA 31 — Actividad práctica integradora</div>
+  <div class="card c-azul">
+    <div class="card-hdr">💻 Actividad Práctica — Clase 06</div>
+    <div class="card-body">
+      <div class="paso">
+        <div class="paso-n">1</div>
+        <div class="paso-body">
+          <h4>Verificar el proyecto completo</h4>
+          <p>Asegurarse de que compila sin errores. Desplegar en GlassFish y verificar que la página de inicio carga correctamente en <code>http://localhost:8080/VeterinariaApp/</code></p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">2</div>
+        <div class="paso-body">
+          <h4>CRUD de Clientes — prueba completa</h4>
+          <p>Alta de 3 clientes. Editar uno. Intentar dar de alta con email duplicado (verificar mensaje de error). Desactivar uno. Verificar en MySQL con <code>SELECT * FROM cliente</code></p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">3</div>
+        <div class="paso-body">
+          <h4>CRUD de Mascotas — probar relación</h4>
+          <p>Dar de alta 2 mascotas para el mismo cliente. Verificar que el selector de dueño muestra los clientes activos. Verificar la FK en MySQL: <code>SELECT * FROM mascota</code></p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">4</div>
+        <div class="paso-body">
+          <h4>Reservar y gestionar turnos</h4>
+          <p>Reservar un turno (estado PENDIENTE). Confirmarlo. Marcarlo como REALIZADO. Intentar confirmar un turno ya REALIZADO (verificar mensaje de error de transición).</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">5</div>
+        <div class="paso-body">
+          <h4>Probar el filtro de turnos</h4>
+          <p>Usar el botón "Ver solo vigentes" para mostrar solo PENDIENTE y CONFIRMADO. Crear un turno CANCELADO y verificar que no aparece en el filtro.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">6</div>
+        <div class="paso-body">
+          <h4>Activar EclipseLink logging y analizar el SQL</h4>
+          <p>Con <code>eclipselink.logging.level.sql=FINE</code> en <code>persistence.xml</code>, observar en la consola de GlassFish el SQL generado por cada operación. Identificar dónde ocurre el JOIN FETCH.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKLIST DE ENTREGA -->
+  <div class="card c-verde" style="margin-top:8px">
+    <div class="card-hdr">📋 Checklist de entrega del Trabajo Práctico Final</div>
+    <div class="card-body">
+      <div class="g2" style="font-size:.88rem">
+        <ul style="padding-left:18px;line-height:2.2">
+          <li>CRUD completo de Cliente (ABM + búsqueda)</li>
+          <li>CRUD completo de Mascota (con relación a Cliente)</li>
+          <li>Gestión de Turnos (reservar + cambiar estado)</li>
+          <li>Validaciones en las 3 capas</li>
+          <li>Mensajes de éxito y error al usuario</li>
+        </ul>
+        <ul style="padding-left:18px;line-height:2.2">
+          <li>Navegación con menú usando Facelets template</li>
+          <li>Persistencia real en MySQL (datos sobreviven al reinicio)</li>
+          <li>Código organizado en 4 capas (modelo/dao/servicio/controlador)</li>
+          <li>Sin PrimeFaces — JSF puro con CSS propio</li>
+          <li>Relaciones JPA funcionando (@OneToMany / @ManyToOne)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-ok" style="margin-top:20px">
+    <span class="a-ico">🎓</span>
+    <div>
+      <strong>Logro de las 6 clases:</strong> Partimos de un "Hola Mundo" JSF con un ArrayList y construimos paso a paso una aplicación empresarial completa con arquitectura de 4 capas, persistencia real en MySQL, validaciones multicapa, transacciones JTA, relaciones JPA y un diseño profesional sin dependencias externas. Esta es la base de cualquier sistema web empresarial Java.
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><strong>Programación Web Avanzada — Backend</strong> &nbsp;|&nbsp; Clase 06: Aplicación Empresarial Completa</p>
+  <p style="margin-top:6px;font-size:.75rem">Jakarta EE 10 &middot; JPA 3.1 &middot; Bean Validation 3.0 &middot; CDI 4.0 &middot; EclipseLink &middot; GlassFish 7 &middot; MySQL 8 &middot; JDK 21</p>
+</footer>
+
+</body>
+</html>
