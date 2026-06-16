@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clase 08 — Validaciones en una Aplicación Web | Jakarta EE 10</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1a3a5c;--azul2:#2563a8;--azul3:#3b82d1;--azul-cl:#dbeafe;--azul-50:#eff6ff;
+  --verde:#166534;--verde-cl:#dcfce7;--verde2:#16a34a;
+  --naranja:#92400e;--naranja-cl:#fef3c7;--naranja2:#d97706;
+  --rojo:#991b1b;--rojo-cl:#fee2e2;--rojo2:#dc2626;
+  --violeta:#4c1d95;--violeta-cl:#ede9fe;--violeta2:#7c3aed;
+  --rosa:#831843;--rosa-cl:#fce7f3;--rosa2:#db2777;
+  --celeste:#0c4a6e;--celeste-cl:#e0f2fe;--celeste2:#0284c7;
+  --gris:#f1f5f9;--gris2:#e2e8f0;--gris3:#94a3b8;--gris4:#475569;--texto:#0f172a;
+  --fuente:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--fuente);background:#f8fafc;color:var(--texto);font-size:15px;line-height:1.6}
+a{color:var(--azul2);text-decoration:none}
+code{font-family:'Cascadia Code','Fira Code','Consolas',monospace;font-size:.92em}
+
+/* ══ PORTADA ══════════════════════════════════════════════ */
+.portada{background:linear-gradient(135deg,#0f172a 0%,#134e4a 40%,#166534 75%,#15803d 100%);
+  color:#fff;padding:72px 40px;text-align:center;border-radius:0 0 28px 28px;
+  box-shadow:0 8px 40px rgba(0,0,0,.35);margin-bottom:44px}
+.portada-badge{display:inline-block;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);padding:6px 20px;border-radius:20px;
+  font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px}
+.portada-num{font-size:5rem;font-weight:900;line-height:1;opacity:.2;margin-bottom:-10px}
+.portada h1{font-size:2.4rem;font-weight:800;margin-bottom:8px;line-height:1.2}
+.portada h2{font-size:1.1rem;font-weight:400;opacity:.8;margin-bottom:28px}
+.portada-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px}
+.tag{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);
+  padding:4px 13px;border-radius:16px;font-size:11px;font-weight:600}
+
+/* ══ ÍNDICE ══════════════════════════════════════════════ */
+.indice{max-width:880px;margin:0 auto 44px;background:#fff;border-radius:16px;
+  border:1px solid var(--gris2);box-shadow:0 2px 10px rgba(0,0,0,.07);overflow:hidden}
+.indice-hdr{background:var(--verde);color:#fff;padding:14px 24px;font-size:.95rem;font-weight:700}
+.indice-lista{list-style:none;display:grid;grid-template-columns:1fr 1fr}
+.indice-lista li{border-bottom:1px solid var(--gris2);border-right:1px solid var(--gris2)}
+.indice-lista a{display:flex;align-items:center;gap:12px;padding:11px 18px;
+  color:var(--texto);font-size:.87rem;transition:background .15s}
+.indice-lista a:hover{background:var(--verde-cl)}
+.ind-n{width:26px;height:26px;background:var(--verde2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+@media(max-width:600px){.indice-lista{grid-template-columns:1fr}}
+
+/* ══ SECCIONES ══════════════════════════════════════════ */
+.sec{max-width:880px;margin:0 auto 52px;scroll-margin-top:20px;padding:0 20px}
+.sec-hdr{display:flex;align-items:center;gap:14px;margin-bottom:22px;
+  padding-bottom:12px;border-bottom:3px solid var(--verde2)}
+.sec-num{width:46px;height:46px;
+  background:linear-gradient(135deg,var(--verde),var(--verde2));
+  color:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:1rem;font-weight:800;flex-shrink:0}
+.sec-titulo{font-size:1.4rem;font-weight:800;color:var(--azul)}
+
+/* ══ DIAP NUM ════════════════════════════════════════════ */
+.dn{display:inline-block;background:var(--verde2);color:#fff;
+  font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:10px;
+  margin-bottom:8px;letter-spacing:.5px}
+
+/* ══ CARDS ══════════════════════════════════════════════ */
+.card{background:#fff;border:1px solid var(--gris2);border-radius:12px;
+  box-shadow:0 1px 6px rgba(0,0,0,.06);margin-bottom:16px;overflow:hidden}
+.card-hdr{padding:11px 18px;font-weight:700;font-size:.9rem;border-bottom:1px solid var(--gris2)}
+.card-body{padding:18px}
+.c-azul   .card-hdr{background:var(--azul-cl);color:var(--azul)}
+.c-verde  .card-hdr{background:var(--verde-cl);color:var(--verde)}
+.c-naranja .card-hdr{background:var(--naranja-cl);color:var(--naranja)}
+.c-rojo   .card-hdr{background:var(--rojo-cl);color:var(--rojo)}
+.c-violeta .card-hdr{background:var(--violeta-cl);color:var(--violeta)}
+.c-rosa   .card-hdr{background:var(--rosa-cl);color:var(--rosa)}
+.c-celeste .card-hdr{background:var(--celeste-cl);color:var(--celeste)}
+
+/* ══ ALERTAS ═════════════════════════════════════════════ */
+.alerta{display:flex;gap:12px;padding:13px 16px;border-radius:10px;margin:14px 0;font-size:.88rem}
+.a-info  {background:var(--azul-cl);border-left:4px solid var(--azul2)}
+.a-ok    {background:var(--verde-cl);border-left:4px solid var(--verde2)}
+.a-warn  {background:var(--naranja-cl);border-left:4px solid var(--naranja2)}
+.a-err   {background:var(--rojo-cl);border-left:4px solid var(--rojo2)}
+.a-viol  {background:var(--violeta-cl);border-left:4px solid var(--violeta2)}
+.a-rosa  {background:var(--rosa-cl);border-left:4px solid var(--rosa2)}
+.a-ico   {font-size:1.2rem;flex-shrink:0;margin-top:1px}
+
+/* ══ CÓDIGO ══════════════════════════════════════════════ */
+pre{background:#0f172a;color:#e2e8f0;padding:20px 22px;border-radius:10px;
+  overflow-x:auto;font-size:13px;line-height:1.8;margin:12px 0;
+  border:1px solid #1e293b;position:relative}
+.cl{background:#1e293b;border-radius:5px;padding:2px 8px;font-size:10px;
+  color:#94a3b8;font-family:var(--fuente);position:absolute;top:8px;right:10px}
+.kw{color:#93c5fd}.an{color:#86efac}.st{color:#fca5a5}
+.cm{color:#64748b;font-style:italic}.cn{color:#fde68a}.mt{color:#c4b5fd}.nm{color:#fdba74}
+.ok{color:#86efac}.bad{color:#fca5a5}.warn{color:#fde68a}
+
+/* ══ TABLA ══════════════════════════════════════════════ */
+table{width:100%;border-collapse:collapse;font-size:.88rem;margin:12px 0}
+th{background:var(--verde);color:#fff;padding:9px 13px;text-align:left;
+  font-size:.78rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:8px 13px;border-bottom:1px solid var(--gris2);vertical-align:top}
+tr:nth-child(even) td{background:var(--gris)}
+tr:hover td{background:var(--verde-cl)}
+
+/* ══ GRIDS ══════════════════════════════════════════════ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:12px 0}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:12px 0}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin:12px 0}
+@media(max-width:750px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* ══ BADGES ═════════════════════════════════════════════ */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-verde  {background:var(--verde-cl);color:var(--verde)}
+.b-rojo   {background:var(--rojo-cl);color:var(--rojo)}
+.b-azul   {background:var(--azul-cl);color:var(--azul2)}
+.b-naranja{background:var(--naranja-cl);color:var(--naranja)}
+.b-violeta{background:var(--violeta-cl);color:var(--violeta2)}
+.b-rosa   {background:var(--rosa-cl);color:var(--rosa2)}
+
+/* ══ PIRÁMIDE / CAPAS VALIDACIÓN ═════════════════════════ */
+.piramide{display:flex;flex-direction:column;align-items:center;gap:0;
+  background:#0f172a;border-radius:16px;padding:28px 24px;margin:16px 0}
+.pir-capa{display:flex;align-items:center;gap:14px;padding:14px 20px;
+  border-radius:10px;border:1px solid;margin-bottom:6px;
+  width:100%;max-width:560px;cursor:default;transition:transform .15s}
+.pir-capa:hover{transform:translateX(4px)}
+.pir-ico{font-size:1.5rem;width:34px;text-align:center;flex-shrink:0}
+.pir-info{flex:1}
+.pir-nombre{font-weight:700;font-size:.9rem;margin-bottom:2px}
+.pir-det{font-size:.77rem;opacity:.78;line-height:1.4}
+.pir-badge{font-size:.68rem;font-weight:700;padding:3px 8px;
+  border-radius:10px;white-space:nowrap;flex-shrink:0}
+.pir-arr{color:#334155;font-size:.75rem;padding:2px 0;
+  display:flex;align-items:center;gap:8px;width:100%;max-width:560px;padding-left:48px}
+
+.pir-cliente   {background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe}
+.pir-cliente   .pir-badge{background:#2563a8;color:#fff}
+.pir-bean      {background:#14532d;border-color:#4ade80;color:#bbf7d0}
+.pir-bean      .pir-badge{background:#16a34a;color:#fff}
+.pir-serv      {background:#422006;border-color:#fb923c;color:#ffedd5}
+.pir-serv      .pir-badge{background:#ea580c;color:#fff}
+.pir-entidad   {background:#3b0764;border-color:#a855f7;color:#f3e8ff}
+.pir-entidad   .pir-badge{background:#9333ea;color:#fff}
+.pir-db        {background:#1c1917;border-color:#78716c;color:#e7e5e4}
+.pir-db        .pir-badge{background:#57534e;color:#fff}
+
+/* ══ NIVEL CARDS ════════════════════════════════════════ */
+.nivel{border-radius:14px;overflow:hidden;margin-bottom:20px;border:2px solid}
+.nivel-hdr{padding:14px 20px;font-weight:800;font-size:1rem;
+  display:flex;align-items:center;gap:10px}
+.nivel-body{padding:18px 20px;background:#fff}
+.nivel-n1{border-color:#3b82d1}.nivel-n1 .nivel-hdr{background:#1e3a5f;color:#bfdbfe}
+.nivel-n2{border-color:#4ade80}.nivel-n2 .nivel-hdr{background:#14532d;color:#bbf7d0}
+.nivel-n3{border-color:#fb923c}.nivel-n3 .nivel-hdr{background:#422006;color:#ffedd5}
+.nivel-n4{border-color:#a855f7}.nivel-n4 .nivel-hdr{background:#3b0764;color:#f3e8ff}
+.nivel-n5{border-color:#78716c}.nivel-n5 .nivel-hdr{background:#1c1917;color:#e7e5e4}
+
+/* ══ TIMELINE ════════════════════════════════════════════ */
+.timeline{position:relative;padding-left:40px;margin:16px 0}
+.timeline::before{content:'';position:absolute;left:14px;top:0;bottom:0;
+  width:3px;background:linear-gradient(180deg,var(--verde2),var(--azul2))}
+.tl-item{position:relative;margin-bottom:22px}
+.tl-dot{position:absolute;left:-33px;top:4px;width:18px;height:18px;
+  border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--verde2)}
+.tl-titulo{font-weight:700;font-size:.9rem;color:var(--azul);margin-bottom:4px}
+.tl-body{font-size:.85rem;color:var(--gris4);line-height:1.6}
+.tl-dot-1{background:var(--azul3)}
+.tl-dot-2{background:var(--verde2)}
+.tl-dot-3{background:var(--naranja2)}
+.tl-dot-4{background:var(--violeta2)}
+.tl-dot-5{background:var(--rojo2)}
+.tl-dot-6{background:var(--rosa2)}
+
+/* ══ COMPARATIVA ════════════════════════════════════════ */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:12px;overflow:hidden;margin:14px 0;border:1px solid var(--gris2)}
+.cmp-col{overflow:hidden}
+.cmp-hdr{padding:10px 16px;font-weight:700;font-size:.85rem;text-align:center}
+.cmp-hdr-ok{background:var(--verde);color:#fff}
+.cmp-hdr-bad{background:var(--rojo);color:#fff}
+@media(max-width:600px){.cmp{grid-template-columns:1fr}}
+.cmp pre{border-radius:0;margin:0;border:none;border-top:1px solid #1e293b}
+
+/* ══ OBJETIVOS ══════════════════════════════════════════ */
+.obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+@media(max-width:600px){.obj-grid{grid-template-columns:1fr}}
+.obj-item{background:#fff;border:1px solid var(--gris2);
+  border-left:4px solid var(--verde2);border-radius:8px;
+  padding:11px 14px;font-size:.88rem;display:flex;align-items:flex-start;gap:10px}
+
+/* ══ PASOS ══════════════════════════════════════════════ */
+.paso{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start}
+.paso-n{width:34px;height:34px;background:var(--verde2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0;margin-top:2px}
+.paso-body h4{font-size:.9rem;color:var(--azul);margin-bottom:3px;font-weight:700}
+.paso-body p{font-size:.84rem;color:var(--gris4)}
+
+/* ══ SEP ════════════════════════════════════════════════ */
+.sep{height:2px;background:linear-gradient(90deg,var(--verde2),transparent);
+  max-width:880px;margin:0 auto 52px;border-radius:2px}
+
+/* ══ FOOTER ═════════════════════════════════════════════ */
+footer{background:var(--azul);color:rgba(255,255,255,.65);text-align:center;
+  padding:22px;font-size:.8rem;margin-top:60px}
+</style>
+</head>
+<body>
+
+
+<!-- PORTADA -->
+<div class="portada">
+  <div class="portada-badge">Programación Web Avanzada — Backend</div>
+  <div class="portada-num">08</div>
+  <h1>Validaciones en una Aplicación Web</h1>
+  <h2>¿Cuáles son las más importantes? · ¿Dónde se implementan? · Cómo construir una defensa en capas</h2>
+  <div class="portada-tags">
+    <span class="tag">Jakarta EE 10</span><span class="tag">Bean Validation 3.0</span>
+    <span class="tag">Jakarta Faces 4.0</span><span class="tag">CDI 4.0</span>
+    <span class="tag">JPA 3.1</span><span class="tag">MySQL 8</span><span class="tag">JDK 21</span>
+  </div>
+</div>
+
+<!-- ÍNDICE -->
+<div style="max-width:880px;margin:0 auto;padding:0 20px">
+<div class="indice">
+  <div class="indice-hdr">📚 Clase 08 — Índice de contenidos</div>
+  <ul class="indice-lista">
+    <li><a href="#obj" ><span class="ind-n">🎯</span> Objetivos</a></li>
+    <li><a href="#s1"  ><span class="ind-n">1</span> ¿Por qué validar?</a></li>
+    <li><a href="#s2"  ><span class="ind-n">2</span> Los 5 niveles de validación</a></li>
+    <li><a href="#s3"  ><span class="ind-n">3</span> Nivel 1 — Vista: JSF + HTML5</a></li>
+    <li><a href="#s4"  ><span class="ind-n">4</span> Nivel 2 — Bean Validation</a></li>
+    <li><a href="#s5"  ><span class="ind-n">5</span> Nivel 3 — Servicio: reglas de negocio</a></li>
+    <li><a href="#s6"  ><span class="ind-n">6</span> Nivel 4 — JPA: restricciones de columna</a></li>
+    <li><a href="#s7"  ><span class="ind-n">7</span> Nivel 5 — Base de datos</a></li>
+    <li><a href="#s8"  ><span class="ind-n">8</span> Mensajes de error en JSF</a></li>
+    <li><a href="#s9"  ><span class="ind-n">9</span> Validaciones más importantes por tipo de dato</a></li>
+    <li><a href="#s10" ><span class="ind-n">10</span> Errores frecuentes</a></li>
+    <li><a href="#res" ><span class="ind-n">✅</span> Resumen y actividad</a></li>
+  </ul>
+</div>
+</div>
+
+<!-- OBJETIVOS -->
+<div class="sec" id="obj">
+  <div class="sec-hdr"><div class="sec-num">🎯</div><div class="sec-titulo">Objetivos de la clase</div></div>
+  <div class="obj-grid">
+    <div class="obj-item"><span>🛡️</span>Comprender por qué la validación es crítica para la seguridad e integridad de datos</div>
+    <div class="obj-item"><span>🏗️</span>Conocer los 5 niveles de validación y la responsabilidad de cada capa</div>
+    <div class="obj-item"><span>🌐</span>Implementar validaciones en la vista JSF con required, validateRegex y convertidores</div>
+    <div class="obj-item"><span>✅</span>Dominar Bean Validation: @NotBlank, @Email, @Size, @Min, @Max, @Pattern</div>
+    <div class="obj-item"><span>⚙️</span>Escribir validaciones de negocio en el Servicio (unicidad, reglas complejas)</div>
+    <div class="obj-item"><span>💬</span>Mostrar mensajes de error claros y amigables al usuario con FacesMessage</div>
+    <div class="obj-item"><span>🔒</span>Aplicar validaciones de base de datos como última línea de defensa</div>
+    <div class="obj-item"><span>🐾</span>Aplicar todo en el sistema Veterinaria con Cliente, Mascota y Turno</div>
+  </div>
+  <div class="alerta a-ok">
+    <span class="a-ico">💡</span>
+    <div><strong>Concepto clave:</strong> Validar es <strong>nunca confiar en los datos que vienen del usuario</strong>. Un usuario puede escribir lo que quiera en un formulario, incluso datos maliciosos. La validación garantiza que solo ingresen datos correctos, completos y seguros al sistema.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 1: POR QUÉ VALIDAR -->
+<div class="sec" id="s1">
+  <div class="sec-hdr"><div class="sec-num">1</div><div class="sec-titulo">¿Por qué validar?</div></div>
+
+  <div class="dn">DIAPOSITIVA 1 — El costo de no validar</div>
+  <div class="g3">
+    <div class="card c-rojo">
+      <div class="card-hdr">💥 Sin validación — Problemas de integridad</div>
+      <div class="card-body" style="font-size:.87rem">
+        <ul style="padding-left:16px;line-height:2.1">
+          <li>Email vacío → no se puede contactar al cliente</li>
+          <li>Documento duplicado → registros inconsistentes</li>
+          <li>Fecha de turno en el pasado → confusión en la agenda</li>
+          <li>Precio negativo → errores contables</li>
+          <li>Texto de 5000 caracteres en campo de 100 → <code>DataTruncation</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-naranja">
+      <div class="card-hdr">⚠️ Sin validación — Problemas de seguridad</div>
+      <div class="card-body" style="font-size:.87rem">
+        <ul style="padding-left:16px;line-height:2.1">
+          <li><strong>SQL Injection:</strong> <code>'; DROP TABLE cliente; --</code></li>
+          <li><strong>XSS:</strong> <code>&lt;script&gt;alert('hack')&lt;/script&gt;</code></li>
+          <li>Subir archivos ejecutables disfrazados de imágenes</li>
+          <li>Acceder a IDs de otros usuarios sin autorización</li>
+          <li>Crear datos inválidos que rompen la lógica de negocio</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">✅ Con validación — Beneficios</div>
+      <div class="card-body" style="font-size:.87rem">
+        <ul style="padding-left:16px;line-height:2.1">
+          <li>Datos limpios y consistentes en la BD</li>
+          <li>Mensajes de error claros al usuario</li>
+          <li>Protección contra ataques comunes</li>
+          <li>Aplicación más robusta y confiable</li>
+          <li>Menos errores en producción</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 2 — Principio de defensa en profundidad</div>
+  <div class="alerta a-viol">
+    <span class="a-ico">🔐</span>
+    <div><strong>Defensa en profundidad:</strong> Ninguna capa es suficiente por sí sola. Si la validación de la vista falla (el usuario desactiva JavaScript o usa una herramienta como Postman), la validación del servidor debe detener el dato inválido. Si el servidor falla, la base de datos es la última barrera.</div>
+  </div>
+
+  <div class="piramide">
+    <div style="color:#94a3b8;font-size:.73rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">LÍNEAS DE DEFENSA — De la primera a la última</div>
+
+    <div class="pir-capa pir-cliente">
+      <div class="pir-ico">🌐</div>
+      <div class="pir-info">
+        <div class="pir-nombre">Nivel 1 — Vista JSF / HTML5</div>
+        <div class="pir-det">required · type="email" · maxlength · f:validateRegex · convertidores</div>
+      </div>
+      <div class="pir-badge">Primera barrera</div>
+    </div>
+    <div class="pir-arr">▼ <span style="color:#3b82d1">Si pasa la vista...</span></div>
+
+    <div class="pir-capa pir-bean">
+      <div class="pir-ico">✅</div>
+      <div class="pir-info">
+        <div class="pir-nombre">Nivel 2 — Bean Validation (Entidad)</div>
+        <div class="pir-det">@NotBlank · @Email · @Size · @Min · @Max · @Pattern · @NotNull</div>
+      </div>
+      <div class="pir-badge">Validación Java</div>
+    </div>
+    <div class="pir-arr">▼ <span style="color:#4ade80">Si pasa la entidad...</span></div>
+
+    <div class="pir-capa pir-serv">
+      <div class="pir-ico">⚙️</div>
+      <div class="pir-info">
+        <div class="pir-nombre">Nivel 3 — Servicio (Reglas de negocio)</div>
+        <div class="pir-det">email único · documento único · fecha futura · mascota activa · estado válido</div>
+      </div>
+      <div class="pir-badge">Lógica de negocio</div>
+    </div>
+    <div class="pir-arr">▼ <span style="color:#fb923c">Si pasa el servicio...</span></div>
+
+    <div class="pir-capa pir-entidad">
+      <div class="pir-ico">🔌</div>
+      <div class="pir-info">
+        <div class="pir-nombre">Nivel 4 — JPA / EclipseLink</div>
+        <div class="pir-det">nullable=false · unique=true · @Column(length) · relaciones optional=false</div>
+      </div>
+      <div class="pir-badge">ORM</div>
+    </div>
+    <div class="pir-arr">▼ <span style="color:#a855f7">Si pasa JPA...</span></div>
+
+    <div class="pir-capa pir-db">
+      <div class="pir-ico">🗄️</div>
+      <div class="pir-info">
+        <div class="pir-nombre">Nivel 5 — MySQL 8</div>
+        <div class="pir-det">NOT NULL · UNIQUE · FOREIGN KEY · CHECK · DEFAULT · tipo de dato</div>
+      </div>
+      <div class="pir-badge">Última barrera</div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 2: LOS 5 NIVELES -->
+<div class="sec" id="s2">
+  <div class="sec-hdr"><div class="sec-num">2</div><div class="sec-titulo">Los 5 niveles de validación</div></div>
+
+  <div class="dn">DIAPOSITIVA 3 — Tabla comparativa de los 5 niveles</div>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Dónde</th><th>Tecnología</th><th>Cuándo actúa</th><th>¿Se puede saltar?</th><th>Qué valida</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge b-azul">1</span></td>
+        <td><strong>Vista</strong></td>
+        <td>JSF · HTML5</td>
+        <td>Antes de enviar el formulario (Fase 3 JSF)</td>
+        <td><span class="badge b-rojo">Sí, con Postman/curl</span></td>
+        <td>Obligatoriedad, formato básico, longitud</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-verde">2</span></td>
+        <td><strong>Entidad Java</strong></td>
+        <td>Bean Validation 3.0</td>
+        <td>Al persistir con JPA y en Fase 3 JSF</td>
+        <td><span class="badge b-naranja">Difícil, solo por código directo</span></td>
+        <td>Formato, tamaño, valores nulos, patrones</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-naranja">3</span></td>
+        <td><strong>Servicio</strong></td>
+        <td>Java puro + DAO</td>
+        <td>Al llamar el método de negocio</td>
+        <td><span class="badge b-naranja">Solo si se llama al DAO directamente</span></td>
+        <td>Unicidad, consistencia, reglas de negocio</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-violeta">4</span></td>
+        <td><strong>JPA/EclipseLink</strong></td>
+        <td>Anotaciones @Column</td>
+        <td>Al hacer persist/merge</td>
+        <td><span class="badge b-rojo">No, es parte del modelo</span></td>
+        <td>Restricciones del esquema de BD</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-rojo">5</span></td>
+        <td><strong>MySQL</strong></td>
+        <td>DDL: NOT NULL, UNIQUE…</td>
+        <td>Al ejecutar el INSERT/UPDATE</td>
+        <td><span class="badge b-rojo">No, es la BD directamente</span></td>
+        <td>Integridad referencial, tipos de datos, unicidad</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 4 — Ejemplo real: Alta de un Cliente</div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot tl-dot-1"></div>
+      <div class="tl-titulo">🌐 Vista (JSF) — <span style="color:var(--azul3)">Nivel 1</span></div>
+      <div class="tl-body">
+        El campo "Email" tiene <code>required="true"</code> y <code>f:validateRegex pattern="^[^@]+@[^@]+\.[^@]+$"</code>.<br/>
+        Si el usuario deja el campo vacío o escribe "nombre_sin_arroba" → JSF muestra el error en la vista <strong>sin ir al servidor</strong>.
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot tl-dot-2"></div>
+      <div class="tl-titulo">✅ Entidad Cliente.java — <span style="color:var(--verde2)">Nivel 2</span></div>
+      <div class="tl-body">
+        El campo <code>email</code> tiene <code>@NotBlank</code> y <code>@Email</code>.<br/>
+        Si alguien llama al servicio directamente sin pasar por JSF → Bean Validation lanza <code>ConstraintViolationException</code> antes de llegar a la BD.
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot tl-dot-3"></div>
+      <div class="tl-titulo">⚙️ ClienteServicio.java — <span style="color:var(--naranja2)">Nivel 3</span></div>
+      <div class="tl-body">
+        El servicio consulta: <code>clienteDAO.buscarPorEmail(email)</code>.<br/>
+        Si ya existe un cliente con ese email → lanza <code>IllegalArgumentException("Ya existe un cliente con ese email")</code>.<br/>
+        Esta validación <strong>no puede hacerla Bean Validation</strong> porque requiere consultar la base de datos.
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot tl-dot-4"></div>
+      <div class="tl-titulo">🔌 JPA/EclipseLink — <span style="color:var(--violeta2)">Nivel 4</span></div>
+      <div class="tl-body">
+        La columna está mapeada con <code>@Column(unique=true, nullable=false)</code>.<br/>
+        Si falla alguna validación anterior y aún así se intenta persistir → JPA lanza <code>PersistenceException</code>.
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot tl-dot-5"></div>
+      <div class="tl-titulo">🗄️ MySQL — <span style="color:var(--rojo2)">Nivel 5</span></div>
+      <div class="tl-body">
+        La columna <code>email</code> en MySQL tiene <code>NOT NULL</code> y <code>UNIQUE</code>.<br/>
+        Si se intenta insertar directamente con SQL sin pasar por la aplicación → MySQL rechaza el dato. Es la <strong>última barrera absoluta</strong>.
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 3: VISTA JSF -->
+<div class="sec" id="s3">
+  <div class="sec-hdr"><div class="sec-num">3</div><div class="sec-titulo">Nivel 1 — Validaciones en la Vista (JSF)</div></div>
+
+  <div class="dn">DIAPOSITIVA 5 — Herramientas de validación en JSF</div>
+  <table>
+    <thead><tr><th>Herramienta</th><th>Etiqueta JSF</th><th>Qué hace</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Campo obligatorio</strong></td><td><code>required="true"</code></td><td>No permite enviar el formulario si está vacío</td><td><code>&lt;h:inputText required="true"/&gt;</code></td></tr>
+      <tr><td><strong>Expresión regular</strong></td><td><code>&lt;f:validateRegex&gt;</code></td><td>Valida el formato con un patrón regex</td><td>Formato de email, DNI, teléfono</td></tr>
+      <tr><td><strong>Longitud</strong></td><td><code>&lt;f:validateLength&gt;</code></td><td>Mínimo y máximo de caracteres</td><td><code>&lt;f:validateLength minimum="2" maximum="100"/&gt;</code></td></tr>
+      <tr><td><strong>Rango numérico</strong></td><td><code>&lt;f:validateLongRange&gt;</code></td><td>Valores enteros mínimo/máximo</td><td><code>&lt;f:validateLongRange minimum="1" maximum="480"/&gt;</code></td></tr>
+      <tr><td><strong>Rango decimal</strong></td><td><code>&lt;f:validateDoubleRange&gt;</code></td><td>Valores decimales mínimo/máximo</td><td><code>&lt;f:validateDoubleRange minimum="0.0"/&gt;</code></td></tr>
+      <tr><td><strong>Conversor de fecha</strong></td><td><code>&lt;f:convertDateTime&gt;</code></td><td>Parsea una fecha con patrón específico</td><td><code>pattern="dd/MM/yyyy"</code></td></tr>
+      <tr><td><strong>Conversor numérico</strong></td><td><code>&lt;f:convertNumber&gt;</code></td><td>Parsea un número con formato</td><td><code>&lt;f:convertNumber integerOnly="true"/&gt;</code></td></tr>
+      <tr><td><strong>Conversor de tipo</strong></td><td><code>&lt;f:converter&gt;</code></td><td>Convierte String → tipo Java</td><td><code>converterId="jakarta.faces.Long"</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 6 — Formulario completo con validaciones JSF</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 clientes/abm.xhtml — Todas las validaciones JSF</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- Namespace passthrough para atributos HTML5 --&gt;</span>
+&lt;<span class="kw">html</span> xmlns:pt=<span class="st">"jakarta.faces.passthrough"</span>
+      xmlns:f=<span class="st">"jakarta.faces.core"</span>
+      xmlns:h=<span class="st">"jakarta.faces.html"</span>&gt;
+
+&lt;<span class="kw">h:form</span> id=<span class="st">"frmCliente"</span>&gt;
+
+  <span class="cm">&lt;!-- 1. Campo obligatorio --&gt;</span>
+  &lt;<span class="kw">h:inputText</span> id=<span class="st">"documento"</span>
+               value=<span class="st">"#{clienteBean.clienteSeleccionado.documento}"</span>
+               required=<span class="st">"true"</span>
+               requiredMessage=<span class="st">"El documento es obligatorio"</span>
+               maxlength=<span class="st">"20"</span>
+               pt:placeholder=<span class="st">"Ej: 30111222"</span>/&gt;
+  &lt;<span class="kw">h:message</span> for=<span class="st">"documento"</span> styleClass=<span class="st">"form-error"</span>/&gt;
+
+  <span class="cm">&lt;!-- 2. Email con regex --&gt;</span>
+  &lt;<span class="kw">h:inputText</span> id=<span class="st">"email"</span>
+               value=<span class="st">"#{clienteBean.clienteSeleccionado.email}"</span>
+               required=<span class="st">"true"</span>
+               requiredMessage=<span class="st">"El email es obligatorio"</span>
+               validatorMessage=<span class="st">"Formato de email inválido"</span>&gt;
+    &lt;<span class="kw">f:validateRegex</span> pattern=<span class="st">"^[^@]+@[^@]+\.[^@]+$"</span>/&gt;
+  &lt;/<span class="kw">h:inputText</span>&gt;
+  &lt;<span class="kw">h:message</span> for=<span class="st">"email"</span> styleClass=<span class="st">"form-error"</span>/&gt;
+
+  <span class="cm">&lt;!-- 3. Texto con longitud mínima y máxima --&gt;</span>
+  &lt;<span class="kw">h:inputText</span> id=<span class="st">"nombre"</span>
+               value=<span class="st">"#{clienteBean.clienteSeleccionado.nombre}"</span>
+               required=<span class="st">"true"</span>
+               requiredMessage=<span class="st">"El nombre es obligatorio"</span>&gt;
+    &lt;<span class="kw">f:validateLength</span> minimum=<span class="st">"2"</span> maximum=<span class="st">"100"</span>/&gt;
+  &lt;/<span class="kw">h:inputText</span>&gt;
+  &lt;<span class="kw">h:message</span> for=<span class="st">"nombre"</span> styleClass=<span class="st">"form-error"</span>/&gt;
+
+  <span class="cm">&lt;!-- 4. Fecha con conversor --&gt;</span>
+  &lt;<span class="kw">h:inputText</span> id=<span class="st">"fechaNac"</span>
+               value=<span class="st">"#{mascotaBean.mascotaSeleccionada.fechaNac}"</span>
+               pt:placeholder=<span class="st">"dd/MM/yyyy"</span>&gt;
+    &lt;<span class="kw">f:convertDateTime</span> pattern=<span class="st">"dd/MM/yyyy"</span> type=<span class="st">"localDate"</span>/&gt;
+  &lt;/<span class="kw">h:inputText</span>&gt;
+  &lt;<span class="kw">h:message</span> for=<span class="st">"fechaNac"</span> styleClass=<span class="st">"form-error"</span>/&gt;
+
+  <span class="cm">&lt;!-- 5. Selector obligatorio con converter de tipo --&gt;</span>
+  &lt;<span class="kw">h:selectOneMenu</span> id=<span class="st">"cliente"</span>
+                   value=<span class="st">"#{mascotaBean.clienteIdSeleccionado}"</span>
+                   required=<span class="st">"true"</span>
+                   requiredMessage=<span class="st">"Debe seleccionar un cliente"</span>&gt;
+    &lt;<span class="kw">f:selectItem</span> itemValue=<span class="st">""</span> itemLabel=<span class="st">"— Seleccione —"</span>
+                  noSelectionOption=<span class="st">"true"</span>/&gt;
+    &lt;<span class="kw">f:selectItems</span> value=<span class="st">"#{mascotaBean.clientes}"</span> var=<span class="st">"c"</span>
+                   itemValue=<span class="st">"#{c.id}"</span>
+                   itemLabel=<span class="st">"#{c.apellido}, #{c.nombre}"</span>/&gt;
+    &lt;<span class="kw">f:converter</span> converterId=<span class="st">"jakarta.faces.Long"</span>/&gt;
+  &lt;/<span class="kw">h:selectOneMenu</span>&gt;
+  &lt;<span class="kw">h:message</span> for=<span class="st">"cliente"</span> styleClass=<span class="st">"form-error"</span>/&gt;
+
+  <span class="cm">&lt;!-- Botón Cancelar con immediate="true" --&gt;</span>
+  <span class="cm">&lt;!-- immediate=true salta las fases 2-4, no valida el formulario --&gt;</span>
+  &lt;<span class="kw">h:commandButton</span> value=<span class="st">"Cancelar"</span>
+                   action=<span class="st">"#{clienteBean.cancelar}"</span>
+                   immediate=<span class="st">"true"</span>/&gt;
+
+&lt;/<span class="kw">h:form</span>&gt;<span class="cl">abm.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">⚠️</span>
+    <div><strong>El atributo <code>message</code> en <code>f:validateRegex</code> no existe en Jakarta Faces 4.0.</strong> El mensaje de error de validación se pone en el componente padre con <code>validatorMessage="..."</code>. Si no se especifica, JSF muestra el mensaje genérico del validador.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 4: BEAN VALIDATION -->
+<div class="sec" id="s4">
+  <div class="sec-hdr"><div class="sec-num">4</div><div class="sec-titulo">Nivel 2 — Bean Validation 3.0</div></div>
+
+  <div class="dn">DIAPOSITIVA 7 — Anotaciones principales</div>
+  <table>
+    <thead><tr><th>Anotación</th><th>Tipo aplicable</th><th>Qué valida</th><th>Atributos clave</th></tr></thead>
+    <tbody>
+      <tr><td><code>@NotNull</code></td><td>Cualquier objeto</td><td>No puede ser <code>null</code></td><td><code>message</code></td></tr>
+      <tr><td><code>@NotBlank</code></td><td>String</td><td>No null, no vacío, no solo espacios en blanco</td><td><code>message</code></td></tr>
+      <tr><td><code>@NotEmpty</code></td><td>String, Collection, Map, Array</td><td>No null y no vacío (sí acepta espacios)</td><td><code>message</code></td></tr>
+      <tr><td><code>@Size</code></td><td>String, Collection</td><td>Tamaño entre min y max</td><td><code>min</code>, <code>max</code>, <code>message</code></td></tr>
+      <tr><td><code>@Email</code></td><td>String</td><td>Formato de correo electrónico válido</td><td><code>message</code>, <code>regexp</code></td></tr>
+      <tr><td><code>@Min</code></td><td>int, long, Integer, Long</td><td>Valor numérico ≥ min</td><td><code>value</code>, <code>message</code></td></tr>
+      <tr><td><code>@Max</code></td><td>int, long, Integer, Long</td><td>Valor numérico ≤ max</td><td><code>value</code>, <code>message</code></td></tr>
+      <tr><td><code>@DecimalMin</code></td><td>BigDecimal, String</td><td>Valor decimal ≥ min</td><td><code>value</code>, <code>inclusive</code></td></tr>
+      <tr><td><code>@DecimalMax</code></td><td>BigDecimal, String</td><td>Valor decimal ≤ max</td><td><code>value</code>, <code>inclusive</code></td></tr>
+      <tr><td><code>@Positive</code></td><td>Numérico</td><td>Número estrictamente positivo (&gt; 0)</td><td><code>message</code></td></tr>
+      <tr><td><code>@PositiveOrZero</code></td><td>Numérico</td><td>Número positivo o cero (≥ 0)</td><td><code>message</code></td></tr>
+      <tr><td><code>@Pattern</code></td><td>String</td><td>Debe cumplir la expresión regular</td><td><code>regexp</code>, <code>message</code></td></tr>
+      <tr><td><code>@Past</code></td><td>Date, LocalDate…</td><td>Fecha anterior al momento actual</td><td><code>message</code></td></tr>
+      <tr><td><code>@Future</code></td><td>Date, LocalDateTime…</td><td>Fecha posterior al momento actual</td><td><code>message</code></td></tr>
+      <tr><td><code>@PastOrPresent</code></td><td>Date, LocalDate…</td><td>Fecha pasada o igual a ahora</td><td><code>message</code></td></tr>
+      <tr><td><code>@Digits</code></td><td>Numérico, String</td><td>Cantidad de dígitos enteros y decimales</td><td><code>integer</code>, <code>fraction</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 8 — Bean Validation en las entidades del sistema</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Cliente.java — Bean Validation completo</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span> <span class="an">@Table</span>(name = <span class="st">"cliente"</span>)
+<span class="kw">public class</span> <span class="cn">Cliente</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="an">@Id</span> <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    <span class="kw">private</span> <span class="cn">Long</span> id;
+
+    <span class="an">@NotBlank</span>(message = <span class="st">"El documento es obligatorio"</span>)
+    <span class="an">@Size</span>(max = <span class="nm">20</span>, message = <span class="st">"El documento no puede superar 20 caracteres"</span>)
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, unique = <span class="kw">true</span>, length = <span class="nm">20</span>)
+    <span class="kw">private</span> <span class="cn">String</span> documento;
+
+    <span class="an">@NotBlank</span>(message = <span class="st">"El nombre es obligatorio"</span>)
+    <span class="an">@Size</span>(min = <span class="nm">2</span>, max = <span class="nm">100</span>, message = <span class="st">"El nombre debe tener entre 2 y 100 caracteres"</span>)
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, length = <span class="nm">100</span>)
+    <span class="kw">private</span> <span class="cn">String</span> nombre;
+
+    <span class="an">@NotBlank</span>(message = <span class="st">"El email es obligatorio"</span>)
+    <span class="an">@Email</span>(message = <span class="st">"El formato del email no es válido"</span>)
+    <span class="an">@Size</span>(max = <span class="nm">150</span>)
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, unique = <span class="kw">true</span>, length = <span class="nm">150</span>)
+    <span class="kw">private</span> <span class="cn">String</span> email;
+
+    <span class="an">@Size</span>(max = <span class="nm">20</span>, message = <span class="st">"El teléfono no puede superar 20 caracteres"</span>)
+    <span class="an">@Pattern</span>(regexp = <span class="st">"^[0-9\\-\\+\\s()]*$"</span>,
+             message = <span class="st">"El teléfono solo puede contener números y guiones"</span>)
+    <span class="an">@Column</span>(length = <span class="nm">20</span>)
+    <span class="kw">private</span> <span class="cn">String</span> telefono;    <span class="cm">// opcional, pero si se ingresa debe tener formato</span>
+}<span class="cl">Cliente.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Turno.java — Validaciones de fecha y relaciones</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span> <span class="an">@Table</span>(name = <span class="st">"turno"</span>)
+<span class="kw">public class</span> <span class="cn">Turno</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="cm">// @NotNull para tipos no-String (LocalDateTime no acepta @NotBlank)</span>
+    <span class="an">@NotNull</span>(message = <span class="st">"La fecha y hora del turno son obligatorias"</span>)
+    <span class="cm">// @Future valida automáticamente que la fecha sea futura</span>
+    <span class="cm">// Complemento: el Servicio también valida esto en código</span>
+    <span class="an">@Column</span>(name = <span class="st">"fecha_hora"</span>, nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> <span class="cn">LocalDateTime</span> fechaHora;
+
+    <span class="an">@Size</span>(max = <span class="nm">200</span>, message = <span class="st">"El motivo no puede superar 200 caracteres"</span>)
+    <span class="an">@Column</span>(length = <span class="nm">200</span>)
+    <span class="kw">private</span> <span class="cn">String</span> motivo;    <span class="cm">// opcional</span>
+
+    <span class="cm">// Para relaciones: optional=false actúa como @NotNull en JPA</span>
+    <span class="an">@ManyToOne</span>(fetch = FetchType.LAZY, optional = <span class="kw">false</span>)
+    <span class="an">@JoinColumn</span>(name = <span class="st">"mascota_id"</span>, nullable = <span class="kw">false</span>)
+    <span class="kw">private</span> <span class="cn">Mascota</span> mascota;    <span class="cm">// siempre debe tener mascota</span>
+}<span class="cl">Turno.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">💡</span>
+    <div><strong>Diferencia clave:</strong> Usar <code>@NotBlank</code> para campos <code>String</code> (nombre, email, documento) y <code>@NotNull</code> para objetos y tipos primitivos (LocalDateTime, Integer, relaciones JPA). <code>@NotBlank</code> es más estricto: también rechaza cadenas con solo espacios en blanco.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 5: SERVICIO -->
+<div class="sec" id="s5">
+  <div class="sec-hdr"><div class="sec-num">5</div><div class="sec-titulo">Nivel 3 — Servicio: reglas de negocio</div></div>
+
+  <div class="dn">DIAPOSITIVA 9 — ¿Qué valida el Servicio que no puede hacer Bean Validation?</div>
+  <div class="alerta a-viol">
+    <span class="a-ico">📌</span>
+    <div><strong>Bean Validation no puede consultar la base de datos.</strong> Las reglas que requieren comparar con datos existentes (unicidad, disponibilidad, consistencia entre tablas) siempre deben implementarse en la capa de Servicio.</div>
+  </div>
+  <table>
+    <thead><tr><th>Regla de negocio</th><th>¿Puede Bean Validation?</th><th>¿Dónde implementar?</th></tr></thead>
+    <tbody>
+      <tr><td>El email no puede estar duplicado</td><td><span class="badge b-rojo">No — requiere consulta a BD</span></td><td>Servicio: buscar por email antes de guardar</td></tr>
+      <tr><td>El documento debe ser único</td><td><span class="badge b-rojo">No — requiere consulta a BD</span></td><td>Servicio: buscar por documento antes de guardar</td></tr>
+      <tr><td>La fecha del turno debe ser futura</td><td><span class="badge b-naranja">@Future parcialmente</span></td><td>Servicio: comparar con <code>LocalDateTime.now()</code></td></tr>
+      <tr><td>La mascota debe estar activa</td><td><span class="badge b-rojo">No — requiere consulta a BD</span></td><td>Servicio: verificar <code>mascota.isActivo()</code></td></tr>
+      <tr><td>Un turno REALIZADO no puede cancelarse</td><td><span class="badge b-rojo">No — lógica de estados</span></td><td>Servicio: validar el estado actual antes de la transición</td></tr>
+      <tr><td>El precio no puede ser negativo</td><td><span class="badge b-verde">Sí — @DecimalMin("0.00")</span></td><td>Bean Validation en la entidad</td></tr>
+      <tr><td>El nombre no puede estar vacío</td><td><span class="badge b-verde">Sí — @NotBlank</span></td><td>Bean Validation en la entidad</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 10 — Patrón completo de validación en el Servicio</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 ClienteServicio.java — Validaciones de negocio</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteServicio</span> {
+
+    <span class="an">@Inject</span> <span class="kw">private</span> <span class="cn">ClienteDAO</span> clienteDAO;
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">guardar</span>(<span class="cn">Cliente</span> cliente) {
+
+        <span class="cm">// ── VALIDACIÓN 1: Documento único ───────────────────────</span>
+        clienteDAO.<span class="mt">buscarPorDocumento</span>(cliente.<span class="mt">getDocumento</span>())
+            .<span class="mt">ifPresent</span>(existente -> {
+                <span class="cm">// Es el mismo registro en edición → está OK</span>
+                <span class="kw">boolean</span> mismoRegistro = existente.<span class="mt">getId</span>() != <span class="kw">null</span>
+                    && existente.<span class="mt">getId</span>().<span class="mt">equals</span>(cliente.<span class="mt">getId</span>());
+                <span class="kw">if</span> (!mismoRegistro) {
+                    <span class="cm">// Documento duplicado → lanzar excepción</span>
+                    <span class="cm">// @Transactional hace ROLLBACK automáticamente</span>
+                    <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+                        <span class="st">"Ya existe un cliente con el documento: "</span>
+                        + cliente.<span class="mt">getDocumento</span>()
+                    );
+                }
+            });
+
+        <span class="cm">// ── VALIDACIÓN 2: Email único ───────────────────────────</span>
+        clienteDAO.<span class="mt">buscarPorEmail</span>(cliente.<span class="mt">getEmail</span>())
+            .<span class="mt">ifPresent</span>(existente -> {
+                <span class="kw">boolean</span> mismoRegistro = existente.<span class="mt">getId</span>() != <span class="kw">null</span>
+                    && existente.<span class="mt">getId</span>().<span class="mt">equals</span>(cliente.<span class="mt">getId</span>());
+                <span class="kw">if</span> (!mismoRegistro) {
+                    <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+                        <span class="st">"Ya existe un cliente con el email: "</span>
+                        + cliente.<span class="mt">getEmail</span>()
+                    );
+                }
+            });
+
+        <span class="cm">// ── Si pasan todas las validaciones → persistir ─────────</span>
+        <span class="kw">if</span> (cliente.<span class="mt">getId</span>() == <span class="kw">null</span>)
+            clienteDAO.<span class="mt">guardar</span>(cliente);    <span class="cm">// INSERT</span>
+        <span class="kw">else</span>
+            clienteDAO.<span class="mt">actualizar</span>(cliente); <span class="cm">// UPDATE</span>
+    }
+}<span class="cl">ClienteServicio.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 TurnoServicio.java — Validaciones de estados y fechas</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Transactional</span>
+<span class="kw">public void</span> <span class="mt">reservar</span>(<span class="cn">Turno</span> turno, <span class="cn">Long</span> mascotaId) {
+
+    <span class="cm">// ── VALIDACIÓN 1: Fecha debe ser futura ─────────────────</span>
+    <span class="kw">if</span> (turno.<span class="mt">getFechaHora</span>() == <span class="kw">null</span>)
+        <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+            <span class="st">"La fecha y hora son obligatorias."</span>);
+
+    <span class="kw">if</span> (turno.<span class="mt">getFechaHora</span>().<span class="mt">isBefore</span>(<span class="cn">LocalDateTime</span>.<span class="mt">now</span>()))
+        <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+            <span class="st">"No se puede reservar un turno en el pasado."</span>);
+
+    <span class="cm">// ── VALIDACIÓN 2: Mascota debe existir y estar activa ────</span>
+    <span class="cn">Mascota</span> mascota = mascotaDAO.<span class="mt">buscarPorId</span>(mascotaId);
+
+    <span class="kw">if</span> (mascota == <span class="kw">null</span>)
+        <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+            <span class="st">"La mascota seleccionada no existe."</span>);
+
+    <span class="kw">if</span> (!mascota.<span class="mt">isActivo</span>())
+        <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+            <span class="st">"La mascota seleccionada está inactiva. No puede reservar un turno."</span>);
+
+    <span class="cm">// ── Si todo está OK → guardar ────────────────────────────</span>
+    turno.<span class="mt">setMascota</span>(mascota);
+    turno.<span class="mt">setEstado</span>(<span class="cn">Turno</span>.PENDIENTE);
+    turnoDAO.<span class="mt">guardar</span>(turno);
+}
+
+<span class="an">@Transactional</span>
+<span class="kw">public void</span> <span class="mt">confirmar</span>(<span class="cn">Long</span> id) {
+    <span class="cn">Turno</span> turno = turnoDAO.<span class="mt">buscarPorId</span>(id);
+
+    <span class="cm">// ── VALIDACIÓN 3: Transición de estado válida ────────────</span>
+    <span class="kw">if</span> (!<span class="cn">Turno</span>.PENDIENTE.<span class="mt">equals</span>(turno.<span class="mt">getEstado</span>())) {
+        <span class="kw">throw new</span> <span class="cn">IllegalStateException</span>(
+            <span class="st">"Solo se puede confirmar un turno PENDIENTE. "</span>
+            + <span class="st">"Estado actual: "</span> + turno.<span class="mt">getEstado</span>()
+        );
+    }
+    turnoDAO.<span class="mt">cambiarEstado</span>(id, <span class="cn">Turno</span>.CONFIRMADO);
+}<span class="cl">TurnoServicio.java</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 6-7: JPA Y BD -->
+<div class="sec" id="s6">
+  <div class="sec-hdr"><div class="sec-num">6</div><div class="sec-titulo">Nivel 4 — JPA: restricciones de columna</div></div>
+
+  <div class="dn">DIAPOSITIVA 11 — @Column como validación</div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 Restricciones en @Column y @JoinColumn</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// nullable=false → genera NOT NULL en la BD</span>
+<span class="an">@Column</span>(nullable = <span class="kw">false</span>, length = <span class="nm">100</span>)
+<span class="kw">private</span> <span class="cn">String</span> nombre;
+
+<span class="cm">// unique=true → genera UNIQUE en la BD</span>
+<span class="an">@Column</span>(unique = <span class="kw">true</span>, nullable = <span class="kw">false</span>, length = <span class="nm">150</span>)
+<span class="kw">private</span> <span class="cn">String</span> email;
+
+<span class="cm">// length → VARCHAR(20) en la BD
+// Si se supera, MySQL trunca o lanza error</span>
+<span class="an">@Column</span>(length = <span class="nm">20</span>)
+<span class="kw">private</span> <span class="cn">String</span> telefono;
+
+<span class="cm">// precision y scale para decimales: DECIMAL(10,2)</span>
+<span class="an">@Column</span>(precision = <span class="nm">10</span>, scale = <span class="nm">2</span>, nullable = <span class="kw">false</span>)
+<span class="kw">private</span> <span class="cn">BigDecimal</span> precio;
+
+<span class="cm">// Restricción única por múltiples columnas</span>
+<span class="an">@Table</span>(name = <span class="st">"turno"</span>,
+  uniqueConstraints = <span class="an">@UniqueConstraint</span>(
+    columnNames = {<span class="st">"mascota_id"</span>, <span class="st">"fecha_hora"</span>}
+  )
+)</code></pre>
+      </div>
+    </div>
+    <div class="card c-azul">
+      <div class="card-hdr">📋 Relación entre @Column y Bean Validation</div>
+      <div class="card-body" style="font-size:.87rem">
+        <table style="margin:0;font-size:.83rem">
+          <thead><tr><th>@Column</th><th>Bean Validation equivalente</th></tr></thead>
+          <tbody>
+            <tr><td><code>nullable=false</code></td><td><code>@NotNull / @NotBlank</code></td></tr>
+            <tr><td><code>length=100</code></td><td><code>@Size(max=100)</code></td></tr>
+            <tr><td><code>unique=true</code></td><td>⚠️ No tiene equivalente directo</td></tr>
+            <tr><td><code>precision=10,scale=2</code></td><td><code>@Digits(integer=8, fraction=2)</code></td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:12px;font-size:.83rem;color:var(--gris4)">Usar <strong>ambas</strong> en paralelo: Bean Validation actúa antes de ir a la BD (más rápido), y @Column define el esquema real de la base de datos (última barrera).</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<div class="sec" id="s7">
+  <div class="sec-hdr"><div class="sec-num">7</div><div class="sec-titulo">Nivel 5 — MySQL: restricciones en la BD</div></div>
+
+  <div class="dn">DIAPOSITIVA 12 — El script SQL como validación definitiva</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 veterinariadb.sql — Restricciones MySQL</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">CREATE TABLE</span> cliente (
+    id         <span class="cn">BIGINT</span>        <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+
+    <span class="cm">-- NOT NULL: protege contra valores nulos directos</span>
+    documento  <span class="cn">VARCHAR</span>(<span class="nm">20</span>)  <span class="kw">NOT NULL</span>,
+    nombre     <span class="cn">VARCHAR</span>(<span class="nm">100</span>) <span class="kw">NOT NULL</span>,
+    email      <span class="cn">VARCHAR</span>(<span class="nm">150</span>) <span class="kw">NOT NULL</span>,
+
+    activo     <span class="cn">TINYINT</span>(<span class="nm">1</span>)   <span class="kw">NOT NULL DEFAULT</span> <span class="nm">1</span>,
+
+    <span class="cm">-- PRIMARY KEY: unicidad e índice del ID</span>
+    <span class="kw">CONSTRAINT</span> pk_cliente      <span class="kw">PRIMARY KEY</span> (id),
+
+    <span class="cm">-- UNIQUE: protege la unicidad de documento y email</span>
+    <span class="kw">CONSTRAINT</span> uq_cli_doc      <span class="kw">UNIQUE</span> (documento),
+    <span class="kw">CONSTRAINT</span> uq_cli_email    <span class="kw">UNIQUE</span> (email)
+);
+
+<span class="kw">CREATE TABLE</span> mascota (
+    id         <span class="cn">BIGINT</span>       <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+    nombre     <span class="cn">VARCHAR</span>(<span class="nm">80</span>)  <span class="kw">NOT NULL</span>,
+    especie    <span class="cn">VARCHAR</span>(<span class="nm">50</span>)  <span class="kw">NOT NULL</span>,
+    cliente_id <span class="cn">BIGINT</span>       <span class="kw">NOT NULL</span>,
+
+    <span class="kw">CONSTRAINT</span> pk_mascota      <span class="kw">PRIMARY KEY</span> (id),
+
+    <span class="cm">-- FOREIGN KEY: integridad referencial</span>
+    <span class="cm">-- ON DELETE RESTRICT: impide eliminar un cliente que tiene mascotas</span>
+    <span class="kw">CONSTRAINT</span> fk_masc_cliente <span class="kw">FOREIGN KEY</span> (cliente_id)
+        <span class="kw">REFERENCES</span> cliente(id)
+        <span class="kw">ON DELETE RESTRICT</span>
+        <span class="kw">ON UPDATE CASCADE</span>
+);</code></pre>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-top:12px">
+    <div class="c-verde card">
+      <div class="card-hdr">✅ ON DELETE RESTRICT (recomendado)</div>
+      <div class="card-body" style="font-size:.87rem">
+        <p>MySQL <strong>impide eliminar</strong> un cliente que tiene mascotas. Protege la integridad.</p>
+        <pre style="margin-top:8px;font-size:12px"><code>ON DELETE RESTRICT
+<span class="cm">-- Intentar borrar cliente con mascotas
+-- → ConstraintViolationException
+-- → La app muestra: "Use Desactivar"</span></code></pre>
+      </div>
+    </div>
+    <div class="c-rojo card">
+      <div class="card-hdr">⚠️ ON DELETE CASCADE (peligroso)</div>
+      <div class="card-body" style="font-size:.87rem">
+        <p>MySQL <strong>elimina automáticamente</strong> todas las mascotas al borrar el cliente.</p>
+        <pre style="margin-top:8px;font-size:12px"><code>ON DELETE CASCADE
+<span class="cm">-- Borrar cliente → borra mascotas
+-- Borrar mascota → borra turnos
+-- Sin confirmación, sin recuperación
+-- ❌ No usar en sistemas reales sin respaldo</span></code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 8: MENSAJES EN JSF -->
+<div class="sec" id="s8">
+  <div class="sec-hdr"><div class="sec-num">8</div><div class="sec-titulo">Mensajes de error al usuario con FacesMessage</div></div>
+
+  <div class="dn">DIAPOSITIVA 13 — Los 3 niveles de severidad</div>
+  <div class="g3">
+    <div class="c-azul card">
+      <div class="card-hdr">ℹ️ SEVERITY_INFO</div>
+      <div class="card-body" style="font-size:.87rem">
+        <p><strong>Cuándo usar:</strong> Operación exitosa. Alta, modificación, baja realizadas correctamente.</p>
+        <pre style="margin-top:8px;font-size:12px"><code>addMsg(SEVERITY_INFO,
+  <span class="st">"Éxito"</span>,
+  <span class="st">"Cliente guardado."</span>);</code></pre>
+        <p style="margin-top:8px;color:var(--azul4)">Texto en azul o verde en la interfaz.</p>
+      </div>
+    </div>
+    <div class="c-naranja card">
+      <div class="card-hdr">⚠️ SEVERITY_WARN</div>
+      <div class="card-body" style="font-size:.87rem">
+        <p><strong>Cuándo usar:</strong> El usuario ingresó datos que violan una regla de negocio. Ej: email duplicado, fecha en pasado.</p>
+        <pre style="margin-top:8px;font-size:12px"><code>addMsg(SEVERITY_WARN,
+  <span class="st">"Atención"</span>,
+  e.getMessage());</code></pre>
+        <p style="margin-top:8px;color:var(--naranja4,#78350f)">Texto en amarillo/naranja.</p>
+      </div>
+    </div>
+    <div class="c-rojo card">
+      <div class="card-hdr">❌ SEVERITY_ERROR</div>
+      <div class="card-body" style="font-size:.87rem">
+        <p><strong>Cuándo usar:</strong> Error técnico inesperado. Fallo de BD, error de red, NPE.</p>
+        <pre style="margin-top:8px;font-size:12px"><code>addMsg(SEVERITY_ERROR,
+  <span class="st">"Error"</span>,
+  <span class="st">"No se pudo guardar."</span>);</code></pre>
+        <p style="margin-top:8px;color:var(--rojo)">Texto en rojo. Nunca mostrar el stack trace.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 14 — Patrón try-catch en el Bean</div>
+  <div class="cmp">
+    <div class="cmp-col">
+      <div class="cmp-hdr cmp-hdr-bad">❌ Sin manejo de errores</div>
+<pre><code><span class="kw">public void</span> <span class="mt">guardar</span>() {
+  <span class="cm">// Sin try-catch:
+  // Si ocurre error → pantalla de error 500
+  // El usuario no sabe qué pasó
+  // La aplicación queda en estado inconsistente</span>
+  clienteServicio.<span class="mt">guardar</span>(clienteSeleccionado);
+}</code></pre>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-hdr cmp-hdr-ok">✅ Con manejo de errores correcto</div>
+<pre><code><span class="kw">public void</span> <span class="mt">guardar</span>() {
+  <span class="kw">try</span> {
+    clienteServicio.<span class="mt">guardar</span>(clienteSeleccionado);
+    <span class="mt">cargarClientes</span>();
+    clienteSeleccionado = <span class="kw">new</span> <span class="cn">Cliente</span>();
+    <span class="mt">addMsg</span>(SEVERITY_INFO, <span class="st">"Éxito"</span>,
+           <span class="st">"Cliente guardado."</span>);
+
+  } <span class="kw">catch</span> (<span class="cn">IllegalArgumentException</span> e) {
+    <span class="cm">// Error de negocio: mensaje del Servicio</span>
+    <span class="mt">addMsg</span>(SEVERITY_WARN, <span class="st">"Atención"</span>,
+           e.<span class="mt">getMessage</span>());
+
+  } <span class="kw">catch</span> (<span class="cn">Exception</span> e) {
+    <span class="cm">// Error técnico: mensaje genérico</span>
+    <span class="mt">addMsg</span>(SEVERITY_ERROR, <span class="st">"Error"</span>,
+           <span class="st">"No se pudo guardar. Intente nuevamente."</span>);
+  }
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 15 — Mostrar mensajes en la vista</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 abm.xhtml — Mensajes globales y por campo</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- Mensajes globales: para addMessage(null, ...) --&gt;</span>
+<span class="cm">&lt;!-- Se muestran fuera del formulario, arriba de la página --&gt;</span>
+&lt;<span class="kw">h:messages</span>
+    globalOnly=<span class="st">"true"</span>
+    showDetail=<span class="st">"true"</span>
+    infoClass=<span class="st">"msg msg-info"</span>
+    warnClass=<span class="st">"msg msg-warn"</span>
+    errorClass=<span class="st">"msg msg-error"</span>
+    layout=<span class="st">"table"</span>/&gt;
+
+<span class="cm">&lt;!-- Mensaje por campo: para errores de validación JSF --&gt;</span>
+<span class="cm">&lt;!-- Se muestra debajo del campo específico --&gt;</span>
+&lt;<span class="kw">h:inputText</span> id=<span class="st">"email"</span> value=<span class="st">"..."</span>
+             required=<span class="st">"true"</span>
+             requiredMessage=<span class="st">"El email es obligatorio"</span>
+             validatorMessage=<span class="st">"Formato de email inválido"</span>&gt;
+    &lt;<span class="kw">f:validateRegex</span> pattern=<span class="st">"^[^@]+@[^@]+\.[^@]+$"</span>/&gt;
+&lt;/<span class="kw">h:inputText</span>&gt;
+
+<span class="cm">&lt;!-- h:message: muestra el error solo de ese campo --&gt;</span>
+&lt;<span class="kw">h:message</span> for=<span class="st">"email"</span> styleClass=<span class="st">"form-error"</span>/&gt;<span class="cl">abm.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card c-azul" style="margin-top:12px">
+    <div class="card-hdr">📋 h:messages vs h:message — ¿Cuándo usar cada uno?</div>
+    <div class="card-body">
+      <table style="margin:0;font-size:.87rem">
+        <thead><tr><th>Etiqueta</th><th>Muestra</th><th>Dónde ponerlo</th><th>Uso típico</th></tr></thead>
+        <tbody>
+          <tr><td><code>&lt;h:messages globalOnly="true"&gt;</code></td><td>Solo mensajes sin campo asociado (addMessage(null,...))</td><td>Fuera del formulario, arriba</td><td>Resultados de operaciones CRUD</td></tr>
+          <tr><td><code>&lt;h:messages globalOnly="false"&gt;</code></td><td>Todos los mensajes: globales + por campo</td><td>Fuera del formulario</td><td>Resumen de todos los errores</td></tr>
+          <tr><td><code>&lt;h:message for="campo"&gt;</code></td><td>Solo el mensaje del campo específico</td><td>Debajo del input</td><td>Error inline del campo</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 9: VALIDACIONES POR TIPO -->
+<div class="sec" id="s9">
+  <div class="sec-hdr"><div class="sec-num">9</div><div class="sec-titulo">Validaciones más importantes por tipo de dato</div></div>
+
+  <div class="dn">DIAPOSITIVA 16 — Referencia completa por tipo de campo</div>
+  <table>
+    <thead><tr><th>Tipo de campo</th><th>Validaciones obligatorias</th><th>Regex útil</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Nombre / Apellido</strong></td>
+        <td><code>@NotBlank</code>, <code>@Size(min=2, max=100)</code></td>
+        <td><code>^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$</code></td>
+      </tr>
+      <tr>
+        <td><strong>Email</strong></td>
+        <td><code>@NotBlank</code>, <code>@Email</code>, <code>@Size(max=150)</code></td>
+        <td><code>^[^@]+@[^@]+\.[^@]+$</code></td>
+      </tr>
+      <tr>
+        <td><strong>DNI/Documento</strong></td>
+        <td><code>@NotBlank</code>, <code>@Size(max=20)</code></td>
+        <td><code>^[0-9]{6,8}$</code> (solo números)</td>
+      </tr>
+      <tr>
+        <td><strong>Teléfono</strong></td>
+        <td><code>@Size(max=20)</code> (opcional)</td>
+        <td><code>^[0-9\-\+\s()]+$</code></td>
+      </tr>
+      <tr>
+        <td><strong>Fecha</strong></td>
+        <td><code>@NotNull</code></td>
+        <td><code>f:convertDateTime pattern="dd/MM/yyyy"</code></td>
+      </tr>
+      <tr>
+        <td><strong>Fecha y Hora</strong></td>
+        <td><code>@NotNull</code> + validar futura en Servicio</td>
+        <td><code>f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"</code></td>
+      </tr>
+      <tr>
+        <td><strong>Número entero</strong></td>
+        <td><code>@NotNull</code>, <code>@Min</code>, <code>@Max</code></td>
+        <td><code>f:validateLongRange minimum="1" maximum="480"</code></td>
+      </tr>
+      <tr>
+        <td><strong>Precio / Monto</strong></td>
+        <td><code>@NotNull</code>, <code>@DecimalMin("0.00")</code></td>
+        <td><code>f:convertNumber minFractionDigits="2"</code></td>
+      </tr>
+      <tr>
+        <td><strong>Selector (selectOneMenu)</strong></td>
+        <td><code>required="true"</code> + <code>noSelectionOption="true"</code> en la opción vacía</td>
+        <td><code>f:converter converterId="jakarta.faces.Long"</code></td>
+      </tr>
+      <tr>
+        <td><strong>Contraseña</strong></td>
+        <td><code>@NotBlank</code>, <code>@Size(min=8)</code></td>
+        <td><code>^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$</code></td>
+      </tr>
+      <tr>
+        <td><strong>URL</strong></td>
+        <td><code>@Size(max=255)</code></td>
+        <td><code>^https?://.*$</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 17 — Validador personalizado en JSF</div>
+  <div class="alerta a-viol">
+    <span class="a-ico">💡</span>
+    <div>Cuando los validadores estándar no alcanzan, se puede crear un <strong>validador personalizado</strong> implementando la interfaz <code>jakarta.faces.validator.Validator</code>. Se registra con <code>@FacesValidator</code> y se usa como cualquier otro validador.</div>
+  </div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">📄 ValidadorDocumento.java — Validador personalizado</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">import</span> jakarta.faces.validator.FacesValidator;
+<span class="kw">import</span> jakarta.faces.validator.Validator;
+<span class="kw">import</span> jakarta.faces.validator.ValidatorException;
+
+<span class="cm">// Registrar con un nombre que se usa en la vista</span>
+<span class="an">@FacesValidator</span>(<span class="st">"validadorDocumento"</span>)
+<span class="kw">public class</span> <span class="cn">ValidadorDocumento</span> <span class="kw">implements</span> <span class="cn">Validator</span>&lt;<span class="cn">String</span>&gt; {
+
+    <span class="an">@Override</span>
+    <span class="kw">public void</span> <span class="mt">validate</span>(<span class="cn">FacesContext</span> ctx,
+                         <span class="cn">UIComponent</span> comp,
+                         <span class="cn">String</span> valor)
+                         <span class="kw">throws</span> <span class="cn">ValidatorException</span> {
+
+        <span class="kw">if</span> (valor == <span class="kw">null</span> || valor.<span class="mt">isBlank</span>()) <span class="kw">return</span>;
+
+        <span class="cm">// Solo dígitos, entre 6 y 9 caracteres</span>
+        <span class="kw">if</span> (!valor.<span class="mt">matches</span>(<span class="st">"^[0-9]{6,9}$"</span>)) {
+            <span class="cn">FacesMessage</span> msg = <span class="kw">new</span> <span class="cn">FacesMessage</span>(
+                <span class="cn">FacesMessage</span>.SEVERITY_ERROR,
+                <span class="st">"Documento inválido"</span>,
+                <span class="st">"Solo se permiten entre 6 y 9 dígitos numéricos"</span>
+            );
+            <span class="kw">throw new</span> <span class="cn">ValidatorException</span>(msg);
+        }
+    }
+}
+
+<span class="cm">&lt;!-- Uso en la vista --&gt;</span>
+&lt;<span class="kw">h:inputText</span> id=<span class="st">"documento"</span> value=<span class="st">"..."</span>&gt;
+    &lt;<span class="kw">f:validator</span> validatorId=<span class="st">"validadorDocumento"</span>/&gt;
+&lt;/<span class="kw">h:inputText</span>&gt;<span class="cl">ValidadorDocumento.java</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCIÓN 10: ERRORES FRECUENTES -->
+<div class="sec" id="s10">
+  <div class="sec-hdr"><div class="sec-num">10</div><div class="sec-titulo">Errores frecuentes con validaciones</div></div>
+
+  <div class="dn">DIAPOSITIVA 18 — Los 8 errores más comunes</div>
+  <table>
+    <thead><tr><th>Error</th><th>Causa</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>placeholder</code> da error en xhtml</td>
+        <td><code>placeholder</code> no es atributo nativo de <code>h:inputText</code></td>
+        <td>Usar <code>pt:placeholder</code> con namespace <code>jakarta.faces.passthrough</code></td>
+      </tr>
+      <tr>
+        <td><code>message</code> da error en <code>f:validateRegex</code></td>
+        <td>El atributo <code>message</code> no existe en <code>f:validateRegex</code> (JSF 4)</td>
+        <td>Usar <code>validatorMessage</code> en el <code>h:inputText</code> padre</td>
+      </tr>
+      <tr>
+        <td><code>ConverterException</code> en selectOneMenu</td>
+        <td>El selector devuelve String, el Bean espera Long</td>
+        <td>Agregar <code>&lt;f:converter converterId="jakarta.faces.Long"/&gt;</code></td>
+      </tr>
+      <tr>
+        <td>El formulario se envía con campos inválidos</td>
+        <td>Falta <code>required="true"</code> o la validación no cubre todos los casos</td>
+        <td>Revisar cada campo obligatorio y agregar validadores JSF + Bean Validation</td>
+      </tr>
+      <tr>
+        <td><code>emptyDataMessage</code> da error en <code>h:dataTable</code></td>
+        <td>El atributo no existe en JSF estándar (solo en PrimeFaces)</td>
+        <td>Usar <code>h:panelGroup rendered="#{empty bean.lista}"</code> con mensaje manual</td>
+      </tr>
+      <tr>
+        <td>Los mensajes no se ven en pantalla</td>
+        <td>Falta <code>&lt;h:messages&gt;</code> o está en el formulario equivocado</td>
+        <td>Poner <code>&lt;h:messages globalOnly="true"&gt;</code> fuera del <code>&lt;h:form&gt;</code> principal</td>
+      </tr>
+      <tr>
+        <td>Validación de unicidad no funciona al editar</td>
+        <td>Compara el email con todos los registros, incluyendo el mismo que se edita</td>
+        <td>Verificar <code>!existente.getId().equals(cliente.getId())</code> para excluir el propio registro</td>
+      </tr>
+      <tr>
+        <td><code>@NotBlank</code> no detiene el guardado</td>
+        <td>Bean Validation integrado con JPA pero no con el Servicio</td>
+        <td>Asegurarse que JPA ejecuta validación: añadir <code>validation-mode=AUTO</code> en persistence.xml, o llamar manualmente al validador</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="sep"></div>
+
+<!-- RESUMEN FINAL -->
+<div class="sec" id="res">
+  <div class="sec-hdr"><div class="sec-num">✅</div><div class="sec-titulo">Resumen de la clase y actividad práctica</div></div>
+
+  <div class="dn">DIAPOSITIVA 19 — Cuadro resumen: los 5 niveles</div>
+  <div class="g2">
+    <div class="nivel nivel-n1">
+      <div class="nivel-hdr">🌐 Nivel 1 — Vista JSF</div>
+      <div class="nivel-body" style="font-size:.87rem">
+        <strong>Herramientas:</strong> <code>required</code>, <code>f:validateRegex</code>, <code>f:validateLength</code>, <code>f:convertDateTime</code>, <code>f:converter</code><br/><br/>
+        <strong>Cuándo actúa:</strong> Fase 3 del ciclo JSF (antes de llamar al Bean)<br/><br/>
+        <strong>Ventaja:</strong> Respuesta inmediata, no va al servidor<br/>
+        <strong>Limitación:</strong> Se puede saltar con Postman o curl
+      </div>
+    </div>
+    <div class="nivel nivel-n2">
+      <div class="nivel-hdr">✅ Nivel 2 — Bean Validation</div>
+      <div class="nivel-body" style="font-size:.87rem">
+        <strong>Herramientas:</strong> <code>@NotBlank</code>, <code>@Email</code>, <code>@Size</code>, <code>@Min</code>, <code>@Max</code>, <code>@Pattern</code>, <code>@NotNull</code><br/><br/>
+        <strong>Cuándo actúa:</strong> Al persistir con JPA y en Fase 3 JSF<br/><br/>
+        <strong>Ventaja:</strong> Anotaciones simples en la entidad, reutilizables<br/>
+        <strong>Limitación:</strong> No puede consultar la BD
+      </div>
+    </div>
+    <div class="nivel nivel-n3">
+      <div class="nivel-hdr">⚙️ Nivel 3 — Servicio</div>
+      <div class="nivel-body" style="font-size:.87rem">
+        <strong>Herramientas:</strong> Código Java puro + consultas DAO<br/><br/>
+        <strong>Cuándo actúa:</strong> Al llamar el método de negocio<br/><br/>
+        <strong>Ventaja:</strong> Puede validar contra la BD (unicidad, existencia, estado)<br/>
+        <strong>Limitación:</strong> Más código a escribir
+      </div>
+    </div>
+    <div class="nivel nivel-n4">
+      <div class="nivel-hdr">🔌 Nivel 4 — JPA</div>
+      <div class="nivel-body" style="font-size:.87rem">
+        <strong>Herramientas:</strong> <code>nullable=false</code>, <code>unique=true</code>, <code>length</code>, <code>precision</code>, <code>optional=false</code><br/><br/>
+        <strong>Cuándo actúa:</strong> Al hacer persist/merge<br/><br/>
+        <strong>Ventaja:</strong> Define el esquema de BD y actúa antes del SQL<br/>
+        <strong>Limitación:</strong> Menos descriptivo que Bean Validation
+      </div>
+    </div>
+    <div class="nivel nivel-n5" style="grid-column:1/-1">
+      <div class="nivel-hdr">🗄️ Nivel 5 — MySQL (última barrera)</div>
+      <div class="nivel-body" style="font-size:.87rem">
+        <strong>Herramientas:</strong> <code>NOT NULL</code>, <code>UNIQUE</code>, <code>FOREIGN KEY</code>, <code>CHECK</code>, tipos de dato, restricciones de FK<br/><br/>
+        <strong>Cuándo actúa:</strong> Al ejecutar INSERT/UPDATE en la base de datos<br/><br/>
+        <strong>Ventaja:</strong> Protege la BD incluso si alguien inserta datos directamente por SQL. <strong>No se puede evadir.</strong><br/>
+        <strong>Limitación:</strong> El mensaje de error no es amigable para el usuario
+      </div>
+    </div>
+  </div>
+
+  <div class="dn" style="margin-top:24px">DIAPOSITIVA 20 — Actividad práctica</div>
+  <div class="c-verde card">
+    <div class="card-hdr">💻 Actividad: auditoría de validaciones en VeterinariaApp</div>
+    <div class="card-body">
+      <div class="paso"><div class="paso-n">1</div><div class="paso-body">
+        <h4>Auditar el formulario de Clientes</h4>
+        <p>Abrir <code>clientes/abm.xhtml</code>. Verificar que cada campo obligatorio tiene <code>required="true"</code> con un <code>requiredMessage</code> claro. Verificar que el campo email tiene <code>f:validateRegex</code> y <code>validatorMessage</code>.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">2</div><div class="paso-body">
+        <h4>Auditar Bean Validation en las entidades</h4>
+        <p>Revisar <code>Cliente.java</code>, <code>Mascota.java</code> y <code>Turno.java</code>. Verificar que todos los campos tienen las anotaciones correspondientes. Agregar <code>@Pattern</code> al campo teléfono de Cliente.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">3</div><div class="paso-body">
+        <h4>Probar la validación de unicidad</h4>
+        <p>Dar de alta dos clientes con el mismo email. Verificar que el segundo muestra el mensaje de error correcto. Luego editar el primer cliente sin cambiar el email → debe guardarse sin error.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">4</div><div class="paso-body">
+        <h4>Probar la validación de fecha futura en Turnos</h4>
+        <p>Ingresar una fecha de turno del año pasado. Verificar que el Servicio lanza el error "No se puede reservar un turno en el pasado" y que aparece en pantalla como mensaje de advertencia.</p>
+      </div></div>
+      <div class="paso"><div class="paso-n">5</div><div class="paso-body">
+        <h4>Verificar en MySQL las restricciones</h4>
+        <p>Intentar insertar directamente en MySQL un cliente sin email: <code>INSERT INTO cliente (documento, nombre, apellido) VALUES ('1', 'Test', 'Test')</code>. Verificar que MySQL rechaza con error <code>NOT NULL</code>.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="alerta a-ok" style="margin-top:20px">
+    <span class="a-ico">🎓</span>
+    <div><strong>Conclusión:</strong> Una aplicación web segura y confiable implementa <strong>validaciones en los 5 niveles</strong>. La vista da feedback inmediato al usuario. Bean Validation protege la entidad. El Servicio implementa las reglas de negocio que requieren consultar la BD. JPA y MySQL son las barreras finales que garantizan la integridad de los datos en cualquier escenario.</div>
+  </div>
+</div>
+
+<footer>
+  <p><strong>Programación Web Avanzada — Backend</strong> &nbsp;|&nbsp; Clase 08: Validaciones en una Aplicación Web</p>
+  <p style="margin-top:6px;font-size:.75rem">Jakarta EE 10 · Bean Validation 3.0 · Jakarta Faces 4.0 · JPA 3.1 · MySQL 8 · CDI 4.0 · JDK 21</p>
+</footer>
+</body>
+</html>
