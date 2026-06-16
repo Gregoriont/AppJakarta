@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/plantilla.xhtml">
+
+    <ui:define name="titulo">Mascotas — VetSystem</ui:define>
+
+    <ui:define name="contenido">
+
+        <div class="page-header">
+            <h2 class="page-titulo">&#x1F436; Administración de Mascotas</h2>
+            <p class="page-subtitulo">Alta, baja y modificación de mascotas registradas.</p>
+        </div>
+
+        <!-- Mensajes de operación -->
+        <h:messages globalOnly="true" showDetail="true"
+                    infoClass="msg msg-info"
+                    warnClass="msg msg-warn"
+                    errorClass="msg msg-error"
+                    layout="table"/>
+
+        <!-- ═══════════════════════════════════════════════════
+             FORMULARIO ALTA / EDICIÓN
+        ══════════════════════════════════════════════════════ -->
+        <h:form id="frmMascota">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-titulo">
+                        #{mascotaBean.modoEdicion ? '&#x270F;&#xFE0F; Modificar Mascota' : '&#x2795; Nueva Mascota'}
+                    </h3>
+                </div>
+                <div class="card-body">
+
+                    <div class="form-grid">
+
+                        <!-- Dueño (Cliente) -->
+                        <div class="form-grupo form-grupo-ancho">
+                            <h:outputLabel for="cliente"
+                                           value="Dueño (Cliente) *"
+                                           styleClass="form-label"/>
+                            <h:selectOneMenu id="cliente"
+                                             value="#{mascotaBean.clienteIdSeleccionado}"
+                                             required="true"
+                                             requiredMessage="Debe seleccionar el dueño"
+                                             styleClass="form-control form-select">
+                                <f:selectItem itemValue=""
+                                              itemLabel="— Seleccione un cliente —"
+                                              noSelectionOption="true"/>
+                                <f:selectItems value="#{mascotaBean.clientes}"
+                                               var="cli"
+                                               itemValue="#{cli.id}"
+                                               itemLabel="#{cli.apellido}, #{cli.nombre}  [Doc: #{cli.documento}]"/>
+                                <f:converter converterId="jakarta.faces.Long"/>
+                            </h:selectOneMenu>
+                            <h:message for="cliente" styleClass="form-error"/>
+                        </div>
+
+                        <!-- Nombre de la mascota -->
+                        <div class="form-grupo">
+                            <h:outputLabel for="nombre"
+                                           value="Nombre *"
+                                           styleClass="form-label"/>
+                            <h:inputText id="nombre"
+                                         value="#{mascotaBean.mascotaSeleccionada.nombre}"
+                                         required="true"
+                                         requiredMessage="El nombre es obligatorio"
+                                         maxlength="80"
+                                         styleClass="form-control"
+                                         placeholder="Nombre de la mascota"/>
+                            <h:message for="nombre" styleClass="form-error"/>
+                        </div>
+
+                        <!-- Especie -->
+                        <div class="form-grupo">
+                            <h:outputLabel for="especie"
+                                           value="Especie *"
+                                           styleClass="form-label"/>
+                            <h:selectOneMenu id="especie"
+                                             value="#{mascotaBean.mascotaSeleccionada.especie}"
+                                             required="true"
+                                             requiredMessage="Debe seleccionar la especie"
+                                             styleClass="form-control form-select">
+                                <f:selectItem itemValue=""
+                                              itemLabel="— Seleccione especie —"
+                                              noSelectionOption="true"/>
+                                <f:selectItems value="#{mascotaBean.especies}"
+                                               var="esp"
+                                               itemValue="#{esp}"
+                                               itemLabel="#{esp}"/>
+                            </h:selectOneMenu>
+                            <h:message for="especie" styleClass="form-error"/>
+                        </div>
+
+                        <!-- Raza -->
+                        <div class="form-grupo">
+                            <h:outputLabel for="raza"
+                                           value="Raza"
+                                           styleClass="form-label"/>
+                            <h:inputText id="raza"
+                                         value="#{mascotaBean.mascotaSeleccionada.raza}"
+                                         maxlength="100"
+                                         styleClass="form-control"
+                                         placeholder="Raza (opcional)"/>
+                            <h:message for="raza" styleClass="form-error"/>
+                        </div>
+
+                        <!-- Sexo -->
+                        <div class="form-grupo">
+                            <h:outputLabel for="sexo"
+                                           value="Sexo"
+                                           styleClass="form-label"/>
+                            <h:selectOneMenu id="sexo"
+                                             value="#{mascotaBean.mascotaSeleccionada.sexo}"
+                                             styleClass="form-control form-select">
+                                <f:selectItem itemValue=""  itemLabel="— No especificado —"/>
+                                <f:selectItem itemValue="M" itemLabel="Macho"/>
+                                <f:selectItem itemValue="H" itemLabel="Hembra"/>
+                            </h:selectOneMenu>
+                            <h:message for="sexo" styleClass="form-error"/>
+                        </div>
+
+                        <!-- Fecha de nacimiento -->
+                        <div class="form-grupo">
+                            <h:outputLabel for="fechaNac"
+                                           value="Fecha de Nacimiento"
+                                           styleClass="form-label"/>
+                            <h:inputText id="fechaNac"
+                                         value="#{mascotaBean.mascotaSeleccionada.fechaNac}"
+                                         placeholder="dd/MM/yyyy"
+                                         styleClass="form-control">
+                                <f:convertDateTime pattern="dd/MM/yyyy" type="localDate"/>
+                            </h:inputText>
+                            <h:message for="fechaNac" styleClass="form-error"/>
+                        </div>
+
+                    </div><!-- /.form-grid -->
+
+                    <div class="form-botones">
+                        <h:commandButton
+                            id="btnGuardar"
+                            value="#{mascotaBean.modoEdicion ? 'Actualizar' : 'Guardar'}"
+                            action="#{mascotaBean.guardar}"
+                            styleClass="btn btn-primario"/>
+                        <h:commandButton
+                            id="btnCancelar"
+                            value="Cancelar"
+                            action="#{mascotaBean.cancelar}"
+                            immediate="true"
+                            styleClass="btn btn-secundario"/>
+                    </div>
+
+                </div><!-- /.card-body -->
+            </div><!-- /.card -->
+        </h:form>
+
+        <!-- ═══════════════════════════════════════════════════
+             BARRA DE BÚSQUEDA
+        ══════════════════════════════════════════════════════ -->
+        <h:form id="frmBusqueda">
+            <div class="barra-busqueda">
+                <h:inputText id="buscar"
+                             value="#{mascotaBean.textoBusqueda}"
+                             placeholder="Buscar por nombre de mascota..."
+                             styleClass="form-control busqueda-input"/>
+                <h:commandButton value="&#x1F50D; Buscar"
+                                 action="#{mascotaBean.buscar}"
+                                 styleClass="btn btn-buscar"/>
+                <h:commandButton value="&#x21BA; Ver todas"
+                                 action="#{mascotaBean.cancelar}"
+                                 immediate="true"
+                                 styleClass="btn btn-secundario"/>
+            </div>
+        </h:form>
+
+        <!-- ═══════════════════════════════════════════════════
+             TABLA LISTADO
+        ══════════════════════════════════════════════════════ -->
+        <h:form id="frmListado">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-titulo">&#x1F4CB; Listado de Mascotas</h3>
+                </div>
+                <div class="tabla-wrapper">
+                    <h:dataTable id="tablaMascotas"
+                                 value="#{mascotaBean.mascotas}"
+                                 var="m"
+                                 styleClass="tabla"
+                                 headerClass="tabla-header"
+                                 rowClasses="fila-par,fila-impar"
+                                 emptyDataMessage="No hay mascotas registradas.">
+
+                        <h:column>
+                            <f:facet name="header">ID</f:facet>
+                            <span class="text-muted">#{m.id}</span>
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Nombre</f:facet>
+                            <strong>#{m.nombre}</strong>
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Especie</f:facet>
+                            #{m.especie}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Raza</f:facet>
+                            #{empty m.raza ? '—' : m.raza}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Sexo</f:facet>
+                            #{m.sexoDescripcion}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Fecha Nac.</f:facet>
+                            <h:outputText value="#{m.fechaNac}"
+                                          rendered="#{m.fechaNac != null}">
+                                <f:convertDateTime pattern="dd/MM/yyyy" type="localDate"/>
+                            </h:outputText>
+                            <h:outputText value="—" rendered="#{m.fechaNac == null}"/>
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Dueño</f:facet>
+                            #{m.cliente.apellido}, #{m.cliente.nombre}
+                            <br/>
+                            <span class="text-muted text-sm">Doc: #{m.cliente.documento}</span>
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <span class="#{m.activo ? 'badge badge-activo' : 'badge badge-inactivo'}">
+                                #{m.activo ? 'Activa' : 'Inactiva'}
+                            </span>
+                        </h:column>
+
+                        <h:column styleClass="col-acciones">
+                            <f:facet name="header">Acciones</f:facet>
+
+                            <h:commandButton value="&#x270F;"
+                                             title="Modificar mascota"
+                                             action="#{mascotaBean.prepararEdicion(m)}"
+                                             styleClass="btn btn-sm btn-editar"/>
+
+                            <h:commandButton value="&#x1F6AB;"
+                                             title="Desactivar"
+                                             action="#{mascotaBean.desactivar(m)}"
+                                             rendered="#{m.activo}"
+                                             styleClass="btn btn-sm btn-warn"
+                                             onclick="return confirm('¿Desactivar a #{m.nombre}?')"/>
+
+                            <h:commandButton value="&#x2705;"
+                                             title="Activar"
+                                             action="#{mascotaBean.activar(m)}"
+                                             rendered="#{!m.activo}"
+                                             styleClass="btn btn-sm btn-ok"/>
+
+                            <h:commandButton value="&#x1F5D1;"
+                                             title="Eliminar definitivamente"
+                                             action="#{mascotaBean.eliminar(m)}"
+                                             styleClass="btn btn-sm btn-peligro"
+                                             onclick="return confirm('¿Eliminar a #{m.nombre}? Esta acción no se puede deshacer.')"/>
+                        </h:column>
+
+                    </h:dataTable>
+                </div>
+            </div>
+        </h:form>
+
+    </ui:define>
+
+</ui:composition>
+</html>

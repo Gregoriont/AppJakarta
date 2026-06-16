@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/plantilla.xhtml">
+
+    <ui:define name="titulo">Inicio — VetSystem</ui:define>
+
+    <ui:define name="contenido">
+
+        <!-- ── Bienvenida ─────────────────────────────────────── -->
+        <div class="bienvenida">
+            <div class="bienvenida-icono">&#x1F43E;</div>
+            <h1 class="bienvenida-titulo">Bienvenido a VetSystem</h1>
+            <p class="bienvenida-sub">
+                Sistema integral de gestión para clínicas y veterinarias.<br/>
+                Seleccioná una opción del menú o usá los accesos rápidos.
+            </p>
+        </div>
+
+        <!-- ── Sección: ABM de Tablas ──────────────────────────── -->
+        <section class="menu-seccion">
+            <h2 class="menu-seccion-titulo">
+                <span class="menu-seccion-icono">&#x1F4CB;</span>
+                Administración de Tablas (ABM)
+            </h2>
+            <div class="menu-grid">
+
+                <!-- Clientes -->
+                <div class="menu-card">
+                    <div class="menu-card-icono menu-card-icono-azul">&#x1F464;</div>
+                    <div class="menu-card-cuerpo">
+                        <h3>Clientes</h3>
+                        <p>Alta, baja y modificación de propietarios de mascotas.
+                           Búsqueda por nombre, apellido o documento.</p>
+                        <div class="menu-card-acciones">
+                            <h:link outcome="/clientes/abm"
+                                    styleClass="btn btn-primario">
+                                Ir a Clientes
+                            </h:link>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mascotas -->
+                <div class="menu-card">
+                    <div class="menu-card-icono menu-card-icono-verde">&#x1F436;</div>
+                    <div class="menu-card-cuerpo">
+                        <h3>Mascotas</h3>
+                        <p>Alta, baja y modificación de mascotas.
+                           Asignación de especie, raza, sexo y dueño.</p>
+                        <div class="menu-card-acciones">
+                            <h:link outcome="/mascotas/abm"
+                                    styleClass="btn btn-primario">
+                                Ir a Mascotas
+                            </h:link>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ── Sección: Gestión de Turnos ─────────────────────── -->
+        <section class="menu-seccion">
+            <h2 class="menu-seccion-titulo">
+                <span class="menu-seccion-icono">&#x1F4C5;</span>
+                Gestión de Turnos
+            </h2>
+            <div class="menu-grid">
+
+                <!-- Reservar Turno -->
+                <div class="menu-card menu-card-destacada">
+                    <div class="menu-card-icono menu-card-icono-naranja">&#x2795;</div>
+                    <div class="menu-card-cuerpo">
+                        <h3>Reservar Turno</h3>
+                        <p>Registrá un nuevo turno seleccionando la mascota,
+                           fecha, hora y motivo de la consulta.</p>
+                        <div class="menu-card-acciones">
+                            <h:link outcome="/turnos/abm"
+                                    styleClass="btn btn-acento">
+                                Reservar Turno
+                            </h:link>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ver y Gestionar Turnos -->
+                <div class="menu-card">
+                    <div class="menu-card-icono menu-card-icono-violeta">&#x1F4CB;</div>
+                    <div class="menu-card-cuerpo">
+                        <h3>Ver y Gestionar Turnos</h3>
+                        <p>Confirmá, cancelá o marcá como realizados los turnos
+                           existentes. Filtrá por vigentes o todos.</p>
+                        <div class="menu-card-acciones">
+                            <h:link outcome="/turnos/abm"
+                                    styleClass="btn btn-primario">
+                                Ver Turnos
+                            </h:link>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ── Referencia rápida de estados ───────────────────── -->
+        <section class="menu-seccion">
+            <h2 class="menu-seccion-titulo">
+                <span class="menu-seccion-icono">&#x2139;</span>
+                Estados de un Turno
+            </h2>
+            <div class="estados-grid">
+                <div class="estado-item">
+                    <span class="badge badge-pendiente">PENDIENTE</span>
+                    <p>Turno reservado, a la espera de confirmación.</p>
+                </div>
+                <div class="estado-item">
+                    <span class="badge badge-confirmado">CONFIRMADO</span>
+                    <p>Turno confirmado por la veterinaria.</p>
+                </div>
+                <div class="estado-item">
+                    <span class="badge badge-realizado">REALIZADO</span>
+                    <p>La atención fue concretada exitosamente.</p>
+                </div>
+                <div class="estado-item">
+                    <span class="badge badge-cancelado">CANCELADO</span>
+                    <p>Turno anulado por el cliente o la veterinaria.</p>
+                </div>
+            </div>
+        </section>
+
+    </ui:define>
+
+</ui:composition>
+</html>

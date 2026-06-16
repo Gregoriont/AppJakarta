@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.1"
+    xmlns="https://jakarta.ee/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+        https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd">
+
+    <persistence-unit name="VeterinariaaPU" transaction-type="JTA">
+
+        <!-- DataSource registrado en GlassFish -->
+        <jta-data-source>jdbc/VeterinariaDB</jta-data-source>
+
+        <!-- Entidades del dominio -->
+        <class>com.veterinaria.modelo.Cliente</class>
+        <class>com.veterinaria.modelo.Mascota</class>
+        <class>com.veterinaria.modelo.Turno</class>
+
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+
+        <properties>
+            <!-- Mostrar SQL generado en consola (solo desarrollo) -->
+            <property name="eclipselink.logging.level"      value="FINE"/>
+            <property name="eclipselink.logging.level.sql"  value="FINE"/>
+            <property name="eclipselink.logging.parameters" value="true"/>
+            <!-- No auto-crear/modificar tablas: usamos el script SQL -->
+            <property name="jakarta.persistence.schema-generation.database.action"
+                      value="none"/>
+        </properties>
+
+    </persistence-unit>
+
+</persistence>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/plantilla.xhtml">
+
+    <ui:define name="titulo">Error — VetSystem</ui:define>
+
+    <ui:define name="contenido">
+        <div class="error-page">
+            <div class="error-codigo">&#x26A0;&#xFE0F;</div>
+            <h2 class="error-titulo">Ocurrió un error</h2>
+            <p class="error-desc">
+                La página que intentás acceder no existe
+                o se produjo un problema interno en el servidor.
+            </p>
+            <h:link outcome="/index" styleClass="btn btn-primario">
+                &#x1F3E0; Volver al inicio
+            </h:link>
+        </div>
+    </ui:define>
+
+</ui:composition>
+</html>

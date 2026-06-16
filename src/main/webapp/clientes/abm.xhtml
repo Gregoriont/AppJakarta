@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="/plantilla.xhtml">
+
+    <ui:define name="titulo">Clientes — VetSystem</ui:define>
+
+    <ui:define name="contenido">
+
+        <div class="page-header">
+            <h2 class="page-titulo">&#x1F464; Administración de Clientes</h2>
+            <p class="page-subtitulo">Alta, baja y modificación de propietarios de mascotas.</p>
+        </div>
+
+        <!-- Mensajes de operación -->
+        <h:messages globalOnly="true" showDetail="true"
+                    infoClass="msg msg-info"
+                    warnClass="msg msg-warn"
+                    errorClass="msg msg-error"
+                    layout="table"/>
+
+        <!-- ═══════════════════════════════════════════════════
+             FORMULARIO ALTA / EDICIÓN
+        ══════════════════════════════════════════════════════ -->
+        <h:form id="frmCliente">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-titulo">
+                        #{clienteBean.modoEdicion ? '&#x270F;&#xFE0F; Modificar Cliente' : '&#x2795; Nuevo Cliente'}
+                    </h3>
+                </div>
+                <div class="card-body">
+
+                    <div class="form-grid">
+
+                        <!-- Documento -->
+                        <div class="form-grupo">
+                            <h:outputLabel for="documento"
+                                           value="Documento *"
+                                           styleClass="form-label"/>
+                            <h:inputText id="documento"
+                                         value="#{clienteBean.clienteSeleccionado.documento}"
+                                         required="true"
+                                         requiredMessage="El documento es obligatorio"
+                                         maxlength="20"
+                                         styleClass="form-control"
+                                         placeholder="Ej: 30111222"/>
+                            <h:message for="documento" styleClass="form-error"/>
+                        </div>
+
+                        <!-- Apellido -->
+                        <div class="form-grupo">
+                            <h:outputLabel for="apellido"
+                                           value="Apellido *"
+                                           styleClass="form-label"/>
+                            <h:inputText id="apellido"
+                                         value="#{clienteBean.clienteSeleccionado.apellido}"
+                                         required="true"
+                                         requiredMessage="El apellido es obligatorio"
+                                         maxlength="100"
+                                         styleClass="form-control"
+                                         placeholder="Apellido"/>
+                            <h:message for="apellido" styleClass="form-error"/>
+                        </div>
+
+                        <!-- Nombre -->
+                        <div class="form-grupo">
+                            <h:outputLabel for="nombre"
+                                           value="Nombre *"
+                                           styleClass="form-label"/>
+                            <h:inputText id="nombre"
+                                         value="#{clienteBean.clienteSeleccionado.nombre}"
+                                         required="true"
+                                         requiredMessage="El nombre es obligatorio"
+                                         maxlength="100"
+                                         styleClass="form-control"
+                                         placeholder="Nombre"/>
+                            <h:message for="nombre" styleClass="form-error"/>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-grupo">
+                            <h:outputLabel for="email"
+                                           value="Email *"
+                                           styleClass="form-label"/>
+                            <h:inputText id="email"
+                                         value="#{clienteBean.clienteSeleccionado.email}"
+                                         required="true"
+                                         requiredMessage="El email es obligatorio"
+                                         maxlength="150"
+                                         styleClass="form-control"
+                                         placeholder="ejemplo@email.com">
+                                <f:validateRegex pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$"
+                                                 message="El formato del email no es válido"/>
+                            </h:inputText>
+                            <h:message for="email" styleClass="form-error"/>
+                        </div>
+
+                        <!-- Teléfono -->
+                        <div class="form-grupo">
+                            <h:outputLabel for="telefono"
+                                           value="Teléfono"
+                                           styleClass="form-label"/>
+                            <h:inputText id="telefono"
+                                         value="#{clienteBean.clienteSeleccionado.telefono}"
+                                         maxlength="20"
+                                         styleClass="form-control"
+                                         placeholder="Ej: 11-1234-5678"/>
+                            <h:message for="telefono" styleClass="form-error"/>
+                        </div>
+
+                        <!-- Dirección -->
+                        <div class="form-grupo form-grupo-ancho">
+                            <h:outputLabel for="direccion"
+                                           value="Dirección"
+                                           styleClass="form-label"/>
+                            <h:inputText id="direccion"
+                                         value="#{clienteBean.clienteSeleccionado.direccion}"
+                                         maxlength="200"
+                                         styleClass="form-control"
+                                         placeholder="Calle, número, ciudad"/>
+                            <h:message for="direccion" styleClass="form-error"/>
+                        </div>
+
+                    </div><!-- /.form-grid -->
+
+                    <div class="form-botones">
+                        <h:commandButton
+                            id="btnGuardar"
+                            value="#{clienteBean.modoEdicion ? 'Actualizar' : 'Guardar'}"
+                            action="#{clienteBean.guardar}"
+                            styleClass="btn btn-primario"/>
+                        <h:commandButton
+                            id="btnCancelar"
+                            value="Cancelar"
+                            action="#{clienteBean.cancelar}"
+                            immediate="true"
+                            styleClass="btn btn-secundario"/>
+                    </div>
+
+                </div><!-- /.card-body -->
+            </div><!-- /.card -->
+        </h:form>
+
+        <!-- ═══════════════════════════════════════════════════
+             BARRA DE BÚSQUEDA
+        ══════════════════════════════════════════════════════ -->
+        <h:form id="frmBusqueda">
+            <div class="barra-busqueda">
+                <h:inputText id="buscar"
+                             value="#{clienteBean.textoBusqueda}"
+                             placeholder="Buscar por nombre, apellido o documento..."
+                             styleClass="form-control busqueda-input"/>
+                <h:commandButton value="&#x1F50D; Buscar"
+                                 action="#{clienteBean.buscar}"
+                                 styleClass="btn btn-buscar"/>
+                <h:commandButton value="&#x21BA; Ver todos"
+                                 action="#{clienteBean.cancelar}"
+                                 immediate="true"
+                                 styleClass="btn btn-secundario"/>
+            </div>
+        </h:form>
+
+        <!-- ═══════════════════════════════════════════════════
+             TABLA LISTADO
+        ══════════════════════════════════════════════════════ -->
+        <h:form id="frmListado">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-titulo">&#x1F4CB; Listado de Clientes</h3>
+                </div>
+                <div class="tabla-wrapper">
+                    <h:dataTable id="tablaClientes"
+                                 value="#{clienteBean.clientes}"
+                                 var="c"
+                                 styleClass="tabla"
+                                 headerClass="tabla-header"
+                                 rowClasses="fila-par,fila-impar"
+                                 emptyDataMessage="No hay clientes registrados.">
+
+                        <h:column>
+                            <f:facet name="header">ID</f:facet>
+                            <span class="text-muted">#{c.id}</span>
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Documento</f:facet>
+                            <strong>#{c.documento}</strong>
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Apellido y Nombre</f:facet>
+                            <strong>#{c.apellido}</strong>, #{c.nombre}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Email</f:facet>
+                            #{c.email}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Teléfono</f:facet>
+                            #{empty c.telefono ? '—' : c.telefono}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Dirección</f:facet>
+                            #{empty c.direccion ? '—' : c.direccion}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <span class="#{c.activo ? 'badge badge-activo' : 'badge badge-inactivo'}">
+                                #{c.activo ? 'Activo' : 'Inactivo'}
+                            </span>
+                        </h:column>
+
+                        <h:column styleClass="col-acciones">
+                            <f:facet name="header">Acciones</f:facet>
+
+                            <!-- Editar -->
+                            <h:commandButton value="&#x270F;"
+                                             title="Modificar cliente"
+                                             action="#{clienteBean.prepararEdicion(c)}"
+                                             styleClass="btn btn-sm btn-editar"/>
+
+                            <!-- Desactivar (baja lógica) -->
+                            <h:commandButton value="&#x1F6AB;"
+                                             title="Desactivar"
+                                             action="#{clienteBean.desactivar(c)}"
+                                             rendered="#{c.activo}"
+                                             styleClass="btn btn-sm btn-warn"
+                                             onclick="return confirm('¿Desactivar a #{c.apellido}, #{c.nombre}?')"/>
+
+                            <!-- Activar -->
+                            <h:commandButton value="&#x2705;"
+                                             title="Activar"
+                                             action="#{clienteBean.activar(c)}"
+                                             rendered="#{!c.activo}"
+                                             styleClass="btn btn-sm btn-ok"/>
+
+                            <!-- Eliminar (baja física) -->
+                            <h:commandButton value="&#x1F5D1;"
+                                             title="Eliminar definitivamente"
+                                             action="#{clienteBean.eliminar(c)}"
+                                             styleClass="btn btn-sm btn-peligro"
+                                             onclick="return confirm('¿Eliminar definitivamente a #{c.apellido}, #{c.nombre}? Esta acción no se puede deshacer.')"/>
+                        </h:column>
+
+                    </h:dataTable>
+                </div><!-- /.tabla-wrapper -->
+            </div><!-- /.card -->
+        </h:form>
+
+    </ui:define>
+
+</ui:composition>
+</html>

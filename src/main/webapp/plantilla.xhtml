@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title><ui:insert name="titulo">VetSystem</ui:insert></title>
+    <h:outputStylesheet library="css" name="estilos.css"/>
+</h:head>
+
+<h:body>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ENCABEZADO
+    ════════════════════════════════════════════════════════════ -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-marca">
+                <span class="header-icono">&#x1F43E;</span>
+                <div>
+                    <div class="header-titulo">VetSystem</div>
+                    <div class="header-subtitulo">Sistema de Gestión Veterinaria</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BARRA DE NAVEGACIÓN SUPERIOR
+    ════════════════════════════════════════════════════════════ -->
+    <nav class="navbar">
+        <ul class="nav-lista">
+            <li>
+                <h:link outcome="/index" styleClass="nav-link">
+                    &#x1F3E0; Inicio
+                </h:link>
+            </li>
+            <li class="nav-separador">|</li>
+            <li class="nav-grupo-label">ABM</li>
+            <li>
+                <h:link outcome="/clientes/abm" styleClass="nav-link">
+                    &#x1F464; Clientes
+                </h:link>
+            </li>
+            <li>
+                <h:link outcome="/mascotas/abm" styleClass="nav-link">
+                    &#x1F436; Mascotas
+                </h:link>
+            </li>
+            <li class="nav-separador">|</li>
+            <li class="nav-grupo-label">TURNOS</li>
+            <li>
+                <h:link outcome="/turnos/abm" styleClass="nav-link nav-link-destacado">
+                    &#x1F4C5; Gestión de Turnos
+                </h:link>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LAYOUT: sidebar + contenido
+    ════════════════════════════════════════════════════════════ -->
+    <div class="layout">
+
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+
+            <div class="sidebar-seccion">
+                <div class="sidebar-titulo">&#x1F4CB; Administración</div>
+                <ul class="sidebar-lista">
+                    <li>
+                        <h:link outcome="/clientes/abm" styleClass="sidebar-link">
+                            <span class="sidebar-icono">&#x1F464;</span> Clientes
+                        </h:link>
+                    </li>
+                    <li>
+                        <h:link outcome="/mascotas/abm" styleClass="sidebar-link">
+                            <span class="sidebar-icono">&#x1F436;</span> Mascotas
+                        </h:link>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-seccion">
+                <div class="sidebar-titulo">&#x1F4C5; Turnos</div>
+                <ul class="sidebar-lista">
+                    <li>
+                        <h:link outcome="/turnos/abm" styleClass="sidebar-link sidebar-link-destac">
+                            <span class="sidebar-icono">&#x2795;</span> Reservar Turno
+                        </h:link>
+                    </li>
+                    <li>
+                        <h:link outcome="/turnos/abm" styleClass="sidebar-link">
+                            <span class="sidebar-icono">&#x1F4CB;</span> Ver Todos
+                        </h:link>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-seccion">
+                <div class="sidebar-titulo">&#x1F517; Accesos Rápidos</div>
+                <ul class="sidebar-lista">
+                    <li>
+                        <h:link outcome="/index" styleClass="sidebar-link">
+                            <span class="sidebar-icono">&#x1F3E0;</span> Inicio
+                        </h:link>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
+
+        <!-- Contenido principal de la página -->
+        <main class="contenido">
+            <ui:insert name="contenido">
+                <p class="text-muted">Contenido no definido.</p>
+            </ui:insert>
+        </main>
+
+    </div><!-- /.layout -->
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PIE DE PÁGINA
+    ════════════════════════════════════════════════════════════ -->
+    <footer class="footer">
+        <p>VetSystem &copy; 2025
+           &mdash; Jakarta EE 10 &middot; GlassFish 7 &middot;
+           JPA EclipseLink &middot; MySQL 8</p>
+    </footer>
+
+</h:body>
+</html>
