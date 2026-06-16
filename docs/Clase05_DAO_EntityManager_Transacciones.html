@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clase 05 — DAO, EntityManager y Transacciones | Jakarta EE 10</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1a3a5c;--azul2:#2563a8;--azul3:#3b82d1;--azul-cl:#dbeafe;
+  --verde:#166534;--verde-cl:#dcfce7;--naranja:#92400e;--naranja-cl:#fef3c7;
+  --rojo:#991b1b;--rojo-cl:#fee2e2;--violeta:#4c1d95;--violeta-cl:#ede9fe;
+  --gris:#f1f5f9;--gris2:#e2e8f0;--gris3:#94a3b8;--texto:#0f172a;
+  --fuente:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--fuente);background:#f8fafc;color:var(--texto);font-size:16px;line-height:1.6}
+a{color:var(--azul2);text-decoration:none}
+
+/* ── PORTADA ── */
+.portada{background:linear-gradient(135deg,var(--azul) 0%,var(--azul2) 60%,var(--azul3) 100%);
+  color:#fff;padding:70px 40px;text-align:center;border-radius:0 0 24px 24px;
+  box-shadow:0 8px 32px rgba(0,0,0,.25);margin-bottom:40px}
+.portada-badge{display:inline-block;background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.35);padding:6px 20px;border-radius:20px;
+  font-size:13px;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px}
+.portada h1{font-size:2.6rem;font-weight:800;margin-bottom:10px;line-height:1.2}
+.portada h2{font-size:1.25rem;font-weight:400;opacity:.85;margin-bottom:30px}
+.portada-tags{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:24px}
+.tag{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  padding:5px 14px;border-radius:16px;font-size:12px;font-weight:600}
+
+/* ── ÍNDICE ── */
+.indice{max-width:860px;margin:0 auto 40px;background:#fff;border-radius:16px;
+  border:1px solid var(--gris2);box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
+.indice-header{background:var(--azul);color:#fff;padding:16px 24px;font-size:1rem;font-weight:700}
+.indice-lista{list-style:none;padding:0}
+.indice-lista li{border-bottom:1px solid var(--gris2)}
+.indice-lista li:last-child{border-bottom:none}
+.indice-lista a{display:flex;align-items:center;gap:14px;padding:13px 24px;
+  color:var(--texto);transition:background .15s}
+.indice-lista a:hover{background:var(--azul-cl)}
+.indice-num{width:32px;height:32px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+
+/* ── SECCIONES ── */
+.seccion{max-width:860px;margin:0 auto 48px;scroll-margin-top:20px}
+.seccion-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;
+  padding-bottom:12px;border-bottom:3px solid var(--azul2)}
+.seccion-num{width:48px;height:48px;background:var(--azul);color:#fff;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;flex-shrink:0}
+.seccion-titulo{font-size:1.5rem;font-weight:800;color:var(--azul)}
+
+/* ── CARDS ── */
+.card{background:#fff;border:1px solid var(--gris2);border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:20px;overflow:hidden}
+.card-header{padding:12px 20px;font-weight:700;font-size:.95rem;border-bottom:1px solid var(--gris2)}
+.card-body{padding:20px}
+.card-azul   .card-header{background:var(--azul-cl);color:var(--azul)}
+.card-verde  .card-header{background:var(--verde-cl);color:var(--verde)}
+.card-naranja.card-header,.card-naranja>.card-header{background:var(--naranja-cl);color:var(--naranja)}
+.card-rojo   .card-header{background:var(--rojo-cl);color:var(--rojo)}
+.card-violeta.card-header,.card-violeta>.card-header{background:var(--violeta-cl);color:var(--violeta)}
+
+/* ── ALERTA ── */
+.alerta{display:flex;gap:14px;padding:14px 18px;border-radius:10px;margin:16px 0;font-size:.93rem}
+.alerta-info   {background:var(--azul-cl);border-left:4px solid var(--azul2)}
+.alerta-ok     {background:var(--verde-cl);border-left:4px solid #16a34a}
+.alerta-warn   {background:var(--naranja-cl);border-left:4px solid #d97706}
+.alerta-error  {background:var(--rojo-cl);border-left:4px solid #dc2626}
+.alerta-icono  {font-size:1.3rem;flex-shrink:0;margin-top:1px}
+
+/* ── CÓDIGO ── */
+pre{background:#0f172a;color:#e2e8f0;padding:22px 24px;border-radius:10px;
+  overflow-x:auto;font-size:13.5px;line-height:1.7;margin:14px 0;
+  border:1px solid #1e293b;position:relative}
+code{font-family:'Cascadia Code','Fira Code','Consolas',monospace}
+.code-label{position:absolute;top:8px;right:14px;font-size:10px;background:#334155;
+  color:#94a3b8;padding:2px 8px;border-radius:6px;letter-spacing:.5px;font-family:var(--fuente)}
+
+.kw  {color:#93c5fd}  /* keywords */
+.an  {color:#86efac}  /* annotations */
+.st  {color:#fca5a5}  /* strings */
+.cm  {color:#64748b;font-style:italic} /* comments */
+.cl  {color:#fde68a}  /* class names */
+.mt  {color:#c4b5fd}  /* methods */
+.nm  {color:#fdba74}  /* numbers */
+
+/* ── TABLA ── */
+table{width:100%;border-collapse:collapse;font-size:.92rem;margin:14px 0}
+th{background:var(--azul);color:#fff;padding:10px 14px;text-align:left;font-size:.82rem;
+   text-transform:uppercase;letter-spacing:.5px}
+td{padding:9px 14px;border-bottom:1px solid var(--gris2)}
+tr:nth-child(even) td{background:var(--gris)}
+tr:hover td{background:var(--azul-cl)}
+
+/* ── DIAGRAMA ── */
+.diagrama{background:#0f172a;border-radius:12px;padding:28px;margin:16px 0;
+  font-family:'Cascadia Code','Consolas',monospace;font-size:13px;
+  color:#e2e8f0;line-height:1.9;overflow-x:auto}
+
+/* ── GRID 2 COL ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+@media(max-width:680px){.grid2{grid-template-columns:1fr}}
+
+/* ── OBJETIVOS ── */
+.objetivo-lista{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+@media(max-width:600px){.objetivo-lista{grid-template-columns:1fr}}
+.objetivo-lista li{background:#fff;border:1px solid var(--gris2);border-left:4px solid var(--azul2);
+  border-radius:8px;padding:12px 16px;font-size:.93rem;display:flex;align-items:flex-start;gap:10px}
+.objetivo-lista li span{font-size:1.1rem;flex-shrink:0}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;
+  font-weight:700;letter-spacing:.3px}
+.badge-azul   {background:var(--azul-cl);color:var(--azul2)}
+.badge-verde  {background:var(--verde-cl);color:var(--verde)}
+.badge-naranja{background:var(--naranja-cl);color:var(--naranja)}
+.badge-rojo   {background:var(--rojo-cl);color:var(--rojo)}
+
+/* ── PASOS ── */
+.paso{display:flex;gap:16px;margin-bottom:16px;align-items:flex-start}
+.paso-num{width:36px;height:36px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;flex-shrink:0;margin-top:2px}
+.paso-cuerpo h4{font-size:.95rem;color:var(--azul);margin-bottom:4px}
+.paso-cuerpo p{font-size:.9rem;color:#475569}
+
+/* ── FOOTER ── */
+footer{background:var(--azul);color:rgba(255,255,255,.7);text-align:center;
+  padding:24px;font-size:.82rem;margin-top:60px}
+
+/* ── SEPARADOR ── */
+.sep{height:2px;background:linear-gradient(90deg,var(--azul2),transparent);
+  max-width:860px;margin:0 auto 48px;border-radius:2px}
+</style>
+</head>
+<body>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PORTADA
+═══════════════════════════════════════════════════════════ -->
+<div class="portada">
+  <div class="portada-badge">Programación Web Avanzada — Backend</div>
+  <h1>Clase 05</h1>
+  <h2>El DAO, EntityManager y Transacciones</h2>
+  <div class="portada-tags">
+    <span class="tag">Jakarta EE 10</span>
+    <span class="tag">JPA 3.1</span>
+    <span class="tag">EclipseLink</span>
+    <span class="tag">GlassFish 7</span>
+    <span class="tag">MySQL 8</span>
+    <span class="tag">CDI 4.0</span>
+    <span class="tag">JDK 21</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ÍNDICE
+═══════════════════════════════════════════════════════════ -->
+<div style="max-width:860px;margin:0 auto 16px;padding:0 20px">
+  <h3 style="color:var(--azul);margin-bottom:14px;font-size:1.1rem">📋 Contenido de la clase</h3>
+</div>
+<div class="indice" style="margin-left:auto;margin-right:auto;max-width:860px;margin-bottom:40px">
+  <div class="indice-header">📚 Clase 05 — Índice de contenidos</div>
+  <ul class="indice-lista">
+    <li><a href="#objetivos"><span class="indice-num">🎯</span> Objetivos de la clase</a></li>
+    <li><a href="#s51"><span class="indice-num">1</span> 5.1 — Patrón DAO (Data Access Object)</a></li>
+    <li><a href="#s52"><span class="indice-num">2</span> 5.2 — EntityManager: Métodos CRUD</a></li>
+    <li><a href="#s53"><span class="indice-num">3</span> 5.3 — JPQL: Jakarta Persistence Query Language</a></li>
+    <li><a href="#s54"><span class="indice-num">4</span> 5.4 — Transacciones con @Transactional</a></li>
+    <li><a href="#s55"><span class="indice-num">5</span> 5.5 — ClienteDAO Completo</a></li>
+    <li><a href="#s56"><span class="indice-num">6</span> 5.6 — ClienteBean Actualizado (usa el DAO)</a></li>
+    <li><a href="#resumen"><span class="indice-num">✅</span> Resumen y puntos clave</a></li>
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     OBJETIVOS
+═══════════════════════════════════════════════════════════ -->
+<div class="seccion" id="objetivos" style="padding:0 20px">
+  <div class="seccion-header">
+    <div class="seccion-num">🎯</div>
+    <div class="seccion-titulo">Objetivos de la clase</div>
+  </div>
+  <ul class="objetivo-lista">
+    <li><span>🏗️</span> Implementar el patrón DAO con JPA en una aplicación Jakarta EE real</li>
+    <li><span>⚙️</span> Dominar los métodos del EntityManager: persist, merge, remove, find</li>
+    <li><span>🔍</span> Escribir consultas JPQL con TypedQuery y NamedQuery</li>
+    <li><span>🔄</span> Reemplazar el ArrayList del bean por el DAO con base de datos real</li>
+    <li><span>🔒</span> Comprender el ciclo de vida de las transacciones JTA con @Transactional</li>
+    <li><span>🧱</span> Separar correctamente las responsabilidades entre capas</li>
+  </ul>
+  <div class="alerta alerta-info" style="margin-top:20px">
+    <span class="alerta-icono">💡</span>
+    <div><strong>Contexto:</strong> En clases anteriores usamos un <code>ArrayList</code> en el Bean para guardar clientes en memoria. Hoy conectamos todo a MySQL a través de JPA y el patrón DAO. Al final de la clase la aplicación será 100% funcional con base de datos.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     5.1 PATRÓN DAO
+═══════════════════════════════════════════════════════════ -->
+<div class="seccion" id="s51" style="padding:0 20px">
+  <div class="seccion-header">
+    <div class="seccion-num">1</div>
+    <div class="seccion-titulo">5.1 — Patrón DAO (Data Access Object)</div>
+  </div>
+
+  <div class="card card-azul">
+    <div class="card-header">🏗️ ¿Qué es el patrón DAO?</div>
+    <div class="card-body">
+      <p>El <strong>Data Access Object (DAO)</strong> es un patrón de diseño que <strong>separa la lógica de acceso a datos del resto de la aplicación</strong>. Actúa como una capa intermedia entre la lógica de negocio y la base de datos.</p>
+      <br/>
+      <p>En lugar de escribir código SQL o JPA dentro del Bean o el Servicio, todo el acceso a la base de datos queda encapsulado en clases DAO especializadas.</p>
+    </div>
+  </div>
+
+  <div class="diagrama">
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ARQUITECTURA EN CAPAS                            │
+│                                                                     │
+│   Vista (.xhtml)                                                    │
+│       ↕  EL (Expression Language)                                  │
+│   ┌─────────────────┐                                               │
+│   │  Managed Bean   │  @Named @ViewScoped  ← CAPA PRESENTACIÓN     │
+│   │  (Controlador)  │                                               │
+│   └────────┬────────┘                                               │
+│            │  @Inject                                               │
+│   ┌────────▼────────┐                                               │
+│   │    Servicio     │  @ApplicationScoped  ← CAPA DE NEGOCIO       │
+│   │  (Reglas de     │                                               │
+│   │   negocio)      │                                               │
+│   └────────┬────────┘                                               │
+│            │  @Inject                                               │
+│   ┌────────▼────────┐                                               │
+│   │      DAO        │  @ApplicationScoped  ← CAPA DE DATOS         │
+│   │  (Acceso a BD)  │  @PersistenceContext                         │
+│   └────────┬────────┘                                               │
+│            │                                                        │
+│   ┌────────▼────────┐                                               │
+│   │  EntityManager  │  JPA / EclipseLink   ← ORM                   │
+│   └────────┬────────┘                                               │
+│            │  JDBC                                                  │
+│   ┌────────▼────────┐                                               │
+│   │    MySQL 8      │                      ← BASE DE DATOS         │
+│   └─────────────────┘                                               │
+└─────────────────────────────────────────────────────────────────────┘</div>
+
+  <div class="grid2">
+    <div class="card card-verde">
+      <div class="card-header">✅ Responsabilidad del DAO</div>
+      <div class="card-body">
+        <ul style="padding-left:18px;line-height:2">
+          <li>Operaciones CRUD sobre una entidad</li>
+          <li>Consultas JPQL específicas</li>
+          <li>Traducir objetos Java ↔ registros BD</li>
+          <li>Gestión del EntityManager</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card card-rojo">
+      <div class="card-header">❌ Lo que el DAO NO debe hacer</div>
+      <div class="card-body">
+        <ul style="padding-left:18px;line-height:2">
+          <li>Contener reglas de negocio</li>
+          <li>Validar datos del formulario</li>
+          <li>Interactuar con la vista</li>
+          <li>Conocer el Bean o la sesión JSF</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="background:#1e293b;color:#e2e8f0">📦 GenericDAO — DAO Genérico Abstracto</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// GenericDAO.java — Clase base abstracta con CRUD genérico</span>
+<span class="kw">package</span> com.veterinaria.dao;
+
+<span class="kw">import</span> jakarta.persistence.EntityManager;
+<span class="kw">import</span> jakarta.persistence.PersistenceContext;
+<span class="kw">import</span> jakarta.transaction.Transactional;
+<span class="kw">import</span> java.util.List;
+
+<span class="kw">public abstract class</span> <span class="cl">GenericDAO</span>&lt;<span class="cl">T</span>, <span class="cl">ID</span>&gt; {
+
+    <span class="cm">// El contenedor (GlassFish) inyecta el EntityManager JTA</span>
+    <span class="an">@PersistenceContext</span>(unitName = <span class="st">"VeterinariaaPU"</span>)
+    <span class="kw">protected</span> <span class="cl">EntityManager</span> em;
+
+    <span class="cm">// Cada subclase indica su tipo de entidad</span>
+    <span class="kw">protected abstract</span> <span class="cl">Class</span>&lt;<span class="cl">T</span>&gt; <span class="mt">getEntityClass</span>();
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">guardar</span>(<span class="cl">T</span> entidad)     { em.<span class="mt">persist</span>(entidad); }
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public</span> <span class="cl">T</span> <span class="mt">actualizar</span>(<span class="cl">T</span> entidad)     { <span class="kw">return</span> em.<span class="mt">merge</span>(entidad); }
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">eliminar</span>(<span class="cl">ID</span> id) {
+        <span class="cl">T</span> entidad = em.<span class="mt">find</span>(<span class="mt">getEntityClass</span>(), id);
+        <span class="kw">if</span> (entidad != <span class="kw">null</span>) em.<span class="mt">remove</span>(entidad);
+    }
+
+    <span class="kw">public</span> <span class="cl">T</span> <span class="mt">buscarPorId</span>(<span class="cl">ID</span> id) {
+        <span class="kw">return</span> em.<span class="mt">find</span>(<span class="mt">getEntityClass</span>(), id);
+    }
+
+    <span class="kw">public</span> <span class="cl">List</span>&lt;<span class="cl">T</span>&gt; <span class="mt">listarTodos</span>() {
+        <span class="cl">String</span> jpql = <span class="st">"SELECT e FROM "</span>
+                    + <span class="mt">getEntityClass</span>().<span class="mt">getSimpleName</span>() + <span class="st">" e"</span>;
+        <span class="kw">return</span> em.<span class="mt">createQuery</span>(jpql, <span class="mt">getEntityClass</span>()).<span class="mt">getResultList</span>();
+    }
+}</code><span class="code-label">GenericDAO.java</span></pre>
+    </div>
+  </div>
+
+  <div class="alerta alerta-info">
+    <span class="alerta-icono">💡</span>
+    <div><strong>Patrón Genérico:</strong> Usando Generics (<code>&lt;T, ID&gt;</code>), el GenericDAO sirve para cualquier entidad. <code>ClienteDAO</code> extiende <code>GenericDAO&lt;Cliente, Long&gt;</code> y hereda automáticamente los 5 métodos base.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     5.2 ENTITYMANAGER
+═══════════════════════════════════════════════════════════ -->
+<div class="seccion" id="s52" style="padding:0 20px">
+  <div class="seccion-header">
+    <div class="seccion-num">2</div>
+    <div class="seccion-titulo">5.2 — EntityManager: Métodos CRUD</div>
+  </div>
+
+  <div class="card card-azul">
+    <div class="card-header">⚙️ ¿Qué es el EntityManager?</div>
+    <div class="card-body">
+      <p>El <strong>EntityManager</strong> es la interfaz central de JPA. Es el objeto que conecta el mundo Java con la base de datos. Permite <strong>persistir, actualizar, eliminar y buscar entidades</strong> sin escribir SQL directamente.</p>
+      <br/>
+      <p>En Jakarta EE con GlassFish, el contenedor <strong>inyecta</strong> el EntityManager automáticamente usando <code>@PersistenceContext</code>. No necesitamos crearlo ni cerrarlo manualmente.</p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Método</th>
+        <th>SQL equivalente</th>
+        <th>Descripción</th>
+        <th>Necesita @Transactional</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>em.persist(entidad)</code></td>
+        <td><code>INSERT</code></td>
+        <td>Inserta una entidad nueva en la BD</td>
+        <td><span class="badge badge-rojo">Sí</span></td>
+      </tr>
+      <tr>
+        <td><code>em.merge(entidad)</code></td>
+        <td><code>UPDATE</code></td>
+        <td>Actualiza una entidad existente</td>
+        <td><span class="badge badge-rojo">Sí</span></td>
+      </tr>
+      <tr>
+        <td><code>em.remove(entidad)</code></td>
+        <td><code>DELETE</code></td>
+        <td>Elimina una entidad de la BD</td>
+        <td><span class="badge badge-rojo">Sí</span></td>
+      </tr>
+      <tr>
+        <td><code>em.find(Clase.class, id)</code></td>
+        <td><code>SELECT por PK</code></td>
+        <td>Busca una entidad por clave primaria</td>
+        <td><span class="badge badge-verde">No</span></td>
+      </tr>
+      <tr>
+        <td><code>em.createQuery(jpql)</code></td>
+        <td><code>SELECT personalizado</code></td>
+        <td>Ejecuta consulta JPQL</td>
+        <td><span class="badge badge-verde">No</span></td>
+      </tr>
+      <tr>
+        <td><code>em.createNamedQuery(nombre)</code></td>
+        <td><code>SELECT predefinido</code></td>
+        <td>Ejecuta una NamedQuery definida en la entidad</td>
+        <td><span class="badge badge-verde">No</span></td>
+      </tr>
+      <tr>
+        <td><code>em.flush()</code></td>
+        <td><code>—</code></td>
+        <td>Sincroniza el contexto de persistencia con la BD</td>
+        <td><span class="badge badge-rojo">Sí</span></td>
+      </tr>
+      <tr>
+        <td><code>em.refresh(entidad)</code></td>
+        <td><code>SELECT recarga</code></td>
+        <td>Recarga el estado desde la BD, descarta cambios</td>
+        <td><span class="badge badge-verde">No</span></td>
+      </tr>
+      <tr>
+        <td><code>em.detach(entidad)</code></td>
+        <td><code>—</code></td>
+        <td>Desasocia la entidad del contexto de persistencia</td>
+        <td><span class="badge badge-verde">No</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="grid2" style="margin-top:20px">
+    <div class="card">
+      <div class="card-header" style="background:#1e293b;color:#e2e8f0">🔵 persist — INSERT</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// Solo para entidades NUEVAS (id == null)</span>
+<span class="cl">Cliente</span> c = <span class="kw">new</span> <span class="cl">Cliente</span>();
+c.<span class="mt">setNombre</span>(<span class="st">"María"</span>);
+c.<span class="mt">setEmail</span>(<span class="st">"maria@mail.com"</span>);
+
+<span class="cm">// genera: INSERT INTO cliente (...) VALUES (...)</span>
+em.<span class="mt">persist</span>(c);
+
+<span class="cm">// Después del persist, c.getId() ya tiene valor</span>
+System.out.<span class="mt">println</span>(c.<span class="mt">getId</span>()); <span class="cm">// ej: 1</span></code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" style="background:#1e293b;color:#e2e8f0">🟡 merge — UPDATE</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// Para entidades EXISTENTES (id != null)</span>
+<span class="cm">// El objeto puede estar "detached" (fuera del contexto)</span>
+<span class="cl">Cliente</span> c = em.<span class="mt">find</span>(<span class="cl">Cliente</span>.<span class="kw">class</span>, <span class="nm">1L</span>);
+c.<span class="mt">setTelefono</span>(<span class="st">"11-9999-8888"</span>);
+
+<span class="cm">// genera: UPDATE cliente SET telefono=? WHERE id=?</span>
+<span class="cl">Cliente</span> managed = em.<span class="mt">merge</span>(c);
+
+<span class="cm">// merge devuelve la instancia gestionada actualizada</span></code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" style="background:#1e293b;color:#e2e8f0">🔴 remove — DELETE</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// remove solo acepta entidades MANAGED</span>
+<span class="cm">// Primero hay que hacer find, luego remove</span>
+<span class="cl">Cliente</span> c = em.<span class="mt">find</span>(<span class="cl">Cliente</span>.<span class="kw">class</span>, <span class="nm">1L</span>);
+
+<span class="kw">if</span> (c != <span class="kw">null</span>) {
+    <span class="cm">// genera: DELETE FROM cliente WHERE id=1</span>
+    em.<span class="mt">remove</span>(c);
+}
+<span class="cm">// Si id no existe, find devuelve null (no da error)</span></code></pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" style="background:#1e293b;color:#e2e8f0">🟢 find — SELECT por PK</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// Busca por clave primaria — el más eficiente</span>
+<span class="cm">// Usa el caché de primer nivel si ya fue cargado</span>
+<span class="cl">Cliente</span> c = em.<span class="mt">find</span>(<span class="cl">Cliente</span>.<span class="kw">class</span>, <span class="nm">5L</span>);
+
+<span class="cm">// genera: SELECT * FROM cliente WHERE id=5</span>
+
+<span class="kw">if</span> (c == <span class="kw">null</span>) {
+    <span class="cm">// El cliente con id=5 no existe en la BD</span>
+    System.out.<span class="mt">println</span>(<span class="st">"No encontrado"</span>);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta alerta-warn">
+    <span class="alerta-icono">⚠️</span>
+    <div><strong>Error común:</strong> Llamar a <code>em.remove(entidad)</code> con una entidad <strong>detached</strong> lanza una excepción. Siempre hay que hacer <code>em.find()</code> primero para obtener la entidad <em>managed</em>, y luego pasársela a <code>em.remove()</code>.</div>
+  </div>
+
+  <div class="card card-azul" style="margin-top:16px">
+    <div class="card-header">🔄 Estados de una Entidad JPA</div>
+    <div class="card-body">
+      <div class="diagrama" style="font-size:12px">
+  NEW (nueva)         →  persist()  →   MANAGED (gestionada)
+  new Cliente()                         em tiene referencia activa
+       │                                    │          │
+       │                                detach()    remove()
+       │                                    │          │
+       └──────────────── merge() ────  DETACHED    REMOVED
+                                       (fuera del   (marcada
+                                        contexto)   para DELETE)</div>
+      <ul style="padding-left:20px;margin-top:12px;line-height:2;font-size:.92rem">
+        <li><strong>NEW:</strong> objeto Java recién creado, no conocido por JPA</li>
+        <li><strong>MANAGED:</strong> JPA rastrea sus cambios — cualquier setter genera un UPDATE al hacer flush/commit</li>
+        <li><strong>DETACHED:</strong> fue managed pero se desconectó (fin de transacción, <code>detach()</code>)</li>
+        <li><strong>REMOVED:</strong> marcada para eliminar — el DELETE ocurre al hacer flush/commit</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     5.3 JPQL
+═══════════════════════════════════════════════════════════ -->
+<div class="seccion" id="s53" style="padding:0 20px">
+  <div class="seccion-header">
+    <div class="seccion-num">3</div>
+    <div class="seccion-titulo">5.3 — JPQL: Jakarta Persistence Query Language</div>
+  </div>
+
+  <div class="card card-azul">
+    <div class="card-header">🔍 ¿Qué es JPQL?</div>
+    <div class="card-body">
+      <p>JPQL es el lenguaje de consultas de JPA. Es similar a SQL pero <strong>trabaja sobre entidades Java, no sobre tablas</strong>. EclipseLink traduce el JPQL al SQL específico del motor de BD (MySQL en nuestro caso).</p>
+      <br/>
+      <p><strong>Diferencia fundamental:</strong> En SQL se usan nombres de tablas y columnas. En JPQL se usan nombres de clases y atributos Java.</p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>SQL</th><th>JPQL equivalente</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>SELECT * FROM cliente</code></td>
+        <td><code>SELECT c FROM Cliente c</code></td>
+      </tr>
+      <tr>
+        <td><code>SELECT * FROM cliente WHERE id = 5</code></td>
+        <td><code>SELECT c FROM Cliente c WHERE c.id = 5</code></td>
+      </tr>
+      <tr>
+        <td><code>SELECT * FROM cliente WHERE activo = 1 ORDER BY apellido</code></td>
+        <td><code>SELECT c FROM Cliente c WHERE c.activo = true ORDER BY c.apellido</code></td>
+      </tr>
+      <tr>
+        <td><code>SELECT * FROM cliente WHERE email = ?</code></td>
+        <td><code>SELECT c FROM Cliente c WHERE c.email = :email</code></td>
+      </tr>
+      <tr>
+        <td><code>SELECT * FROM mascota WHERE cliente_id = ?</code></td>
+        <td><code>SELECT m FROM Mascota m WHERE m.cliente.id = :id</code></td>
+      </tr>
+      <tr>
+        <td><code>SELECT COUNT(*) FROM cliente</code></td>
+        <td><code>SELECT COUNT(c) FROM Cliente c</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="color:var(--azul);margin:24px 0 12px;font-size:1.05rem">▶ Tipos de consultas JPQL</h3>
+
+  <div class="card">
+    <div class="card-header" style="background:#1e293b;color:#e2e8f0">1️⃣ createQuery — consulta dinámica</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// TypedQuery garantiza el tipo de retorno en tiempo de compilación</span>
+<span class="cl">String</span> jpql = <span class="st">"SELECT c FROM Cliente c WHERE c.activo = true ORDER BY c.apellido"</span>;
+
+<span class="cl">TypedQuery</span>&lt;<span class="cl">Cliente</span>&gt; query = em.<span class="mt">createQuery</span>(jpql, <span class="cl">Cliente</span>.<span class="kw">class</span>);
+
+<span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; lista = query.<span class="mt">getResultList</span>();   <span class="cm">// devuelve lista</span>
+<span class="cl">Cliente</span> uno     = query.<span class="mt">getSingleResult</span>();     <span class="cm">// devuelve uno solo</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="background:#1e293b;color:#e2e8f0">2️⃣ Parámetros nombrados con :nombre</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// Los parámetros nombrados evitan SQL injection</span>
+<span class="cl">String</span> jpql = <span class="st">"SELECT c FROM Cliente c WHERE c.email = :email"</span>;
+
+<span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; resultado = em
+    .<span class="mt">createQuery</span>(jpql, <span class="cl">Cliente</span>.<span class="kw">class</span>)
+    .<span class="mt">setParameter</span>(<span class="st">"email"</span>, <span class="st">"maria@mail.com"</span>) <span class="cm">// :email ← valor</span>
+    .<span class="mt">getResultList</span>();
+
+<span class="cm">// Búsqueda parcial con LIKE (case insensitive)</span>
+<span class="cl">String</span> busqueda = <span class="st">"SELECT c FROM Cliente c WHERE LOWER(c.nombre) LIKE :patron"</span>;
+em.<span class="mt">createQuery</span>(busqueda, <span class="cl">Cliente</span>.<span class="kw">class</span>)
+  .<span class="mt">setParameter</span>(<span class="st">"patron"</span>, <span class="st">"%" + texto.toLowerCase() + "%"</span>)
+  .<span class="mt">getResultList</span>();</code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="background:#1e293b;color:#e2e8f0">3️⃣ @NamedQuery — consulta predefinida en la entidad</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// Se define UNA VEZ en la clase de entidad</span>
+<span class="an">@Entity</span>
+<span class="an">@NamedQueries</span>({
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Cliente.findAll"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c ORDER BY c.apellido, c.nombre"</span>
+    ),
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Cliente.findActivos"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c WHERE c.activo = true ORDER BY c.apellido"</span>
+    ),
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Cliente.findByEmail"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c WHERE c.email = :email"</span>
+    )
+})
+<span class="kw">public class</span> <span class="cl">Cliente</span> { ... }
+
+<span class="cm">// Se usa en el DAO así:</span>
+em.<span class="mt">createNamedQuery</span>(<span class="st">"Cliente.findAll"</span>, <span class="cl">Cliente</span>.<span class="kw">class</span>)
+  .<span class="mt">getResultList</span>();
+
+em.<span class="mt">createNamedQuery</span>(<span class="st">"Cliente.findByEmail"</span>, <span class="cl">Cliente</span>.<span class="kw">class</span>)
+  .<span class="mt">setParameter</span>(<span class="st">"email"</span>, emailBuscado)
+  .<span class="mt">getResultList</span>();</code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="background:#1e293b;color:#e2e8f0">4️⃣ JOIN FETCH — evitar el problema N+1</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// ❌ SIN JOIN FETCH: genera 1 + N consultas</span>
+<span class="cm">// 1 SELECT para mascotas + 1 SELECT por cada mascota para cargar cliente</span>
+<span class="st">"SELECT m FROM Mascota m"</span>  <span class="cm">// si hay 100 mascotas → 101 queries!</span>
+
+<span class="cm">// ✅ CON JOIN FETCH: genera UNA SOLA consulta con JOIN</span>
+<span class="st">"SELECT m FROM Mascota m JOIN FETCH m.cliente ORDER BY m.nombre"</span>
+<span class="cm">// → SELECT m.*, c.* FROM mascota m INNER JOIN cliente c ON m.cliente_id = c.id</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta alerta-ok">
+    <span class="alerta-icono">✅</span>
+    <div><strong>Buena práctica:</strong> Usar siempre <code>@NamedQuery</code> para las consultas frecuentes. Se validan al arrancar el servidor y se compilan una sola vez, siendo más eficientes que las consultas dinámicas.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     5.4 TRANSACCIONES
+═══════════════════════════════════════════════════════════ -->
+<div class="seccion" id="s54" style="padding:0 20px">
+  <div class="seccion-header">
+    <div class="seccion-num">4</div>
+    <div class="seccion-titulo">5.4 — Transacciones con @Transactional</div>
+  </div>
+
+  <div class="card card-azul">
+    <div class="card-header">🔒 ¿Qué es una transacción?</div>
+    <div class="card-body">
+      <p>Una <strong>transacción</strong> es un conjunto de operaciones sobre la base de datos que se ejecutan como una unidad: <strong>todas tienen éxito o ninguna se aplica</strong>. Garantiza la integridad de los datos.</p>
+      <br/>
+      <p>En Jakarta EE con JTA (Jakarta Transactions API), el servidor GlassFish gestiona las transacciones automáticamente. Solo necesitamos indicar con <code>@Transactional</code> qué métodos deben ejecutarse dentro de una transacción.</p>
+    </div>
+  </div>
+
+  <div class="card card-verde" style="margin-top:16px">
+    <div class="card-header">✅ Las 4 propiedades ACID</div>
+    <div class="card-body">
+      <table style="margin:0">
+        <thead><tr><th>Propiedad</th><th>Significado</th><th>Ejemplo</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Atomicidad</strong></td><td>Todo o nada</td><td>Si falla el INSERT, no queda nada a medias</td></tr>
+          <tr><td><strong>Consistencia</strong></td><td>La BD pasa de un estado válido a otro</td><td>No puede quedar un turno sin mascota</td></tr>
+          <tr><td><strong>Aislamiento</strong></td><td>Transacciones no se interfieren</td><td>Dos usuarios no editan el mismo registro simultáneamente</td></tr>
+          <tr><td><strong>Durabilidad</strong></td><td>Los cambios son permanentes</td><td>Un COMMIT sobrevive a un corte de luz</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h3 style="color:var(--azul);margin:24px 0 12px;font-size:1.05rem">▶ @Transactional en la práctica</h3>
+
+  <div class="card">
+    <div class="card-header" style="background:#1e293b;color:#e2e8f0">Comportamiento de @Transactional</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cl">ClienteServicio</span> {
+
+    <span class="an">@Inject</span>
+    <span class="kw">private</span> <span class="cl">ClienteDAO</span> clienteDAO;
+
+    <span class="cm">// ✅ @Transactional: el contenedor abre TX antes y hace COMMIT al final</span>
+    <span class="cm">// Si se lanza una RuntimeException → ROLLBACK automático</span>
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">guardar</span>(<span class="cl">Cliente</span> cliente) {
+
+        <span class="cm">// 1. Validación de negocio (antes de tocar la BD)</span>
+        clienteDAO.<span class="mt">buscarPorEmail</span>(cliente.<span class="mt">getEmail</span>())
+            .<span class="mt">ifPresent</span>(existente -&gt; {
+                <span class="kw">boolean</span> mismo = existente.<span class="mt">getId</span>().<span class="mt">equals</span>(cliente.<span class="mt">getId</span>());
+                <span class="kw">if</span> (!mismo)
+                    <span class="cm">// RuntimeException → ROLLBACK automático</span>
+                    <span class="kw">throw new</span> <span class="cl">IllegalArgumentException</span>(<span class="st">"Email duplicado"</span>);
+            });
+
+        <span class="cm">// 2. Alta o modificación</span>
+        <span class="kw">if</span> (cliente.<span class="mt">getId</span>() == <span class="kw">null</span>)
+            clienteDAO.<span class="mt">guardar</span>(cliente);   <span class="cm">// INSERT</span>
+        <span class="kw">else</span>
+            clienteDAO.<span class="mt">actualizar</span>(cliente); <span class="cm">// UPDATE</span>
+
+    } <span class="cm">// ← COMMIT aquí (si no hubo excepción)</span>
+
+    <span class="cm">// Sin @Transactional → solo lectura, más eficiente</span>
+    <span class="kw">public</span> <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; <span class="mt">listarTodos</span>() {
+        <span class="kw">return</span> clienteDAO.<span class="mt">listarTodos</span>();
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card card-verde">
+      <div class="card-header">✅ Con @Transactional (escritura)</div>
+      <div class="card-body">
+        <div class="diagrama" style="font-size:11.5px;padding:16px">
+Llamada al método
+      ↓
+GlassFish abre TX
+      ↓
+  persist / merge / remove
+      ↓
+  ¿Excepción?
+  ├── NO  → COMMIT ✅
+  └── SÍ  → ROLLBACK ❌</div>
+      </div>
+    </div>
+    <div class="card card-rojo">
+      <div class="card-header">❌ Sin @Transactional (en escritura)</div>
+      <div class="card-body">
+        <div class="diagrama" style="font-size:11.5px;padding:16px">
+Llamada al método
+      ↓
+  persist / merge / remove
+      ↓
+ TransactionRequiredException
+ "No active transaction"
+      ↓
+   💥 ERROR en runtime</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta alerta-warn">
+    <span class="alerta-icono">⚠️</span>
+    <div><strong>Regla importante:</strong> <code>persist()</code>, <code>merge()</code> y <code>remove()</code> <strong>siempre</strong> necesitan <code>@Transactional</code>. Los métodos de solo lectura (<code>find()</code>, <code>getResultList()</code>) <strong>no</strong> lo necesitan, aunque no rompen si lo tienen.</div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-header" style="background:#1e293b;color:#e2e8f0">📋 Tipos de propagación @Transactional</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">import</span> jakarta.transaction.Transactional;
+<span class="kw">import</span> jakarta.transaction.Transactional.TxType;
+
+<span class="cm">// REQUIRED (defecto): usa TX existente o crea una nueva</span>
+<span class="an">@Transactional</span>(TxType.REQUIRED)
+<span class="kw">public void</span> <span class="mt">guardar</span>(<span class="cl">Cliente</span> c) { ... }
+
+<span class="cm">// REQUIRES_NEW: siempre crea una TX nueva, suspende la existente</span>
+<span class="an">@Transactional</span>(TxType.REQUIRES_NEW)
+<span class="kw">public void</span> <span class="mt">auditoria</span>(<span class="cl">String</span> accion) { ... }
+
+<span class="cm">// NOT_SUPPORTED: se ejecuta sin TX (lectura pura, más eficiente)</span>
+<span class="an">@Transactional</span>(TxType.NOT_SUPPORTED)
+<span class="kw">public</span> <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; <span class="mt">listarTodos</span>() { ... }
+
+<span class="cm">// NEVER: lanza excepción si existe TX activa</span>
+<span class="an">@Transactional</span>(TxType.NEVER)
+<span class="kw">public void</span> <span class="mt">soloLectura</span>() { ... }</code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     5.5 CLIENTEDAO COMPLETO
+═══════════════════════════════════════════════════════════ -->
+<div class="seccion" id="s55" style="padding:0 20px">
+  <div class="seccion-header">
+    <div class="seccion-num">5</div>
+    <div class="seccion-titulo">5.5 — ClienteDAO Completo</div>
+  </div>
+
+  <div class="alerta alerta-info">
+    <span class="alerta-icono">💡</span>
+    <div><strong>Estrategia:</strong> <code>ClienteDAO</code> extiende <code>GenericDAO&lt;Cliente, Long&gt;</code> y hereda los 5 métodos base. Solo agrega las consultas específicas de la entidad Cliente.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="background:#1e293b;color:#e2e8f0">📄 NamedQueries en Cliente.java (Entidad)</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"cliente"</span>)
+<span class="an">@NamedQueries</span>({
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Cliente.findAll"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c ORDER BY c.apellido, c.nombre"</span>),
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Cliente.findActivos"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c WHERE c.activo = true ORDER BY c.apellido"</span>),
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Cliente.findByDocumento"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c WHERE c.documento = :documento"</span>),
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Cliente.findByEmail"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c WHERE c.email = :email"</span>),
+    <span class="an">@NamedQuery</span>(
+        name  = <span class="st">"Cliente.buscarPorTexto"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c "</span>
+              + <span class="st">"WHERE LOWER(c.nombre) LIKE :patron "</span>
+              + <span class="st">"   OR LOWER(c.apellido) LIKE :patron "</span>
+              + <span class="st">"   OR LOWER(c.documento) LIKE :patron "</span>
+              + <span class="st">"ORDER BY c.apellido, c.nombre"</span>)
+})
+<span class="kw">public class</span> <span class="cl">Cliente</span> <span class="kw">implements</span> <span class="cl">Serializable</span> { ... }</code><span class="code-label">Cliente.java</span></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="background:#1e293b;color:#e2e8f0">📄 ClienteDAO.java — Completo</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.dao;
+
+<span class="kw">import</span> com.veterinaria.modelo.Cliente;
+<span class="kw">import</span> jakarta.enterprise.context.ApplicationScoped;
+<span class="kw">import</span> jakarta.transaction.Transactional;
+<span class="kw">import</span> java.util.List;
+<span class="kw">import</span> java.util.Optional;
+
+<span class="cm">/**
+ * DAO para la entidad Cliente.
+ * Extiende GenericDAO y agrega consultas específicas del dominio.
+ *
+ * @ApplicationScoped → CDI crea UNA sola instancia para toda la app
+ */</span>
+<span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cl">ClienteDAO</span> <span class="kw">extends</span> <span class="cl">GenericDAO</span>&lt;<span class="cl">Cliente</span>, <span class="cl">Long</span>&gt; {
+
+    <span class="an">@Override</span>
+    <span class="kw">protected</span> <span class="cl">Class</span>&lt;<span class="cl">Cliente</span>&gt; <span class="mt">getEntityClass</span>() { <span class="kw">return</span> <span class="cl">Cliente</span>.<span class="kw">class</span>; }
+
+    <span class="cm">// ─── Consultas específicas ──────────────────────────────</span>
+
+    <span class="cm">/** Todos los clientes ordenados por apellido y nombre */</span>
+    <span class="kw">public</span> <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; <span class="mt">listarTodos</span>() {
+        <span class="kw">return</span> em.<span class="mt">createNamedQuery</span>(<span class="st">"Cliente.findAll"</span>, <span class="cl">Cliente</span>.<span class="kw">class</span>)
+                 .<span class="mt">getResultList</span>();
+    }
+
+    <span class="cm">/** Solo clientes con activo = true */</span>
+    <span class="kw">public</span> <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; <span class="mt">listarActivos</span>() {
+        <span class="kw">return</span> em.<span class="mt">createNamedQuery</span>(<span class="st">"Cliente.findActivos"</span>, <span class="cl">Cliente</span>.<span class="kw">class</span>)
+                 .<span class="mt">getResultList</span>();
+    }
+
+    <span class="cm">/** Busca por número de documento exacto — retorna Optional */</span>
+    <span class="kw">public</span> <span class="cl">Optional</span>&lt;<span class="cl">Cliente</span>&gt; <span class="mt">buscarPorDocumento</span>(<span class="cl">String</span> documento) {
+        <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; r = em
+            .<span class="mt">createNamedQuery</span>(<span class="st">"Cliente.findByDocumento"</span>, <span class="cl">Cliente</span>.<span class="kw">class</span>)
+            .<span class="mt">setParameter</span>(<span class="st">"documento"</span>, documento)
+            .<span class="mt">getResultList</span>();
+        <span class="kw">return</span> r.<span class="mt">isEmpty</span>() ? <span class="cl">Optional</span>.<span class="mt">empty</span>() : <span class="cl">Optional</span>.<span class="mt">of</span>(r.<span class="mt">get</span>(<span class="nm">0</span>));
+    }
+
+    <span class="cm">/** Busca por email exacto — retorna Optional */</span>
+    <span class="kw">public</span> <span class="cl">Optional</span>&lt;<span class="cl">Cliente</span>&gt; <span class="mt">buscarPorEmail</span>(<span class="cl">String</span> email) {
+        <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; r = em
+            .<span class="mt">createNamedQuery</span>(<span class="st">"Cliente.findByEmail"</span>, <span class="cl">Cliente</span>.<span class="kw">class</span>)
+            .<span class="mt">setParameter</span>(<span class="st">"email"</span>, email)
+            .<span class="mt">getResultList</span>();
+        <span class="kw">return</span> r.<span class="mt">isEmpty</span>() ? <span class="cl">Optional</span>.<span class="mt">empty</span>() : <span class="cl">Optional</span>.<span class="mt">of</span>(r.<span class="mt">get</span>(<span class="nm">0</span>));
+    }
+
+    <span class="cm">/** Búsqueda parcial por nombre, apellido o documento */</span>
+    <span class="kw">public</span> <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; <span class="mt">buscarPorTexto</span>(<span class="cl">String</span> texto) {
+        <span class="cl">String</span> patron = <span class="st">"%"</span> + texto.<span class="mt">toLowerCase</span>().<span class="mt">trim</span>() + <span class="st">"%"</span>;
+        <span class="kw">return</span> em
+            .<span class="mt">createNamedQuery</span>(<span class="st">"Cliente.buscarPorTexto"</span>, <span class="cl">Cliente</span>.<span class="kw">class</span>)
+            .<span class="mt">setParameter</span>(<span class="st">"patron"</span>, patron)
+            .<span class="mt">getResultList</span>();
+    }
+
+    <span class="cm">/** Baja lógica: activo = false, sin eliminar el registro */</span>
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">desactivar</span>(<span class="cl">Long</span> id) {
+        <span class="cl">Cliente</span> c = em.<span class="mt">find</span>(<span class="cl">Cliente</span>.<span class="kw">class</span>, id);
+        <span class="kw">if</span> (c != <span class="kw">null</span>) {
+            c.<span class="mt">setActivo</span>(<span class="kw">false</span>);
+            em.<span class="mt">merge</span>(c);
+        }
+    }
+
+    <span class="cm">/** Reactiva un cliente previamente desactivado */</span>
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">activar</span>(<span class="cl">Long</span> id) {
+        <span class="cl">Cliente</span> c = em.<span class="mt">find</span>(<span class="cl">Cliente</span>.<span class="kw">class</span>, id);
+        <span class="kw">if</span> (c != <span class="kw">null</span>) {
+            c.<span class="mt">setActivo</span>(<span class="kw">true</span>);
+            em.<span class="mt">merge</span>(c);
+        }
+    }
+}<span class="code-label">ClienteDAO.java</span></pre>
+    </div>
+  </div>
+
+  <div class="alerta alerta-ok">
+    <span class="alerta-icono">🔎</span>
+    <div><strong>¿Por qué Optional?</strong> Cuando buscamos por email o documento esperamos 0 o 1 resultado. Retornar <code>Optional&lt;Cliente&gt;</code> en lugar de <code>Cliente</code> o <code>null</code> obliga al llamador a manejar explícitamente el caso "no encontrado", evitando <code>NullPointerException</code>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     5.6 CLIENTEBEAN ACTUALIZADO
+═══════════════════════════════════════════════════════════ -->
+<div class="seccion" id="s56" style="padding:0 20px">
+  <div class="seccion-header">
+    <div class="seccion-num">6</div>
+    <div class="seccion-titulo">5.6 — ClienteBean Actualizado (usa el DAO)</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card card-rojo">
+      <div class="card-header">❌ ANTES — ClienteBean con ArrayList</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Named</span>(<span class="st">"clienteBean"</span>)
+<span class="an">@SessionScoped</span>
+<span class="kw">public class</span> <span class="cl">ClienteBean</span> {
+
+  <span class="cm">// ❌ Lista en memoria — se pierde al reiniciar</span>
+  <span class="kw">private</span> <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; clientes
+    = <span class="kw">new</span> <span class="cl">ArrayList</span>&lt;&gt;();
+
+  <span class="kw">private</span> <span class="cl">Cliente</span> nuevo = <span class="kw">new</span> <span class="cl">Cliente</span>();
+
+  <span class="kw">public void</span> <span class="mt">agregar</span>() {
+    <span class="cm">// ❌ Solo agrega al ArrayList, no a la BD</span>
+    clientes.<span class="mt">add</span>(nuevo);
+    nuevo = <span class="kw">new</span> <span class="cl">Cliente</span>();
+  }
+}</code></pre>
+      </div>
+    </div>
+    <div class="card card-verde">
+      <div class="card-header">✅ AHORA — ClienteBean con DAO</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Named</span>(<span class="st">"clienteBean"</span>)
+<span class="an">@ViewScoped</span>  <span class="cm">// ← cambio de scope</span>
+<span class="kw">public class</span> <span class="cl">ClienteBean</span> <span class="kw">implements</span> <span class="cl">Serializable</span> {
+
+  <span class="cm">// ✅ Inyectamos el servicio con CDI</span>
+  <span class="an">@Inject</span>
+  <span class="kw">private</span> <span class="cl">ClienteServicio</span> clienteServicio;
+
+  <span class="cm">// Lista cargada desde la BD</span>
+  <span class="kw">private</span> <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; clientes;
+
+  <span class="an">@PostConstruct</span>
+  <span class="kw">public void</span> <span class="mt">init</span>() {
+    clientes = clienteServicio.<span class="mt">listarTodos</span>();
+  }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="background:#1e293b;color:#e2e8f0">📄 ClienteBean.java — Versión completa con DAO</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.controlador;
+
+<span class="kw">import</span> com.veterinaria.modelo.Cliente;
+<span class="kw">import</span> com.veterinaria.servicio.ClienteServicio;
+<span class="kw">import</span> jakarta.annotation.PostConstruct;
+<span class="kw">import</span> jakarta.faces.application.FacesMessage;
+<span class="kw">import</span> jakarta.faces.context.FacesContext;
+<span class="kw">import</span> jakarta.faces.view.ViewScoped;
+<span class="kw">import</span> jakarta.inject.Inject;
+<span class="kw">import</span> jakarta.inject.Named;
+<span class="kw">import</span> java.io.Serializable;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@Named</span>(<span class="st">"clienteBean"</span>)
+<span class="an">@ViewScoped</span>  <span class="cm">// vive mientras el usuario está en la misma vista</span>
+<span class="kw">public class</span> <span class="cl">ClienteBean</span> <span class="kw">implements</span> <span class="cl">Serializable</span> {
+
+    <span class="kw">private static final long</span> serialVersionUID = <span class="nm">1L</span>;
+
+    <span class="cm">// ── CDI inyecta el servicio ──────────────────────────────</span>
+    <span class="an">@Inject</span>
+    <span class="kw">private</span> <span class="cl">ClienteServicio</span> clienteServicio;
+
+    <span class="cm">// ── Estado de la vista ───────────────────────────────────</span>
+    <span class="kw">private</span> <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; clientes;
+    <span class="kw">private</span> <span class="cl">Cliente</span>        clienteSeleccionado;
+    <span class="kw">private</span> <span class="cl">String</span>         textoBusqueda;
+    <span class="kw">private boolean</span>        modoEdicion = <span class="kw">false</span>;
+
+    <span class="cm">// ── @PostConstruct: se ejecuta al crear el bean ──────────</span>
+    <span class="an">@PostConstruct</span>
+    <span class="kw">public void</span> <span class="mt">init</span>() {
+        clienteSeleccionado = <span class="kw">new</span> <span class="cl">Cliente</span>();
+        <span class="mt">cargarClientes</span>();  <span class="cm">// carga desde BD al iniciar</span>
+    }
+
+    <span class="cm">// ── Carga de datos desde BD ──────────────────────────────</span>
+    <span class="kw">public void</span> <span class="mt">cargarClientes</span>() {
+        clientes = clienteServicio.<span class="mt">listarTodos</span>();
+    }
+
+    <span class="cm">// ── Preparar formulario para nueva alta ──────────────────</span>
+    <span class="kw">public void</span> <span class="mt">prepararNuevo</span>() {
+        clienteSeleccionado = <span class="kw">new</span> <span class="cl">Cliente</span>();
+        modoEdicion = <span class="kw">false</span>;
+    }
+
+    <span class="cm">// ── Cargar cliente existente en el formulario ────────────</span>
+    <span class="kw">public void</span> <span class="mt">prepararEdicion</span>(<span class="cl">Cliente</span> c) {
+        <span class="cm">// Recargamos desde BD para tener datos frescos</span>
+        clienteSeleccionado = clienteServicio.<span class="mt">buscarPorId</span>(c.<span class="mt">getId</span>());
+        modoEdicion = <span class="kw">true</span>;
+    }
+
+    <span class="cm">// ── Guardar (INSERT o UPDATE) ────────────────────────────</span>
+    <span class="kw">public void</span> <span class="mt">guardar</span>() {
+        <span class="kw">try</span> {
+            clienteServicio.<span class="mt">guardar</span>(clienteSeleccionado); <span class="cm">// llama al DAO</span>
+            <span class="mt">cargarClientes</span>();                           <span class="cm">// refresca la tabla</span>
+            clienteSeleccionado = <span class="kw">new</span> <span class="cl">Cliente</span>();
+            modoEdicion = <span class="kw">false</span>;
+            <span class="mt">addMsg</span>(<span class="cl">FacesMessage</span>.SEVERITY_INFO,
+                <span class="st">"Éxito"</span>, <span class="st">"Cliente guardado correctamente."</span>);
+
+        } <span class="kw">catch</span> (<span class="cl">IllegalArgumentException</span> e) {
+            <span class="mt">addMsg</span>(<span class="cl">FacesMessage</span>.SEVERITY_WARN, <span class="st">"Atención"</span>, e.<span class="mt">getMessage</span>());
+
+        } <span class="kw">catch</span> (<span class="cl">Exception</span> e) {
+            <span class="mt">addMsg</span>(<span class="cl">FacesMessage</span>.SEVERITY_ERROR,
+                <span class="st">"Error"</span>, <span class="st">"No se pudo guardar el cliente."</span>);
+        }
+    }
+
+    <span class="cm">// ── Eliminar (DELETE físico) ─────────────────────────────</span>
+    <span class="kw">public void</span> <span class="mt">eliminar</span>(<span class="cl">Cliente</span> c) {
+        <span class="kw">try</span> {
+            clienteServicio.<span class="mt">eliminar</span>(c.<span class="mt">getId</span>());
+            <span class="mt">cargarClientes</span>();
+            <span class="mt">addMsg</span>(<span class="cl">FacesMessage</span>.SEVERITY_INFO,
+                <span class="st">"Eliminado"</span>, <span class="st">"El cliente fue eliminado."</span>);
+        } <span class="kw">catch</span> (<span class="cl">Exception</span> e) {
+            <span class="mt">addMsg</span>(<span class="cl">FacesMessage</span>.SEVERITY_ERROR, <span class="st">"Error"</span>,
+                <span class="st">"El cliente tiene mascotas. Use Desactivar."</span>);
+        }
+    }
+
+    <span class="cm">// ── Desactivar (baja lógica) ─────────────────────────────</span>
+    <span class="kw">public void</span> <span class="mt">desactivar</span>(<span class="cl">Cliente</span> c) {
+        clienteServicio.<span class="mt">desactivar</span>(c.<span class="mt">getId</span>());
+        <span class="mt">cargarClientes</span>();
+        <span class="mt">addMsg</span>(<span class="cl">FacesMessage</span>.SEVERITY_INFO,
+            <span class="st">"Desactivado"</span>, c.<span class="mt">getNombreCompleto</span>() + <span class="st">" fue desactivado."</span>);
+    }
+
+    <span class="cm">// ── Búsqueda ─────────────────────────────────────────────</span>
+    <span class="kw">public void</span> <span class="mt">buscar</span>() {
+        clientes = clienteServicio.<span class="mt">buscar</span>(textoBusqueda);
+    }
+
+    <span class="cm">// ── Cancelar edición ─────────────────────────────────────</span>
+    <span class="kw">public void</span> <span class="mt">cancelar</span>() {
+        clienteSeleccionado = <span class="kw">new</span> <span class="cl">Cliente</span>();
+        textoBusqueda = <span class="kw">null</span>;
+        modoEdicion = <span class="kw">false</span>;
+        <span class="mt">cargarClientes</span>();
+    }
+
+    <span class="cm">// ── Helper para mensajes JSF ─────────────────────────────</span>
+    <span class="kw">private void</span> <span class="mt">addMsg</span>(<span class="cl">FacesMessage</span>.<span class="cl">Severity</span> s, <span class="cl">String</span> r, <span class="cl">String</span> d) {
+        <span class="cl">FacesContext</span>.<span class="mt">getCurrentInstance</span>()
+            .<span class="mt">addMessage</span>(<span class="kw">null</span>, <span class="kw">new</span> <span class="cl">FacesMessage</span>(s, r, d));
+    }
+
+    <span class="cm">// ── Getters y Setters ────────────────────────────────────</span>
+    <span class="kw">public</span> <span class="cl">List</span>&lt;<span class="cl">Cliente</span>&gt; <span class="mt">getClientes</span>()            { <span class="kw">return</span> clientes; }
+    <span class="kw">public</span> <span class="cl">Cliente</span> <span class="mt">getClienteSeleccionado</span>()        { <span class="kw">return</span> clienteSeleccionado; }
+    <span class="kw">public void</span> <span class="mt">setClienteSeleccionado</span>(<span class="cl">Cliente</span> c) { clienteSeleccionado = c; }
+    <span class="kw">public</span> <span class="cl">String</span> <span class="mt">getTextoBusqueda</span>()              { <span class="kw">return</span> textoBusqueda; }
+    <span class="kw">public void</span> <span class="mt">setTextoBusqueda</span>(<span class="cl">String</span> t)        { textoBusqueda = t; }
+    <span class="kw">public boolean</span> <span class="mt">isModoEdicion</span>()                { <span class="kw">return</span> modoEdicion; }
+}<span class="code-label">ClienteBean.java</span></pre>
+    </div>
+  </div>
+
+  <h3 style="color:var(--azul);margin:24px 0 12px;font-size:1.05rem">▶ Flujo completo de una operación de guardado</h3>
+  <div class="diagrama">
+Usuario llena el formulario y hace click en "Guardar"
+        ↓
+Jakarta Faces ejecuta las 6 fases del ciclo de vida
+        ↓
+Fase 5: Invoke Application → clienteBean.guardar()
+        ↓
+ClienteBean.guardar()
+  └─→ clienteServicio.guardar(cliente)         [CAPA SERVICIO]
+        ├─ Valida: ¿email duplicado?
+        │    └─ clienteDAO.buscarPorEmail()     [CAPA DAO]
+        │         └─ em.createNamedQuery(...)   [EntityManager → MySQL]
+        └─ clienteDAO.guardar(cliente)          [CAPA DAO]  @Transactional
+              └─ em.persist(cliente)            [EntityManager]
+                    └─ INSERT INTO cliente...   [MySQL 8]
+                          ↓
+                       COMMIT ✅
+        ↓
+ClienteBean.cargarClientes()
+  └─→ clienteServicio.listarTodos()
+        └─→ clienteDAO.listarTodos()
+              └─→ SELECT * FROM cliente ORDER BY apellido
+                          ↓
+               Lista actualizada en la vista</div>
+</div>
+<div class="sep"></div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     RESUMEN
+═══════════════════════════════════════════════════════════ -->
+<div class="seccion" id="resumen" style="padding:0 20px">
+  <div class="seccion-header">
+    <div class="seccion-num">✅</div>
+    <div class="seccion-titulo">Resumen y Puntos Clave</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card card-azul">
+      <div class="card-header">🏗️ Patrón DAO</div>
+      <div class="card-body">
+        <ul style="padding-left:18px;line-height:2;font-size:.92rem">
+          <li>Separa el acceso a datos del negocio</li>
+          <li><code>GenericDAO&lt;T,ID&gt;</code> provee CRUD base</li>
+          <li>Cada entidad tiene su DAO específico</li>
+          <li><code>@ApplicationScoped</code> = una instancia</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card card-verde">
+      <div class="card-header">⚙️ EntityManager</div>
+      <div class="card-body">
+        <ul style="padding-left:18px;line-height:2;font-size:.92rem">
+          <li><code>@PersistenceContext</code> para inyectarlo</li>
+          <li><code>persist</code> → INSERT (entidad nueva)</li>
+          <li><code>merge</code> → UPDATE (entidad existente)</li>
+          <li><code>remove</code> → DELETE (después de find)</li>
+          <li><code>find</code> → SELECT por PK</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card" style="border-color:#e0e7ff">
+      <div class="card-header" style="background:#e0e7ff;color:#3730a3">🔍 JPQL</div>
+      <div class="card-body">
+        <ul style="padding-left:18px;line-height:2;font-size:.92rem">
+          <li>Trabaja con clases Java, no con tablas SQL</li>
+          <li><code>:parametro</code> para evitar injection</li>
+          <li><code>@NamedQuery</code> para consultas frecuentes</li>
+          <li><code>JOIN FETCH</code> evita el problema N+1</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card card-naranja">
+      <div class="card-header">🔒 @Transactional</div>
+      <div class="card-body">
+        <ul style="padding-left:18px;line-height:2;font-size:.92rem">
+          <li>Obligatorio en persist, merge, remove</li>
+          <li>Commit automático al terminar el método</li>
+          <li>Rollback automático ante RuntimeException</li>
+          <li>Lecturas no lo necesitan (pero no rompen)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:8px">
+    <div class="card-header" style="background:var(--azul);color:#fff">📐 Arquitectura final de la aplicación</div>
+    <div class="card-body">
+      <table style="margin:0">
+        <thead>
+          <tr>
+            <th>Capa</th>
+            <th>Clase / Archivo</th>
+            <th>Anotación CDI</th>
+            <th>Responsabilidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Vista</strong></td>
+            <td><code>clientes/abm.xhtml</code></td>
+            <td>—</td>
+            <td>Formulario HTML + EL</td>
+          </tr>
+          <tr>
+            <td><strong>Controlador</strong></td>
+            <td><code>ClienteBean.java</code></td>
+            <td><code>@Named @ViewScoped</code></td>
+            <td>Estado de la vista, acciones del usuario</td>
+          </tr>
+          <tr>
+            <td><strong>Servicio</strong></td>
+            <td><code>ClienteServicio.java</code></td>
+            <td><code>@ApplicationScoped</code></td>
+            <td>Reglas de negocio, validaciones</td>
+          </tr>
+          <tr>
+            <td><strong>DAO</strong></td>
+            <td><code>ClienteDAO.java</code></td>
+            <td><code>@ApplicationScoped</code></td>
+            <td>CRUD + JPQL sobre la entidad Cliente</td>
+          </tr>
+          <tr>
+            <td><strong>Entidad</strong></td>
+            <td><code>Cliente.java</code></td>
+            <td><code>@Entity</code></td>
+            <td>Mapeo objeto-relacional + NamedQueries</td>
+          </tr>
+          <tr>
+            <td><strong>BD</strong></td>
+            <td><code>tabla: cliente</code></td>
+            <td>—</td>
+            <td>Persistencia real en MySQL 8</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="alerta alerta-ok" style="margin-top:20px">
+    <span class="alerta-icono">🎯</span>
+    <div>
+      <strong>Logro de la clase:</strong> Reemplazamos el <code>ArrayList</code> temporal por una arquitectura profesional de 4 capas conectada a MySQL. El Bean ya no sabe nada de SQL: delega todo al Servicio que delega al DAO que usa el EntityManager. Cada capa tiene una sola responsabilidad — esto es lo que hace un sistema mantenible y escalable.
+    </div>
+  </div>
+
+  <!-- ACTIVIDAD PRÁCTICA -->
+  <div class="card card-azul" style="margin-top:24px">
+    <div class="card-header">💻 Actividad Práctica — Clase 05</div>
+    <div class="card-body">
+      <div class="paso">
+        <div class="paso-num">1</div>
+        <div class="paso-cuerpo">
+          <h4>Crear GenericDAO.java</h4>
+          <p>Crear el paquete <code>com.veterinaria.dao</code> y la clase abstracta genérica con los 5 métodos base.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">2</div>
+        <div class="paso-cuerpo">
+          <h4>Agregar @NamedQueries a Cliente.java</h4>
+          <p>Definir las 5 NamedQueries en la entidad: findAll, findActivos, findByDocumento, findByEmail y buscarPorTexto.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">3</div>
+        <div class="paso-cuerpo">
+          <h4>Crear ClienteDAO.java</h4>
+          <p>Extender GenericDAO y agregar los métodos específicos: listarTodos, buscarPorEmail, buscarPorTexto, desactivar, activar.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">4</div>
+        <div class="paso-cuerpo">
+          <h4>Crear ClienteServicio.java</h4>
+          <p>Inyectar ClienteDAO con @Inject y agregar las reglas de negocio: validar email único, validar documento único.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">5</div>
+        <div class="paso-cuerpo">
+          <h4>Actualizar ClienteBean.java</h4>
+          <p>Reemplazar el ArrayList por @Inject ClienteServicio. Actualizar todos los métodos para usar el servicio. Cambiar @SessionScoped a @ViewScoped.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">6</div>
+        <div class="paso-cuerpo">
+          <h4>Probar el CRUD completo</h4>
+          <p>Alta, búsqueda, modificación, desactivar y eliminar. Verificar en MySQL que los cambios persisten al recargar la página.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p><strong>Programación Web Avanzada — Backend</strong> &nbsp;|&nbsp; Clase 05: El DAO, EntityManager y Transacciones</p>
+  <p style="margin-top:6px">Jakarta EE 10 &middot; JPA 3.1 &middot; EclipseLink &middot; GlassFish 7 &middot; MySQL 8 &middot; CDI 4.0 &middot; JDK 21</p>
+</footer>
+
+</body>
+</html>
