@@ -93,9 +93,9 @@
                                          requiredMessage="El email es obligatorio"
                                          maxlength="150"
                                          styleClass="form-control"
-                                         pt:placeholder="ejemplo@email.com">
-                                <f:validateRegex pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$"
-                                                 message="El formato del email no es válido"/>
+                                         pt:placeholder="ejemplo@email.com"
+                                         validatorMessage="El formato del email no es válido">
+                                <f:validateRegex pattern="^[^@]+@[^@]+\.[^@]+$"/>
                             </h:inputText>
                             <h:message for="email" styleClass="form-error"/>
                         </div>
