@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:ui="jakarta.faces.facelets">
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:pt="jakarta.faces.passthrough">
 
 <ui:composition template="/plantilla.xhtml">
 
@@ -69,7 +70,7 @@
                                          requiredMessage="El nombre es obligatorio"
                                          maxlength="80"
                                          styleClass="form-control"
-                                         placeholder="Nombre de la mascota"/>
+                                         pt:placeholder="Nombre de la mascota"/>
                             <h:message for="nombre" styleClass="form-error"/>
                         </div>
 
@@ -103,7 +104,7 @@
                                          value="#{mascotaBean.mascotaSeleccionada.raza}"
                                          maxlength="100"
                                          styleClass="form-control"
-                                         placeholder="Raza (opcional)"/>
+                                         pt:placeholder="Raza (opcional)"/>
                             <h:message for="raza" styleClass="form-error"/>
                         </div>
 
@@ -129,8 +130,8 @@
                                            styleClass="form-label"/>
                             <h:inputText id="fechaNac"
                                          value="#{mascotaBean.mascotaSeleccionada.fechaNac}"
-                                         placeholder="dd/MM/yyyy"
-                                         styleClass="form-control">
+                                         styleClass="form-control"
+                                         pt:placeholder="dd/MM/yyyy">
                                 <f:convertDateTime pattern="dd/MM/yyyy" type="localDate"/>
                             </h:inputText>
                             <h:message for="fechaNac" styleClass="form-error"/>
@@ -163,8 +164,8 @@
             <div class="barra-busqueda">
                 <h:inputText id="buscar"
                              value="#{mascotaBean.textoBusqueda}"
-                             placeholder="Buscar por nombre de mascota..."
-                             styleClass="form-control busqueda-input"/>
+                             styleClass="form-control busqueda-input"
+                             pt:placeholder="Buscar por nombre de mascota..."/>
                 <h:commandButton value="&#x1F50D; Buscar"
                                  action="#{mascotaBean.buscar}"
                                  styleClass="btn btn-buscar"/>
@@ -265,7 +266,7 @@
                                              title="Eliminar definitivamente"
                                              action="#{mascotaBean.eliminar(m)}"
                                              styleClass="btn btn-sm btn-peligro"
-                                             onclick="return confirm('¿Eliminar a #{m.nombre}? Esta acción no se puede deshacer.')"/>
+                                             onclick="return confirm('¿Eliminar a #{m.nombre}?')"/>
                         </h:column>
 
                     </h:dataTable>

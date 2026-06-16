@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:ui="jakarta.faces.facelets">
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:pt="jakarta.faces.passthrough">
 
 <ui:composition template="/plantilla.xhtml">
 
@@ -20,92 +21,73 @@
             </p>
         </div>
 
-        <!-- Mensajes de operación -->
         <h:messages globalOnly="true" showDetail="true"
                     infoClass="msg msg-info"
                     warnClass="msg msg-warn"
                     errorClass="msg msg-error"
                     layout="table"/>
 
-        <!-- ═══════════════════════════════════════════════════
-             FORMULARIO: RESERVAR TURNO
-        ══════════════════════════════════════════════════════ -->
+        <!-- FORMULARIO RESERVAR TURNO -->
         <h:form id="frmTurno">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-titulo">&#x2795; Reservar Nuevo Turno</h3>
                 </div>
                 <div class="card-body">
-
                     <div class="form-grid">
 
-                        <!-- Mascota -->
                         <div class="form-grupo form-grupo-ancho">
-                            <h:outputLabel for="mascota"
-                                           value="Mascota *"
-                                           styleClass="form-label"/>
+                            <h:outputLabel for="mascota" value="Mascota *" styleClass="form-label"/>
                             <h:selectOneMenu id="mascota"
                                              value="#{turnoBean.mascotaIdSeleccionada}"
                                              required="true"
                                              requiredMessage="Debe seleccionar una mascota"
                                              styleClass="form-control form-select">
-                                <f:selectItem itemValue=""
-                                              itemLabel="— Seleccione una mascota —"
+                                <f:selectItem itemValue="" itemLabel="— Seleccione una mascota —"
                                               noSelectionOption="true"/>
-                                <f:selectItems value="#{turnoBean.mascotas}"
-                                               var="m"
+                                <f:selectItems value="#{turnoBean.mascotas}" var="m"
                                                itemValue="#{m.id}"
-                                               itemLabel="#{m.nombre} (#{m.especie})  —  Dueño: #{m.cliente.apellido}, #{m.cliente.nombre}"/>
+                                               itemLabel="#{m.nombre} (#{m.especie})  —  #{m.cliente.apellido}, #{m.cliente.nombre}"/>
                                 <f:converter converterId="jakarta.faces.Long"/>
                             </h:selectOneMenu>
                             <h:message for="mascota" styleClass="form-error"/>
                         </div>
 
-                        <!-- Fecha y Hora -->
                         <div class="form-grupo">
-                            <h:outputLabel for="fechaHora"
-                                           value="Fecha y Hora *"
-                                           styleClass="form-label"/>
+                            <h:outputLabel for="fechaHora" value="Fecha y Hora *" styleClass="form-label"/>
                             <h:inputText id="fechaHora"
                                          value="#{turnoBean.turnoSeleccionado.fechaHora}"
                                          required="true"
                                          requiredMessage="La fecha y hora son obligatorias"
-                                         placeholder="dd/MM/yyyy HH:mm"
-                                         styleClass="form-control">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm"
-                                                   type="localDateTime"/>
+                                         styleClass="form-control"
+                                         pt:placeholder="dd/MM/yyyy HH:mm">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
                             </h:inputText>
                             <h:message for="fechaHora" styleClass="form-error"/>
                         </div>
 
-                        <!-- Motivo -->
                         <div class="form-grupo">
-                            <h:outputLabel for="motivo"
-                                           value="Motivo"
-                                           styleClass="form-label"/>
+                            <h:outputLabel for="motivo" value="Motivo" styleClass="form-label"/>
                             <h:inputText id="motivo"
                                          value="#{turnoBean.turnoSeleccionado.motivo}"
                                          maxlength="200"
                                          styleClass="form-control"
-                                         placeholder="Ej: Consulta general, Vacunación..."/>
+                                         pt:placeholder="Ej: Consulta general, Vacunación..."/>
                             <h:message for="motivo" styleClass="form-error"/>
                         </div>
 
-                        <!-- Observaciones -->
                         <div class="form-grupo form-grupo-ancho">
-                            <h:outputLabel for="observaciones"
-                                           value="Observaciones"
-                                           styleClass="form-label"/>
+                            <h:outputLabel for="observaciones" value="Observaciones" styleClass="form-label"/>
                             <h:inputTextarea id="observaciones"
                                              value="#{turnoBean.turnoSeleccionado.observaciones}"
                                              rows="2"
                                              maxlength="500"
                                              styleClass="form-control"
-                                             placeholder="Información adicional (opcional)"/>
+                                             pt:placeholder="Información adicional (opcional)"/>
                             <h:message for="observaciones" styleClass="form-error"/>
                         </div>
 
-                    </div><!-- /.form-grid -->
+                    </div>
 
                     <div class="form-botones">
                         <h:commandButton value="&#x1F4C5; Reservar Turno"
@@ -116,14 +98,11 @@
                                          immediate="true"
                                          styleClass="btn btn-secundario"/>
                     </div>
-
-                </div><!-- /.card-body -->
-            </div><!-- /.card -->
+                </div>
+            </div>
         </h:form>
 
-        <!-- ═══════════════════════════════════════════════════
-             FILTRO DE TURNOS
-        ══════════════════════════════════════════════════════ -->
+        <!-- FILTRO -->
         <h:form id="frmFiltro">
             <div class="barra-busqueda">
                 <h:commandButton value="#{turnoBean.textoFiltro}"
@@ -137,16 +116,12 @@
             </div>
         </h:form>
 
-        <!-- ═══════════════════════════════════════════════════
-             TABLA DE TURNOS
-        ══════════════════════════════════════════════════════ -->
+        <!-- TABLA DE TURNOS -->
         <h:form id="frmListado">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-titulo">
-                        #{turnoBean.soloVigentes
-                            ? '&#x1F4CB; Turnos Vigentes'
-                            : '&#x1F4CB; Todos los Turnos'}
+                        #{turnoBean.soloVigentes ? '&#x1F4CB; Turnos Vigentes' : '&#x1F4CB; Todos los Turnos'}
                     </h3>
                 </div>
                 <div class="tabla-wrapper">
@@ -167,26 +142,21 @@
                             <f:facet name="header">Fecha y Hora</f:facet>
                             <strong>
                                 <h:outputText value="#{t.fechaHora}">
-                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"
-                                                       type="localDateTime"/>
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" type="localDateTime"/>
                                 </h:outputText>
                             </strong>
                         </h:column>
 
                         <h:column>
                             <f:facet name="header">Mascota</f:facet>
-                            <strong>#{t.mascota.nombre}</strong>
-                            <br/>
+                            <strong>#{t.mascota.nombre}</strong><br/>
                             <span class="text-muted text-sm">#{t.mascota.especie}</span>
                         </h:column>
 
                         <h:column>
                             <f:facet name="header">Dueño</f:facet>
-                            #{t.mascota.cliente.apellido}, #{t.mascota.cliente.nombre}
-                            <br/>
-                            <span class="text-muted text-sm">
-                                Doc: #{t.mascota.cliente.documento}
-                            </span>
+                            #{t.mascota.cliente.apellido}, #{t.mascota.cliente.nombre}<br/>
+                            <span class="text-muted text-sm">Doc: #{t.mascota.cliente.documento}</span>
                         </h:column>
 
                         <h:column>
@@ -196,22 +166,17 @@
 
                         <h:column>
                             <f:facet name="header">Observaciones</f:facet>
-                            <span class="text-sm">
-                                #{empty t.observaciones ? '—' : t.observaciones}
-                            </span>
+                            <span class="text-sm">#{empty t.observaciones ? '—' : t.observaciones}</span>
                         </h:column>
 
                         <h:column>
                             <f:facet name="header">Estado</f:facet>
-                            <span class="badge badge-#{t.estado.toLowerCase()}">
-                                #{t.estado}
-                            </span>
+                            <span class="badge badge-#{t.estado.toLowerCase()}">#{t.estado}</span>
                         </h:column>
 
                         <h:column styleClass="col-acciones-turnos">
                             <f:facet name="header">Acciones</f:facet>
 
-                            <!-- PENDIENTE → CONFIRMADO -->
                             <h:commandButton value="&#x2714; Confirmar"
                                              title="Confirmar turno"
                                              action="#{turnoBean.confirmar(t)}"
@@ -219,7 +184,6 @@
                                              styleClass="btn btn-sm btn-ok"
                                              onclick="return confirm('¿Confirmar el turno de #{t.mascota.nombre}?')"/>
 
-                            <!-- CONFIRMADO → REALIZADO -->
                             <h:commandButton value="&#x2705; Realizado"
                                              title="Marcar como realizado"
                                              action="#{turnoBean.marcarRealizado(t)}"
@@ -227,7 +191,6 @@
                                              styleClass="btn btn-sm btn-editar"
                                              onclick="return confirm('¿Marcar el turno de #{t.mascota.nombre} como realizado?')"/>
 
-                            <!-- Cancelar (PENDIENTE o CONFIRMADO) -->
                             <h:commandButton value="&#x2716; Cancelar"
                                              title="Cancelar turno"
                                              action="#{turnoBean.cancelarTurno(t)}"
@@ -235,7 +198,6 @@
                                              styleClass="btn btn-sm btn-warn"
                                              onclick="return confirm('¿Cancelar el turno de #{t.mascota.nombre}?')"/>
 
-                            <!-- Eliminar (solo CANCELADO o REALIZADO) -->
                             <h:commandButton value="&#x1F5D1;"
                                              title="Eliminar registro"
                                              action="#{turnoBean.eliminar(t)}"
@@ -245,8 +207,8 @@
                         </h:column>
 
                     </h:dataTable>
-                </div><!-- /.tabla-wrapper -->
-            </div><!-- /.card -->
+                </div>
+            </div>
         </h:form>
 
     </ui:define>

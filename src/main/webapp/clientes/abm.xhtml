@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:ui="jakarta.faces.facelets">
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:pt="jakarta.faces.passthrough">
 
 <ui:composition template="/plantilla.xhtml">
 
@@ -47,7 +48,7 @@
                                          requiredMessage="El documento es obligatorio"
                                          maxlength="20"
                                          styleClass="form-control"
-                                         placeholder="Ej: 30111222"/>
+                                         pt:placeholder="Ej: 30111222"/>
                             <h:message for="documento" styleClass="form-error"/>
                         </div>
 
@@ -62,7 +63,7 @@
                                          requiredMessage="El apellido es obligatorio"
                                          maxlength="100"
                                          styleClass="form-control"
-                                         placeholder="Apellido"/>
+                                         pt:placeholder="Apellido"/>
                             <h:message for="apellido" styleClass="form-error"/>
                         </div>
 
@@ -77,7 +78,7 @@
                                          requiredMessage="El nombre es obligatorio"
                                          maxlength="100"
                                          styleClass="form-control"
-                                         placeholder="Nombre"/>
+                                         pt:placeholder="Nombre"/>
                             <h:message for="nombre" styleClass="form-error"/>
                         </div>
 
@@ -92,7 +93,7 @@
                                          requiredMessage="El email es obligatorio"
                                          maxlength="150"
                                          styleClass="form-control"
-                                         placeholder="ejemplo@email.com">
+                                         pt:placeholder="ejemplo@email.com">
                                 <f:validateRegex pattern="^[^@\s]+@[^@\s]+\.[^@\s]+$"
                                                  message="El formato del email no es válido"/>
                             </h:inputText>
@@ -108,7 +109,7 @@
                                          value="#{clienteBean.clienteSeleccionado.telefono}"
                                          maxlength="20"
                                          styleClass="form-control"
-                                         placeholder="Ej: 11-1234-5678"/>
+                                         pt:placeholder="Ej: 11-1234-5678"/>
                             <h:message for="telefono" styleClass="form-error"/>
                         </div>
 
@@ -121,7 +122,7 @@
                                          value="#{clienteBean.clienteSeleccionado.direccion}"
                                          maxlength="200"
                                          styleClass="form-control"
-                                         placeholder="Calle, número, ciudad"/>
+                                         pt:placeholder="Calle, número, ciudad"/>
                             <h:message for="direccion" styleClass="form-error"/>
                         </div>
 
@@ -152,8 +153,8 @@
             <div class="barra-busqueda">
                 <h:inputText id="buscar"
                              value="#{clienteBean.textoBusqueda}"
-                             placeholder="Buscar por nombre, apellido o documento..."
-                             styleClass="form-control busqueda-input"/>
+                             styleClass="form-control busqueda-input"
+                             pt:placeholder="Buscar por nombre, apellido o documento..."/>
                 <h:commandButton value="&#x1F50D; Buscar"
                                  action="#{clienteBean.buscar}"
                                  styleClass="btn btn-buscar"/>
@@ -221,13 +222,11 @@
                         <h:column styleClass="col-acciones">
                             <f:facet name="header">Acciones</f:facet>
 
-                            <!-- Editar -->
                             <h:commandButton value="&#x270F;"
                                              title="Modificar cliente"
                                              action="#{clienteBean.prepararEdicion(c)}"
                                              styleClass="btn btn-sm btn-editar"/>
 
-                            <!-- Desactivar (baja lógica) -->
                             <h:commandButton value="&#x1F6AB;"
                                              title="Desactivar"
                                              action="#{clienteBean.desactivar(c)}"
@@ -235,24 +234,22 @@
                                              styleClass="btn btn-sm btn-warn"
                                              onclick="return confirm('¿Desactivar a #{c.apellido}, #{c.nombre}?')"/>
 
-                            <!-- Activar -->
                             <h:commandButton value="&#x2705;"
                                              title="Activar"
                                              action="#{clienteBean.activar(c)}"
                                              rendered="#{!c.activo}"
                                              styleClass="btn btn-sm btn-ok"/>
 
-                            <!-- Eliminar (baja física) -->
                             <h:commandButton value="&#x1F5D1;"
                                              title="Eliminar definitivamente"
                                              action="#{clienteBean.eliminar(c)}"
                                              styleClass="btn btn-sm btn-peligro"
-                                             onclick="return confirm('¿Eliminar definitivamente a #{c.apellido}, #{c.nombre}? Esta acción no se puede deshacer.')"/>
+                                             onclick="return confirm('¿Eliminar definitivamente a #{c.apellido}, #{c.nombre}?')"/>
                         </h:column>
 
                     </h:dataTable>
-                </div><!-- /.tabla-wrapper -->
-            </div><!-- /.card -->
+                </div>
+            </div>
         </h:form>
 
     </ui:define>
