@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clase 04 &#x2014; JPA Avanzado: Validaciones, JPQL y Navegaci&#xF3;n</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1a3a5c;--azul2:#2563a8;--azul3:#3b82d1;--azul-cl:#dbeafe;
+  --verde:#166534;--verde-cl:#dcfce7;--verde2:#16a34a;
+  --naranja:#92400e;--naranja-cl:#fef3c7;--naranja2:#d97706;
+  --rojo:#991b1b;--rojo-cl:#fee2e2;--rojo2:#dc2626;
+  --violeta:#4c1d95;--violeta-cl:#ede9fe;--violeta2:#7c3aed;
+  --gris:#f1f5f9;--gris2:#e2e8f0;--gris3:#94a3b8;--gris4:#475569;--texto:#0f172a;
+  --fuente:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--fuente);background:#f8fafc;color:var(--texto);font-size:15px;line-height:1.6}
+a{color:var(--azul2);text-decoration:none}
+code{font-family:'Cascadia Code','Fira Code','Consolas',monospace;font-size:.92em}
+
+/* PORTADA */
+.portada{background:linear-gradient(135deg,#0f172a 0%,var(--azul) 45%,var(--azul2) 80%,var(--azul3) 100%);
+  color:#fff;padding:70px 40px;text-align:center;border-radius:0 0 28px 28px;
+  box-shadow:0 8px 40px rgba(0,0,0,.35);margin-bottom:40px}
+.portada-badge{display:inline-block;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);padding:6px 20px;border-radius:20px;
+  font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+.portada-num{font-size:5rem;font-weight:900;line-height:1;opacity:.18;margin-bottom:-10px}
+.portada h1{font-size:2.3rem;font-weight:800;margin-bottom:8px;line-height:1.2}
+.portada h2{font-size:1.05rem;font-weight:400;opacity:.8;margin-bottom:24px}
+.portada-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.tag{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:16px;font-size:11px;font-weight:600}
+
+/* INDICE */
+.indice{max-width:880px;margin:0 auto 40px;background:#fff;border-radius:14px;
+  border:1px solid var(--gris2);box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
+.indice-hdr{background:var(--azul);color:#fff;padding:13px 22px;font-size:.95rem;font-weight:700}
+.indice-lista{list-style:none;display:grid;grid-template-columns:1fr 1fr}
+.indice-lista li{border-bottom:1px solid var(--gris2);border-right:1px solid var(--gris2)}
+.indice-lista a{display:flex;align-items:center;gap:11px;padding:11px 17px;
+  color:var(--texto);font-size:.86rem;transition:background .15s}
+.indice-lista a:hover{background:var(--azul-cl)}
+.ind-n{width:26px;height:26px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+@media(max-width:580px){.indice-lista{grid-template-columns:1fr}}
+
+/* SECCIONES */
+.sec{max-width:880px;margin:0 auto 50px;scroll-margin-top:20px;padding:0 20px}
+.sec-hdr{display:flex;align-items:center;gap:13px;margin-bottom:20px;
+  padding-bottom:11px;border-bottom:3px solid var(--azul2)}
+.sec-num{width:44px;height:44px;background:linear-gradient(135deg,var(--azul),var(--azul2));
+  color:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:.97rem;font-weight:800;flex-shrink:0}
+.sec-titulo{font-size:1.38rem;font-weight:800;color:var(--azul)}
+.dn{display:inline-block;background:var(--azul2);color:#fff;
+  font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:10px;
+  margin-bottom:8px;letter-spacing:.5px}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--gris2);border-radius:11px;
+  box-shadow:0 1px 5px rgba(0,0,0,.06);margin-bottom:14px;overflow:hidden}
+.card-hdr{padding:11px 17px;font-weight:700;font-size:.88rem;border-bottom:1px solid var(--gris2)}
+.card-body{padding:16px}
+.c-azul   .card-hdr{background:var(--azul-cl);color:var(--azul)}
+.c-verde  .card-hdr{background:var(--verde-cl);color:var(--verde)}
+.c-naranja .card-hdr{background:var(--naranja-cl);color:var(--naranja)}
+.c-rojo   .card-hdr{background:var(--rojo-cl);color:var(--rojo)}
+.c-violeta .card-hdr{background:var(--violeta-cl);color:var(--violeta)}
+
+/* ALERTAS */
+.alerta{display:flex;gap:11px;padding:12px 15px;border-radius:9px;margin:12px 0;font-size:.87rem}
+.a-info {background:var(--azul-cl);border-left:4px solid var(--azul2)}
+.a-ok   {background:var(--verde-cl);border-left:4px solid var(--verde2)}
+.a-warn {background:var(--naranja-cl);border-left:4px solid var(--naranja2)}
+.a-err  {background:var(--rojo-cl);border-left:4px solid var(--rojo2)}
+.a-viol {background:var(--violeta-cl);border-left:4px solid var(--violeta2)}
+.a-ico  {font-size:1.15rem;flex-shrink:0;margin-top:2px}
+
+/* CODIGO */
+pre{background:#0f172a;color:#e2e8f0;padding:18px 20px;border-radius:10px;
+  overflow-x:auto;font-size:12.5px;line-height:1.8;margin:10px 0;
+  border:1px solid #1e293b;position:relative}
+.cl{background:#1e293b;border-radius:5px;padding:2px 8px;font-size:10px;
+  color:#94a3b8;font-family:var(--fuente);position:absolute;top:7px;right:9px}
+.kw{color:#93c5fd}.an{color:#86efac}.st{color:#fca5a5}
+.cm{color:#64748b;font-style:italic}.cn{color:#fde68a}.mt{color:#c4b5fd}.nm{color:#fdba74}
+.ok{color:#86efac}.bad{color:#fca5a5}
+
+/* TABLA */
+table{width:100%;border-collapse:collapse;font-size:.87rem;margin:10px 0}
+th{background:var(--azul);color:#fff;padding:8px 12px;text-align:left;
+  font-size:.76rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:8px 12px;border-bottom:1px solid var(--gris2);vertical-align:top}
+tr:nth-child(even) td{background:var(--gris)}
+tr:hover td{background:var(--azul-cl)}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:10px 0}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-verde  {background:var(--verde-cl);color:var(--verde)}
+.b-rojo   {background:var(--rojo-cl);color:var(--rojo)}
+.b-azul   {background:var(--azul-cl);color:var(--azul2)}
+.b-naranja{background:var(--naranja-cl);color:var(--naranja)}
+.b-violeta{background:var(--violeta-cl);color:var(--violeta2)}
+
+/* CAPAS VISUAL */
+.capas{background:#0f172a;border-radius:14px;padding:24px 20px;
+  margin:14px 0;display:flex;flex-direction:column;align-items:center;gap:0}
+.capa{width:100%;max-width:540px;display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-radius:9px;border:1px solid;transition:transform .15s}
+.capa:hover{transform:translateX(4px)}
+.capa-ico{font-size:1.3rem;width:30px;text-align:center;flex-shrink:0}
+.capa-info{flex:1}
+.capa-nom{font-weight:700;font-size:.87rem}
+.capa-det{font-size:.74rem;opacity:.75;margin-top:1px}
+.capa-tag{font-size:.67rem;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.capa-arr{color:#334155;font-size:.72rem;padding:3px 0;
+  display:flex;align-items:center;gap:8px;width:100%;max-width:540px;padding-left:42px}
+.cp-jsf {background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe}
+.cp-jsf .capa-tag{background:#2563a8;color:#fff}
+.cp-bean{background:#312e81;border-color:#818cf8;color:#e0e7ff}
+.cp-bean .capa-tag{background:#4f46e5;color:#fff}
+.cp-serv{background:#14532d;border-color:#4ade80;color:#bbf7d0}
+.cp-serv .capa-tag{background:#16a34a;color:#fff}
+.cp-dao {background:#3b0764;border-color:#a855f7;color:#f3e8ff}
+.cp-dao .capa-tag{background:#9333ea;color:#fff}
+.cp-db  {background:#1c1917;border-color:#78716c;color:#e7e5e4}
+.cp-db  .capa-tag{background:#57534e;color:#fff}
+
+/* OBJETIVOS */
+.obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+@media(max-width:560px){.obj-grid{grid-template-columns:1fr}}
+.obj-item{background:#fff;border:1px solid var(--gris2);
+  border-left:4px solid var(--azul2);border-radius:8px;
+  padding:10px 13px;font-size:.87rem;display:flex;align-items:flex-start;gap:9px}
+
+/* PASOS */
+.paso{display:flex;gap:13px;margin-bottom:13px;align-items:flex-start}
+.paso-n{width:32px;height:32px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.83rem;flex-shrink:0;margin-top:2px}
+.paso-body h4{font-size:.88rem;color:var(--azul);margin-bottom:3px;font-weight:700}
+.paso-body p{font-size:.83rem;color:var(--gris4)}
+
+/* DIAGRAMA FLUJO */
+.flujo{background:#0f172a;border-radius:14px;padding:24px 20px;margin:14px 0;
+  display:flex;flex-direction:column;align-items:center;gap:0}
+.flujo-paso{width:100%;max-width:480px;display:flex;align-items:center;gap:12px;
+  padding:11px 16px;border-radius:9px;border:1px solid;background:#1e293b;border-color:#334155;color:#e2e8f0}
+.flujo-num{width:28px;height:28px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0}
+.flujo-txt{font-size:.82rem;font-weight:600}
+.flujo-arr{color:#475569;font-size:1.2rem;padding:2px 0;text-align:center;width:100%;max-width:480px}
+
+/* ARBOL ARCHIVOS */
+.tree{background:#0f172a;color:#e2e8f0;padding:20px 24px;border-radius:10px;
+  font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.9;margin:10px 0}
+.tree-dir{color:#93c5fd;font-weight:700}
+.tree-file{color:#fde68a}
+.tree-desc{color:#64748b;font-style:italic}
+
+/* SEP / FOOTER */
+.sep{height:2px;background:linear-gradient(90deg,var(--azul2),transparent);
+  max-width:880px;margin:0 auto 50px;border-radius:2px}
+footer{background:var(--azul);color:rgba(255,255,255,.65);text-align:center;
+  padding:20px;font-size:.79rem;margin-top:56px}
+</style>
+</head>
+
+
+<body>
+
+<!-- PORTADA -->
+<div class="portada">
+  <div class="portada-badge">Programaci&#xF3;n Web Avanzada &#x2014; Backend</div>
+  <div class="portada-num">04</div>
+  <h1>JPA Avanzado: Validaciones, JPQL y Navegaci&#xF3;n</h1>
+  <h2>Bean Validation &#xB7; JPQL &#xB7; Plantilla Facelets &#xB7; Men&#xFA; &#xB7; CSS</h2>
+  <div class="portada-tags">
+    <span class="tag">Bean Validation 3.0</span><span class="tag">JPQL</span>
+    <span class="tag">@NamedQuery</span><span class="tag">Facelets Template</span>
+    <span class="tag">Navegaci&#xF3;n</span><span class="tag">CSS Profesional</span>
+    <span class="tag">JSF 4.0</span><span class="tag">GlassFish 7</span>
+  </div>
+</div>
+
+<!-- INDICE -->
+<div style="max-width:880px;margin:0 auto;padding:0 20px">
+<div class="indice">
+  <div class="indice-hdr">&#x1F4DA; Clase 04 &#x2014; &#xCD;ndice de contenidos</div>
+  <ul class="indice-lista">
+    <li><a href="#obj"><span class="ind-n">&#x1F3AF;</span>Objetivos</a></li>
+    <li><a href="#s1"><span class="ind-n">1</span>Evoluci&#xF3;n del modelo Cliente</a></li>
+    <li><a href="#s2"><span class="ind-n">2</span>Validaciones en la Vista (JSF)</a></li>
+    <li><a href="#s3"><span class="ind-n">3</span>Bean Validation en la Entidad</a></li>
+    <li><a href="#s4"><span class="ind-n">4</span>Validaciones de Negocio en el Servicio</a></li>
+    <li><a href="#s5"><span class="ind-n">5</span>JPQL &#x2014; Jakarta Persistence Query Language</a></li>
+    <li><a href="#s6"><span class="ind-n">6</span>Plantilla Facelets</a></li>
+    <li><a href="#s7"><span class="ind-n">7</span>Men&#xFA; de navegaci&#xF3;n</a></li>
+    <li><a href="#s8"><span class="ind-n">8</span>CSS profesional</a></li>
+    <li><a href="#s9"><span class="ind-n">9</span>AppVeterinaria04 completo</a></li>
+    <li><a href="#res"><span class="ind-n">&#x2705;</span>Resumen y actividad pr&#xE1;ctica</a></li>
+  </ul>
+</div>
+</div>
+
+
+<!-- OBJETIVOS -->
+<div class="sec" id="obj">
+  <div class="sec-hdr"><div class="sec-num">&#x1F3AF;</div><div class="sec-titulo">Objetivos de la clase</div></div>
+  <div class="obj-grid">
+    <div class="obj-item"><span>&#x2705;</span>Implementar validaciones en 3 niveles (vista, entidad, servicio)</div>
+    <div class="obj-item"><span>&#x1F512;</span>Validar unicidad (documento y email) en el servicio</div>
+    <div class="obj-item"><span>&#x1F50D;</span>Escribir consultas JPQL con @NamedQuery y TypedQuery</div>
+    <div class="obj-item"><span>&#x1F4C4;</span>Crear plantilla Facelets con men&#xFA; de navegaci&#xF3;n</div>
+    <div class="obj-item"><span>&#x1F3A8;</span>Aplicar estilos CSS profesionales</div>
+    <div class="obj-item"><span>&#x1F4E7;</span>Agregar campos correo y fechaNacimiento al Cliente</div>
+  </div>
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>Punto de partida:</strong> Partimos de la AppVeterinaria03 (CRUD b&#xE1;sico con JPA). En esta clase agregaremos validaciones robustas, consultas JPQL, una plantilla compartida y estilos profesionales.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 1: Evolucion del modelo Cliente -->
+<div class="sec" id="s1">
+  <div class="sec-hdr"><div class="sec-num">1</div><div class="sec-titulo">Evoluci&#xF3;n del modelo Cliente</div></div>
+
+  <div class="dn">DIAPOSITIVA 1 &#x2014; Before vs After</div>
+  <p style="margin-bottom:14px">En la Clase 03 el modelo Cliente ten&#xED;a solo 3 campos. Ahora agregamos <strong>correo</strong> y <strong>fechaNacimiento</strong> para trabajar con validaciones m&#xE1;s completas.</p>
+
+  <div class="g2">
+    <div class="card c-rojo">
+      <div class="card-hdr">&#x274C; Clase 03 &#x2014; Modelo anterior</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li><code>int id</code> &#x2014; clave primaria</li>
+          <li><code>String documento</code> &#x2014; DNI</li>
+          <li><code>String nombre</code> &#x2014; nombre completo</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">&#x2705; Clase 04 &#x2014; Modelo ampliado</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li><code>int id</code> &#x2014; clave primaria</li>
+          <li><code>String documento</code> &#x2014; DNI (UNIQUE)</li>
+          <li><code>String nombre</code> &#x2014; nombre completo</li>
+          <li><strong><code>String correo</code></strong> &#x2014; email (UNIQUE)</li>
+          <li><strong><code>LocalDate fechaNacimiento</code></strong> &#x2014; fecha</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 2 &#x2014; SQL actualizado</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; veterinariadb.sql &#x2014; Tabla actualizada</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">CREATE DATABASE IF NOT EXISTS</span> veterinariadb;
+<span class="kw">USE</span> veterinariadb;
+
+<span class="kw">DROP TABLE IF EXISTS</span> clientes;
+
+<span class="kw">CREATE TABLE</span> clientes (
+    id          <span class="cn">INT</span> <span class="kw">AUTO_INCREMENT PRIMARY KEY</span>,
+    documento   <span class="cn">VARCHAR</span>(<span class="nm">20</span>)  <span class="kw">NOT NULL UNIQUE</span>,
+    nombre      <span class="cn">VARCHAR</span>(<span class="nm">100</span>) <span class="kw">NOT NULL</span>,
+    correo      <span class="cn">VARCHAR</span>(<span class="nm">150</span>) <span class="kw">UNIQUE</span>,
+    fecha_nacimiento <span class="cn">DATE</span>
+);<span class="cl">veterinariadb.sql</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 3 &#x2014; Entidad Cliente.java actualizada</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; modelo/Cliente.java &#x2014; Campos b&#xE1;sicos (sin validaciones a&#xFA;n)</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.modelo;
+
+<span class="kw">import</span> jakarta.persistence.*;
+<span class="kw">import</span> java.time.LocalDate;
+
+<span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"clientes"</span>)
+<span class="kw">public class</span> <span class="cn">Cliente</span> {
+
+    <span class="an">@Id</span>
+    <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    <span class="kw">private</span> <span class="cn">int</span> id;
+
+    <span class="an">@Column</span>(nullable = <span class="nm">false</span>, unique = <span class="nm">true</span>, length = <span class="nm">20</span>)
+    <span class="kw">private</span> <span class="cn">String</span> documento;
+
+    <span class="an">@Column</span>(nullable = <span class="nm">false</span>, length = <span class="nm">100</span>)
+    <span class="kw">private</span> <span class="cn">String</span> nombre;
+
+    <span class="an">@Column</span>(unique = <span class="nm">true</span>, length = <span class="nm">150</span>)
+    <span class="kw">private</span> <span class="cn">String</span> correo;
+
+    <span class="an">@Column</span>(name = <span class="st">"fecha_nacimiento"</span>)
+    <span class="kw">private</span> <span class="cn">LocalDate</span> fechaNacimiento;
+
+    <span class="cm">// Constructor vac&#xED;o + getters/setters</span>
+}<span class="cl">Cliente.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">&#x26A0;&#xFE0F;</span>
+    <div><strong>Importante:</strong> El campo <code>id</code> es de tipo <code>int</code> (primitivo), NO <code>Long</code>. El GenericDAO usa <code>Integer</code> como tipo de la clave: <code>GenericDAO&lt;Cliente, Integer&gt;</code>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 2: Validaciones en la Vista -->
+<div class="sec" id="s2">
+  <div class="sec-hdr"><div class="sec-num">2</div><div class="sec-titulo">Validaciones en la Vista (JSF)</div></div>
+
+  <div class="dn">DIAPOSITIVA 4 &#x2014; 3 Niveles de validaci&#xF3;n</div>
+  <p style="margin-bottom:14px">Una aplicaci&#xF3;n robusta valida en <strong>3 niveles</strong>. Cada nivel atrapa errores distintos:</p>
+
+  <div class="capas">
+    <div class="capa cp-jsf">
+      <div class="capa-ico">&#x1F3A8;</div>
+      <div class="capa-info">
+        <div class="capa-nom">Nivel 1: Vista (JSF)</div>
+        <div class="capa-det">required, f:validateRegex, f:validateLength, f:convertDateTime</div>
+      </div>
+      <div class="capa-tag">Fase 3</div>
+    </div>
+    <div class="capa-arr">&#x2193; Si pasa la vista...</div>
+    <div class="capa cp-bean">
+      <div class="capa-ico">&#x1F4CB;</div>
+      <div class="capa-info">
+        <div class="capa-nom">Nivel 2: Entidad (Bean Validation)</div>
+        <div class="capa-det">@NotBlank, @Email, @Size, @Past &#x2014; valida antes de persist</div>
+      </div>
+      <div class="capa-tag">JPA</div>
+    </div>
+    <div class="capa-arr">&#x2193; Si pasa la entidad...</div>
+    <div class="capa cp-serv">
+      <div class="capa-ico">&#x1F512;</div>
+      <div class="capa-info">
+        <div class="capa-nom">Nivel 3: Servicio (L&#xF3;gica de negocio)</div>
+        <div class="capa-det">Unicidad de documento/correo, reglas complejas</div>
+      </div>
+      <div class="capa-tag">Servicio</div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 5 &#x2014; Validaciones JSF disponibles</div>
+  <table>
+    <thead><tr><th>Validador/Atributo</th><th>Descripci&#xF3;n</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><code>required="true"</code></td><td>Campo obligatorio</td><td><code>requiredMessage="Campo requerido"</code></td></tr>
+      <tr><td><code>f:validateLength</code></td><td>Largo m&#xED;nimo/m&#xE1;ximo</td><td><code>minimum="2" maximum="100"</code></td></tr>
+      <tr><td><code>f:validateRegex</code></td><td>Expresi&#xF3;n regular</td><td><code>pattern="^[^@]+@[^@]+\.[^@]+$"</code></td></tr>
+      <tr><td><code>f:convertDateTime</code></td><td>Convierte texto a fecha</td><td><code>pattern="dd/MM/yyyy" type="localDate"</code></td></tr>
+      <tr><td><code>validatorMessage</code></td><td>Mensaje personalizado para validador</td><td><code>validatorMessage="Email inv&#xE1;lido"</code></td></tr>
+      <tr><td><code>converterMessage</code></td><td>Mensaje personalizado para conversor</td><td><code>converterMessage="Formato: dd/MM/yyyy"</code></td></tr>
+      <tr><td><code>pt:placeholder</code></td><td>Placeholder HTML5 (passthrough)</td><td><code>pt:placeholder="ejemplo@mail.com"</code></td></tr>
+      <tr><td><code>immediate="true"</code></td><td>Salta validaciones (para Cancelar)</td><td>En <code>h:commandButton</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 6 &#x2014; Ejemplo: campo con validaciones</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; Campo documento con validaciones JSF</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;h:inputText</span> id=<span class="st">"documento"</span>
+             value=<span class="st">"#{clienteBean.cliente.documento}"</span>
+             required=<span class="st">"true"</span>
+             requiredMessage=<span class="st">"El documento es obligatorio"</span>
+             validatorMessage=<span class="st">"Solo n&#xFA;meros, 7-8 d&#xED;gitos"</span>
+             pt:placeholder=<span class="st">"Ej: 12345678"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;f:validateRegex</span> pattern=<span class="st">"^[0-9]{7,8}$"</span> <span class="kw">/&gt;</span>
+<span class="kw">&lt;/h:inputText&gt;</span>
+<span class="kw">&lt;h:message</span> for=<span class="st">"documento"</span> styleClass=<span class="st">"msg-error"</span> <span class="kw">/&gt;</span><span class="cl">campo-documento.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; Campo correo con validaci&#xF3;n de email</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;h:inputText</span> id=<span class="st">"correo"</span>
+             value=<span class="st">"#{clienteBean.cliente.correo}"</span>
+             required=<span class="st">"true"</span>
+             requiredMessage=<span class="st">"El correo es obligatorio"</span>
+             validatorMessage=<span class="st">"Formato de email inv&#xE1;lido"</span>
+             pt:placeholder=<span class="st">"ejemplo@correo.com"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;f:validateRegex</span> pattern=<span class="st">"^[^@]+@[^@]+\.[^@]+$"</span> <span class="kw">/&gt;</span>
+<span class="kw">&lt;/h:inputText&gt;</span>
+<span class="kw">&lt;h:message</span> for=<span class="st">"correo"</span> styleClass=<span class="st">"msg-error"</span> <span class="kw">/&gt;</span><span class="cl">campo-correo.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; Campo fechaNacimiento con convertidor</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;h:inputText</span> id=<span class="st">"fechaNac"</span>
+             value=<span class="st">"#{clienteBean.cliente.fechaNacimiento}"</span>
+             converterMessage=<span class="st">"Formato v&#xE1;lido: dd/MM/yyyy"</span>
+             pt:placeholder=<span class="st">"dd/MM/yyyy"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;f:convertDateTime</span> pattern=<span class="st">"dd/MM/yyyy"</span> type=<span class="st">"localDate"</span> <span class="kw">/&gt;</span>
+<span class="kw">&lt;/h:inputText&gt;</span>
+<span class="kw">&lt;h:message</span> for=<span class="st">"fechaNac"</span> styleClass=<span class="st">"msg-error"</span> <span class="kw">/&gt;</span><span class="cl">campo-fecha.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>Namespace passthrough:</strong> Para usar <code>pt:placeholder</code> hay que declarar el namespace: <code>xmlns:pt="jakarta.faces.passthrough"</code> en la etiqueta ra&#xED;z del XHTML.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 3: Bean Validation en la Entidad -->
+<div class="sec" id="s3">
+  <div class="sec-hdr"><div class="sec-num">3</div><div class="sec-titulo">Bean Validation en la Entidad</div></div>
+
+  <div class="dn">DIAPOSITIVA 7 &#x2014; Anotaciones Bean Validation</div>
+  <p style="margin-bottom:14px">Bean Validation 3.0 permite declarar restricciones directamente en los campos de la entidad. JPA las valida autom&#xE1;ticamente antes de <code>persist()</code> y <code>merge()</code>.</p>
+
+  <table>
+    <thead><tr><th>Anotaci&#xF3;n</th><th>&#xBF;Qu&#xE9; valida?</th><th>Aplica a</th></tr></thead>
+    <tbody>
+      <tr><td><code>@NotNull</code></td><td>No puede ser null</td><td>Cualquier tipo</td></tr>
+      <tr><td><code>@NotBlank</code></td><td>No null, no vac&#xED;o, no solo espacios</td><td>Solo String</td></tr>
+      <tr><td><code>@NotEmpty</code></td><td>No null y no vac&#xED;o (length &gt; 0)</td><td>String, Collection, Map</td></tr>
+      <tr><td><code>@Size(min, max)</code></td><td>Longitud entre min y max</td><td>String, Collection</td></tr>
+      <tr><td><code>@Email</code></td><td>Formato de email v&#xE1;lido</td><td>String</td></tr>
+      <tr><td><code>@Past</code></td><td>Fecha anterior a hoy</td><td>LocalDate, Date</td></tr>
+      <tr><td><code>@PastOrPresent</code></td><td>Fecha anterior o igual a hoy</td><td>LocalDate, Date</td></tr>
+      <tr><td><code>@Min(value)</code></td><td>Valor m&#xED;nimo num&#xE9;rico</td><td>int, long, BigDecimal</td></tr>
+      <tr><td><code>@Pattern(regexp)</code></td><td>Cumple expresi&#xF3;n regular</td><td>String</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 8 &#x2014; @NotBlank vs @NotNull vs @NotEmpty</div>
+  <table>
+    <thead><tr><th>Valor del campo</th><th>@NotNull</th><th>@NotEmpty</th><th>@NotBlank</th></tr></thead>
+    <tbody>
+      <tr><td><code>null</code></td><td><span class="badge b-rojo">&#x274C; Falla</span></td><td><span class="badge b-rojo">&#x274C; Falla</span></td><td><span class="badge b-rojo">&#x274C; Falla</span></td></tr>
+      <tr><td><code>""</code> (vac&#xED;o)</td><td><span class="badge b-verde">&#x2705; Pasa</span></td><td><span class="badge b-rojo">&#x274C; Falla</span></td><td><span class="badge b-rojo">&#x274C; Falla</span></td></tr>
+      <tr><td><code>"   "</code> (espacios)</td><td><span class="badge b-verde">&#x2705; Pasa</span></td><td><span class="badge b-verde">&#x2705; Pasa</span></td><td><span class="badge b-rojo">&#x274C; Falla</span></td></tr>
+      <tr><td><code>"abc"</code></td><td><span class="badge b-verde">&#x2705; Pasa</span></td><td><span class="badge b-verde">&#x2705; Pasa</span></td><td><span class="badge b-verde">&#x2705; Pasa</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>Recomendaci&#xF3;n:</strong> Para campos String obligatorios, usar siempre <code>@NotBlank</code> porque es la m&#xE1;s estricta: rechaza null, vac&#xED;o Y solo espacios.</div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 9 &#x2014; Cliente.java con Bean Validation completo</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; modelo/Cliente.java &#x2014; Con validaciones</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.modelo;
+
+<span class="kw">import</span> jakarta.persistence.*;
+<span class="kw">import</span> jakarta.validation.constraints.*;
+<span class="kw">import</span> java.time.LocalDate;
+
+<span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"clientes"</span>)
+<span class="kw">public class</span> <span class="cn">Cliente</span> {
+
+    <span class="an">@Id</span>
+    <span class="an">@GeneratedValue</span>(strategy = GenerationType.IDENTITY)
+    <span class="kw">private</span> <span class="cn">int</span> id;
+
+    <span class="an">@NotBlank</span>(message = <span class="st">"El documento es obligatorio"</span>)
+    <span class="an">@Size</span>(min = <span class="nm">7</span>, max = <span class="nm">20</span>, message = <span class="st">"Documento: 7 a 20 caracteres"</span>)
+    <span class="an">@Column</span>(nullable = <span class="nm">false</span>, unique = <span class="nm">true</span>, length = <span class="nm">20</span>)
+    <span class="kw">private</span> <span class="cn">String</span> documento;
+
+    <span class="an">@NotBlank</span>(message = <span class="st">"El nombre es obligatorio"</span>)
+    <span class="an">@Size</span>(min = <span class="nm">2</span>, max = <span class="nm">100</span>, message = <span class="st">"Nombre: 2 a 100 caracteres"</span>)
+    <span class="an">@Column</span>(nullable = <span class="nm">false</span>, length = <span class="nm">100</span>)
+    <span class="kw">private</span> <span class="cn">String</span> nombre;
+
+    <span class="an">@NotBlank</span>(message = <span class="st">"El correo es obligatorio"</span>)
+    <span class="an">@Email</span>(message = <span class="st">"El formato de correo no es v&#xE1;lido"</span>)
+    <span class="an">@Column</span>(unique = <span class="nm">true</span>, length = <span class="nm">150</span>)
+    <span class="kw">private</span> <span class="cn">String</span> correo;
+
+    <span class="an">@Past</span>(message = <span class="st">"La fecha debe ser anterior a hoy"</span>)
+    <span class="an">@Column</span>(name = <span class="st">"fecha_nacimiento"</span>)
+    <span class="kw">private</span> <span class="cn">LocalDate</span> fechaNacimiento;
+
+    <span class="cm">// Constructor vac&#xED;o</span>
+    <span class="kw">public</span> <span class="mt">Cliente</span>() {}
+
+    <span class="cm">// Getters y Setters</span>
+    <span class="kw">public</span> <span class="cn">int</span> <span class="mt">getId</span>() { <span class="kw">return</span> id; }
+    <span class="kw">public void</span> <span class="mt">setId</span>(<span class="cn">int</span> id) { <span class="kw">this</span>.id = id; }
+    <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getDocumento</span>() { <span class="kw">return</span> documento; }
+    <span class="kw">public void</span> <span class="mt">setDocumento</span>(<span class="cn">String</span> d) { <span class="kw">this</span>.documento = d; }
+    <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getNombre</span>() { <span class="kw">return</span> nombre; }
+    <span class="kw">public void</span> <span class="mt">setNombre</span>(<span class="cn">String</span> n) { <span class="kw">this</span>.nombre = n; }
+    <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getCorreo</span>() { <span class="kw">return</span> correo; }
+    <span class="kw">public void</span> <span class="mt">setCorreo</span>(<span class="cn">String</span> c) { <span class="kw">this</span>.correo = c; }
+    <span class="kw">public</span> <span class="cn">LocalDate</span> <span class="mt">getFechaNacimiento</span>() { <span class="kw">return</span> fechaNacimiento; }
+    <span class="kw">public void</span> <span class="mt">setFechaNacimiento</span>(<span class="cn">LocalDate</span> f) { <span class="kw">this</span>.fechaNacimiento = f; }
+}<span class="cl">Cliente.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>Integraci&#xF3;n autom&#xE1;tica:</strong> JSF valida en la fase 3 (Process Validations). Si pasa esa fase y llega a JPA, Bean Validation se ejecuta autom&#xE1;ticamente antes de <code>em.persist()</code>. Doble protecci&#xF3;n sin c&#xF3;digo extra.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 4: Validaciones de Negocio -->
+<div class="sec" id="s4">
+  <div class="sec-hdr"><div class="sec-num">4</div><div class="sec-titulo">Validaciones de Negocio en el Servicio</div></div>
+
+  <div class="dn">DIAPOSITIVA 10 &#x2014; Lo que Bean Validation NO puede hacer</div>
+  <div class="g2">
+    <div class="card c-verde">
+      <div class="card-hdr">&#x2705; Bean Validation PUEDE</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Validar formato (email, regex)</li>
+          <li>Validar largo (min/max)</li>
+          <li>Validar obligatoriedad (not null/blank)</li>
+          <li>Validar rango de fechas (past/future)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-rojo">
+      <div class="card-hdr">&#x274C; Bean Validation NO PUEDE</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Verificar unicidad en la BD</li>
+          <li>Comparar con otros registros existentes</li>
+          <li>Reglas que requieran consultar datos</li>
+          <li>L&#xF3;gica de negocio compleja</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 11 &#x2014; ClienteServicio con validaci&#xF3;n de unicidad</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; servicio/ClienteServicio.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.servicio;
+
+<span class="kw">import</span> com.veterinaria.dao.ClienteDAO;
+<span class="kw">import</span> com.veterinaria.modelo.Cliente;
+<span class="kw">import</span> jakarta.enterprise.context.ApplicationScoped;
+<span class="kw">import</span> jakarta.inject.Inject;
+<span class="kw">import</span> jakarta.transaction.Transactional;
+<span class="kw">import</span> java.util.List;
+<span class="kw">import</span> java.util.Optional;
+
+<span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteServicio</span> {
+
+    <span class="an">@Inject</span>
+    <span class="kw">private</span> <span class="cn">ClienteDAO</span> clienteDAO;
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">guardar</span>(<span class="cn">Cliente</span> cliente) {
+        <span class="cm">// Validar unicidad de documento</span>
+        Optional&lt;Cliente&gt; porDoc = clienteDAO.buscarPorDocumento(cliente.getDocumento());
+        <span class="kw">if</span> (porDoc.isPresent() &amp;&amp; porDoc.get().getId() != cliente.getId()) {
+            <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+                <span class="st">"Ya existe un cliente con documento: "</span> + cliente.getDocumento());
+        }
+
+        <span class="cm">// Validar unicidad de correo</span>
+        Optional&lt;Cliente&gt; porEmail = clienteDAO.buscarPorEmail(cliente.getCorreo());
+        <span class="kw">if</span> (porEmail.isPresent() &amp;&amp; porEmail.get().getId() != cliente.getId()) {
+            <span class="kw">throw new</span> <span class="cn">IllegalArgumentException</span>(
+                <span class="st">"Ya existe un cliente con correo: "</span> + cliente.getCorreo());
+        }
+
+        <span class="cm">// Si pasa las validaciones, guardar</span>
+        <span class="kw">if</span> (cliente.getId() == <span class="nm">0</span>) {
+            clienteDAO.crear(cliente);
+        } <span class="kw">else</span> {
+            clienteDAO.actualizar(cliente);
+        }
+    }
+
+    <span class="kw">public</span> List&lt;Cliente&gt; <span class="mt">listarTodos</span>() {
+        <span class="kw">return</span> clienteDAO.listarTodos();
+    }
+
+    <span class="kw">public</span> List&lt;Cliente&gt; <span class="mt">buscar</span>(<span class="cn">String</span> texto) {
+        <span class="kw">return</span> clienteDAO.buscarPorTexto(texto);
+    }
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">eliminar</span>(<span class="cn">int</span> id) {
+        clienteDAO.eliminar(id);
+    }
+}<span class="cl">ClienteServicio.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 12 &#x2014; try/catch en el Bean</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; Manejo del error en ClienteBean</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">public void</span> <span class="mt">guardar</span>() {
+    <span class="kw">try</span> {
+        clienteServicio.guardar(cliente);
+        FacesContext.getCurrentInstance().addMessage(<span class="nm">null</span>,
+            <span class="kw">new</span> <span class="cn">FacesMessage</span>(FacesMessage.SEVERITY_INFO,
+                <span class="st">"Cliente guardado correctamente"</span>, <span class="nm">null</span>));
+        cliente = <span class="kw">new</span> <span class="cn">Cliente</span>();  <span class="cm">// limpiar formulario</span>
+        listar();
+    } <span class="kw">catch</span> (<span class="cn">IllegalArgumentException</span> e) {
+        FacesContext.getCurrentInstance().addMessage(<span class="nm">null</span>,
+            <span class="kw">new</span> <span class="cn">FacesMessage</span>(FacesMessage.SEVERITY_ERROR,
+                e.getMessage(), <span class="nm">null</span>));
+    }
+}<span class="cl">ClienteBean.guardar()</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">&#x26A0;&#xFE0F;</span>
+    <div><strong>Patr&#xF3;n importante:</strong> Al editar, comparamos <code>porDoc.get().getId() != cliente.getId()</code> para excluir al propio registro. Si no hici&#xE9;ramos esta verificaci&#xF3;n, al editar sin cambiar el documento fallar&#xED;a por duplicado consigo mismo.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 5: JPQL -->
+<div class="sec" id="s5">
+  <div class="sec-hdr"><div class="sec-num">5</div><div class="sec-titulo">JPQL &#x2014; Jakarta Persistence Query Language</div></div>
+
+  <div class="dn">DIAPOSITIVA 13 &#x2014; SQL vs JPQL</div>
+  <p style="margin-bottom:14px">JPQL es el lenguaje de consultas de JPA. Se parece a SQL pero trabaja sobre <strong>entidades y atributos Java</strong>, no sobre tablas y columnas.</p>
+
+  <table>
+    <thead><tr><th>SQL (tablas/columnas)</th><th>JPQL (entidades/atributos)</th></tr></thead>
+    <tbody>
+      <tr><td><code>SELECT * FROM clientes</code></td><td><code>SELECT c FROM Cliente c</code></td></tr>
+      <tr><td><code>SELECT * FROM clientes WHERE documento = ?</code></td><td><code>SELECT c FROM Cliente c WHERE c.documento = :doc</code></td></tr>
+      <tr><td><code>SELECT * FROM clientes WHERE correo = ?</code></td><td><code>SELECT c FROM Cliente c WHERE c.correo = :correo</code></td></tr>
+      <tr><td><code>SELECT * FROM clientes WHERE nombre LIKE '%texto%'</code></td><td><code>SELECT c FROM Cliente c WHERE LOWER(c.nombre) LIKE :texto</code></td></tr>
+      <tr><td><code>DELETE FROM clientes WHERE id = ?</code></td><td><code>DELETE FROM Cliente c WHERE c.id = :id</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>Diferencia clave:</strong> En JPQL escribimos <code>Cliente</code> (nombre de la clase Java), no <code>clientes</code> (nombre de la tabla). Usamos <code>c.nombre</code> (atributo Java), no <code>nombre</code> (columna SQL).</div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 14 &#x2014; @NamedQuery en la entidad</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; @NamedQuery en Cliente.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"clientes"</span>)
+<span class="an">@NamedQueries</span>({
+    <span class="an">@NamedQuery</span>(name = <span class="st">"Cliente.findAll"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c ORDER BY c.nombre"</span>),
+    <span class="an">@NamedQuery</span>(name = <span class="st">"Cliente.findByDocumento"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c WHERE c.documento = :documento"</span>),
+    <span class="an">@NamedQuery</span>(name = <span class="st">"Cliente.findByEmail"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c WHERE c.correo = :correo"</span>),
+    <span class="an">@NamedQuery</span>(name = <span class="st">"Cliente.buscarPorTexto"</span>,
+        query = <span class="st">"SELECT c FROM Cliente c WHERE LOWER(c.nombre) LIKE :texto OR c.documento LIKE :texto"</span>)
+})
+<span class="kw">public class</span> <span class="cn">Cliente</span> { ... }<span class="cl">Cliente.java (@NamedQuery)</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 15 &#x2014; Uso en el DAO con TypedQuery</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; dao/ClienteDAO.java &#x2014; M&#xE9;todos JPQL</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteDAO</span> <span class="kw">extends</span> GenericDAO&lt;Cliente, Integer&gt; {
+
+    <span class="kw">public</span> <span class="cn">ClienteDAO</span>() {
+        <span class="kw">super</span>(Cliente.<span class="kw">class</span>);
+    }
+
+    <span class="kw">public</span> Optional&lt;Cliente&gt; <span class="mt">buscarPorDocumento</span>(<span class="cn">String</span> documento) {
+        TypedQuery&lt;Cliente&gt; query = em.createNamedQuery(
+            <span class="st">"Cliente.findByDocumento"</span>, Cliente.<span class="kw">class</span>);
+        query.setParameter(<span class="st">"documento"</span>, documento);
+        List&lt;Cliente&gt; resultados = query.getResultList();
+        <span class="kw">return</span> resultados.isEmpty() ? Optional.empty()
+                                    : Optional.of(resultados.get(<span class="nm">0</span>));
+    }
+
+    <span class="kw">public</span> Optional&lt;Cliente&gt; <span class="mt">buscarPorEmail</span>(<span class="cn">String</span> correo) {
+        TypedQuery&lt;Cliente&gt; query = em.createNamedQuery(
+            <span class="st">"Cliente.findByEmail"</span>, Cliente.<span class="kw">class</span>);
+        query.setParameter(<span class="st">"correo"</span>, correo);
+        List&lt;Cliente&gt; resultados = query.getResultList();
+        <span class="kw">return</span> resultados.isEmpty() ? Optional.empty()
+                                    : Optional.of(resultados.get(<span class="nm">0</span>));
+    }
+
+    <span class="kw">public</span> List&lt;Cliente&gt; <span class="mt">buscarPorTexto</span>(<span class="cn">String</span> texto) {
+        TypedQuery&lt;Cliente&gt; query = em.createNamedQuery(
+            <span class="st">"Cliente.buscarPorTexto"</span>, Cliente.<span class="kw">class</span>);
+        query.setParameter(<span class="st">"texto"</span>, <span class="st">"%"</span> + texto.toLowerCase() + <span class="st">"%"</span>);
+        <span class="kw">return</span> query.getResultList();
+    }
+}<span class="cl">ClienteDAO.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>TypedQuery:</strong> A diferencia de <code>Query</code>, el <code>TypedQuery&lt;Cliente&gt;</code> devuelve directamente una lista tipada sin necesidad de casting. Siempre preferir TypedQuery.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 6: Plantilla Facelets -->
+<div class="sec" id="s6">
+  <div class="sec-hdr"><div class="sec-num">6</div><div class="sec-titulo">Plantilla Facelets</div></div>
+
+  <div class="dn">DIAPOSITIVA 16 &#x2014; &#xBF;Qu&#xE9; es una plantilla?</div>
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">&#x1F4CB; &#xBF;Qu&#xE9; es?</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Un layout compartido para <strong>todas</strong> las p&#xE1;ginas</li>
+          <li>Define zonas reemplazables con <code>ui:insert</code></li>
+          <li>Evita repetir header, men&#xFA; y footer en cada p&#xE1;gina</li>
+          <li>Cada p&#xE1;gina hija usa <code>ui:composition</code> + <code>ui:define</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">&#x1F504; Flujo</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ol style="padding-left:16px">
+          <li><code>plantilla.xhtml</code> define la estructura general</li>
+          <li>Usa <code>ui:insert name="titulo"</code> y <code>ui:insert name="contenido"</code></li>
+          <li>Las p&#xE1;ginas hijas usan <code>ui:composition template="/plantilla.xhtml"</code></li>
+          <li>Cada hija define <code>ui:define name="contenido"</code></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 17 &#x2014; plantilla.xhtml completa</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; webapp/plantilla.xhtml</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;?xml version=</span><span class="st">"1.0"</span> <span class="kw">encoding=</span><span class="st">"UTF-8"</span><span class="kw">?&gt;</span>
+<span class="kw">&lt;!DOCTYPE html&gt;</span>
+<span class="kw">&lt;html</span> xmlns=<span class="st">"http://www.w3.org/1999/xhtml"</span>
+      xmlns:h=<span class="st">"jakarta.faces.html"</span>
+      xmlns:ui=<span class="st">"jakarta.faces.facelets"</span><span class="kw">&gt;</span>
+
+<span class="kw">&lt;h:head&gt;</span>
+    <span class="kw">&lt;title&gt;</span><span class="an">&lt;ui:insert name=<span class="st">"titulo"</span>&gt;</span>Veterinaria<span class="an">&lt;/ui:insert&gt;</span><span class="kw">&lt;/title&gt;</span>
+    <span class="kw">&lt;h:outputStylesheet</span> library=<span class="st">"css"</span> name=<span class="st">"estilos.css"</span> <span class="kw">/&gt;</span>
+<span class="kw">&lt;/h:head&gt;</span>
+
+<span class="kw">&lt;h:body&gt;</span>
+    <span class="cm">&lt;!-- NAV --&gt;</span>
+    <span class="kw">&lt;nav</span> class=<span class="st">"navbar"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;div</span> class=<span class="st">"nav-brand"</span><span class="kw">&gt;</span>&#x1F3E5; Veterinaria<span class="kw">&lt;/div&gt;</span>
+        <span class="kw">&lt;div</span> class=<span class="st">"nav-links"</span><span class="kw">&gt;</span>
+            <span class="kw">&lt;h:link</span> outcome=<span class="st">"/index"</span> value=<span class="st">"Inicio"</span> <span class="kw">/&gt;</span>
+            <span class="kw">&lt;h:link</span> outcome=<span class="st">"/clientes/abm"</span> value=<span class="st">"Clientes"</span> <span class="kw">/&gt;</span>
+            <span class="kw">&lt;span</span> class=<span class="st">"nav-disabled"</span><span class="kw">&gt;</span>Mascotas<span class="kw">&lt;/span&gt;</span>
+            <span class="kw">&lt;span</span> class=<span class="st">"nav-disabled"</span><span class="kw">&gt;</span>Turnos<span class="kw">&lt;/span&gt;</span>
+        <span class="kw">&lt;/div&gt;</span>
+    <span class="kw">&lt;/nav&gt;</span>
+
+    <span class="cm">&lt;!-- CONTENIDO --&gt;</span>
+    <span class="kw">&lt;main</span> class=<span class="st">"contenido"</span><span class="kw">&gt;</span>
+        <span class="an">&lt;ui:insert name=<span class="st">"contenido"</span>&gt;</span>
+            Contenido por defecto
+        <span class="an">&lt;/ui:insert&gt;</span>
+    <span class="kw">&lt;/main&gt;</span>
+
+    <span class="cm">&lt;!-- FOOTER --&gt;</span>
+    <span class="kw">&lt;footer</span> class=<span class="st">"pie"</span><span class="kw">&gt;</span>
+        AppVeterinaria04 &#x2014; Jakarta EE 10 &#xB7; GlassFish 7
+    <span class="kw">&lt;/footer&gt;</span>
+<span class="kw">&lt;/h:body&gt;</span>
+<span class="kw">&lt;/html&gt;</span><span class="cl">plantilla.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; P&#xE1;gina hija: clientes/abm.xhtml (estructura)</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;?xml version=</span><span class="st">"1.0"</span> <span class="kw">encoding=</span><span class="st">"UTF-8"</span><span class="kw">?&gt;</span>
+<span class="kw">&lt;!DOCTYPE html&gt;</span>
+<span class="an">&lt;ui:composition</span> template=<span class="st">"/plantilla.xhtml"</span>
+    xmlns=<span class="st">"http://www.w3.org/1999/xhtml"</span>
+    xmlns:h=<span class="st">"jakarta.faces.html"</span>
+    xmlns:f=<span class="st">"jakarta.faces.core"</span>
+    xmlns:ui=<span class="st">"jakarta.faces.facelets"</span>
+    xmlns:pt=<span class="st">"jakarta.faces.passthrough"</span><span class="kw">&gt;</span>
+
+    <span class="an">&lt;ui:define name=<span class="st">"titulo"</span>&gt;</span>Gesti&#xF3;n de Clientes<span class="an">&lt;/ui:define&gt;</span>
+
+    <span class="an">&lt;ui:define name=<span class="st">"contenido"</span>&gt;</span>
+        <span class="cm">&lt;!-- Aqu&#xED; va el formulario y la tabla --&gt;</span>
+    <span class="an">&lt;/ui:define&gt;</span>
+
+<span class="an">&lt;/ui:composition&gt;</span><span class="cl">clientes/abm.xhtml</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 7: Menu de navegacion -->
+<div class="sec" id="s7">
+  <div class="sec-hdr"><div class="sec-num">7</div><div class="sec-titulo">Men&#xFA; de navegaci&#xF3;n</div></div>
+
+  <div class="dn">DIAPOSITIVA 18 &#x2014; Estructura del men&#xFA;</div>
+  <p style="margin-bottom:14px">El men&#xFA; de navegaci&#xF3;n permite moverse entre las secciones de la aplicaci&#xF3;n. Usamos <code>h:link</code> (GET) en lugar de <code>h:commandLink</code> (POST) para la navegaci&#xF3;n.</p>
+
+  <div style="background:#0f172a;border-radius:14px;padding:20px;margin:14px 0;display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap">
+    <div style="background:#2563a8;color:#fff;padding:10px 18px;border-radius:8px 0 0 8px;font-size:.85rem;font-weight:700">&#x1F3E5; Veterinaria</div>
+    <div style="background:#1e3a5f;border:1px solid #3b82d1;color:#bfdbfe;padding:10px 16px;font-size:.82rem;font-weight:600">Inicio</div>
+    <div style="background:#14532d;border:1px solid #4ade80;color:#bbf7d0;padding:10px 16px;font-size:.82rem;font-weight:600">Clientes</div>
+    <div style="background:#1c1917;border:1px solid #78716c;color:#78716c;padding:10px 16px;font-size:.82rem;font-style:italic">Mascotas</div>
+    <div style="background:#1c1917;border:1px solid #78716c;color:#78716c;padding:10px 16px;border-radius:0 8px 8px 0;font-size:.82rem;font-style:italic">Turnos</div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 19 &#x2014; h:link vs h:commandLink</div>
+  <table>
+    <thead><tr><th>Caracter&#xED;stica</th><th>h:link</th><th>h:commandLink</th></tr></thead>
+    <tbody>
+      <tr><td>M&#xE9;todo HTTP</td><td><span class="badge b-verde">GET</span></td><td><span class="badge b-naranja">POST</span></td></tr>
+      <tr><td>Genera</td><td><code>&lt;a href="..."&gt;</code></td><td><code>&lt;a onclick="submit()"&gt;</code></td></tr>
+      <tr><td>Requiere h:form</td><td><span class="badge b-verde">NO</span></td><td><span class="badge b-rojo">S&#xCD;</span></td></tr>
+      <tr><td>Uso ideal</td><td>Navegaci&#xF3;n entre p&#xE1;ginas</td><td>Ejecutar acciones (guardar, eliminar)</td></tr>
+      <tr><td>Bookmarkeable</td><td><span class="badge b-verde">S&#xCD;</span></td><td><span class="badge b-rojo">NO</span></td></tr>
+      <tr><td>SEO friendly</td><td><span class="badge b-verde">S&#xCD;</span></td><td><span class="badge b-rojo">NO</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; C&#xF3;digo del nav en plantilla.xhtml</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;nav</span> class=<span class="st">"navbar"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;div</span> class=<span class="st">"nav-brand"</span><span class="kw">&gt;</span>&#x1F3E5; Veterinaria<span class="kw">&lt;/div&gt;</span>
+    <span class="kw">&lt;div</span> class=<span class="st">"nav-links"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;h:link</span> outcome=<span class="st">"/index"</span> value=<span class="st">"Inicio"</span>
+                styleClass=<span class="st">"nav-link"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;h:link</span> outcome=<span class="st">"/clientes/abm"</span> value=<span class="st">"Clientes"</span>
+                styleClass=<span class="st">"nav-link"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;span</span> class=<span class="st">"nav-disabled"</span><span class="kw">&gt;</span>Mascotas<span class="kw">&lt;/span&gt;</span>
+        <span class="kw">&lt;span</span> class=<span class="st">"nav-disabled"</span><span class="kw">&gt;</span>Turnos<span class="kw">&lt;/span&gt;</span>
+    <span class="kw">&lt;/div&gt;</span>
+<span class="kw">&lt;/nav&gt;</span><span class="cl">plantilla.xhtml (nav)</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>outcome:</strong> El atributo <code>outcome</code> de <code>h:link</code> es la ruta de la p&#xE1;gina destino SIN la extensi&#xF3;n <code>.xhtml</code>. JSF agrega la extensi&#xF3;n autom&#xE1;ticamente. El <code>/</code> inicial indica ruta desde la ra&#xED;z del contexto.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 8: CSS profesional -->
+<div class="sec" id="s8">
+  <div class="sec-hdr"><div class="sec-num">8</div><div class="sec-titulo">CSS profesional</div></div>
+
+  <div class="dn">DIAPOSITIVA 20 &#x2014; Archivo estilos.css</div>
+  <p style="margin-bottom:14px">Creamos un archivo CSS centralizado en <code>resources/css/estilos.css</code> y lo enlazamos con <code>h:outputStylesheet</code>.</p>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; resources/css/estilos.css (extracto)</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">/* === NAVBAR === */</span>
+.<span class="cn">navbar</span> {
+    <span class="kw">display</span>: flex; <span class="kw">align-items</span>: center;
+    <span class="kw">justify-content</span>: space-between;
+    <span class="kw">background</span>: <span class="st">#1a3a5c</span>; <span class="kw">color</span>: <span class="st">#fff</span>;
+    <span class="kw">padding</span>: <span class="nm">12px 24px</span>; <span class="kw">border-radius</span>: <span class="nm">0 0 10px 10px</span>;
+}
+.<span class="cn">nav-brand</span> { <span class="kw">font-weight</span>: <span class="nm">800</span>; <span class="kw">font-size</span>: <span class="nm">1.1rem</span>; }
+.<span class="cn">nav-links</span> { <span class="kw">display</span>: flex; <span class="kw">gap</span>: <span class="nm">8px</span>; }
+.<span class="cn">nav-link</span>  { <span class="kw">color</span>: <span class="st">#bfdbfe</span>; <span class="kw">padding</span>: <span class="nm">6px 14px</span>;
+             <span class="kw">border-radius</span>: <span class="nm">6px</span>; <span class="kw">transition</span>: background <span class="nm">.2s</span>; }
+.<span class="cn">nav-link</span>:hover { <span class="kw">background</span>: <span class="st">rgba(255,255,255,.15)</span>; }
+.<span class="cn">nav-disabled</span> { <span class="kw">color</span>: <span class="st">#64748b</span>; <span class="kw">padding</span>: <span class="nm">6px 14px</span>;
+               <span class="kw">font-style</span>: italic; }
+
+<span class="cm">/* === FORMULARIOS === */</span>
+.<span class="cn">form-control</span> { <span class="kw">width</span>: <span class="nm">100%</span>; <span class="kw">padding</span>: <span class="nm">8px 12px</span>;
+               <span class="kw">border</span>: <span class="nm">1px</span> solid <span class="st">#cbd5e1</span>;
+               <span class="kw">border-radius</span>: <span class="nm">6px</span>; <span class="kw">font-size</span>: <span class="nm">.9rem</span>; }
+.<span class="cn">form-control</span>:focus { <span class="kw">outline</span>: none;
+                      <span class="kw">border-color</span>: <span class="st">#2563a8</span>;
+                      <span class="kw">box-shadow</span>: <span class="nm">0 0 0 3px</span> <span class="st">rgba(37,99,168,.15)</span>; }
+.<span class="cn">form-label</span> { <span class="kw">font-weight</span>: <span class="nm">600</span>; <span class="kw">font-size</span>: <span class="nm">.85rem</span>;
+             <span class="kw">margin-bottom</span>: <span class="nm">4px</span>; <span class="kw">display</span>: block; }
+.<span class="cn">form-error</span> { <span class="kw">color</span>: <span class="st">#dc2626</span>; <span class="kw">font-size</span>: <span class="nm">.78rem</span>; }
+
+<span class="cm">/* === BOTONES === */</span>
+.<span class="cn">btn</span> { <span class="kw">padding</span>: <span class="nm">8px 18px</span>; <span class="kw">border</span>: none; <span class="kw">border-radius</span>: <span class="nm">6px</span>;
+      <span class="kw">font-weight</span>: <span class="nm">600</span>; <span class="kw">cursor</span>: pointer; <span class="kw">font-size</span>: <span class="nm">.85rem</span>; }
+.<span class="cn">btn-primario</span>   { <span class="kw">background</span>: <span class="st">#2563a8</span>; <span class="kw">color</span>: <span class="st">#fff</span>; }
+.<span class="cn">btn-secundario</span> { <span class="kw">background</span>: <span class="st">#e2e8f0</span>; <span class="kw">color</span>: <span class="st">#1a3a5c</span>; }
+.<span class="cn">btn-peligro</span>    { <span class="kw">background</span>: <span class="st">#dc2626</span>; <span class="kw">color</span>: <span class="st">#fff</span>; }
+
+<span class="cm">/* === TABLA === */</span>
+.<span class="cn">tabla</span> { <span class="kw">width</span>: <span class="nm">100%</span>; <span class="kw">border-collapse</span>: collapse; }
+.<span class="cn">tabla-header</span> th { <span class="kw">background</span>: <span class="st">#1a3a5c</span>; <span class="kw">color</span>: <span class="st">#fff</span>;
+                   <span class="kw">padding</span>: <span class="nm">10px 12px</span>; <span class="kw">text-align</span>: left; }
+.<span class="cn">fila-par</span> td   { <span class="kw">background</span>: <span class="st">#f8fafc</span>; }
+.<span class="cn">fila-impar</span> td { <span class="kw">background</span>: <span class="st">#fff</span>; }
+
+<span class="cm">/* === MENSAJES === */</span>
+.<span class="cn">msg</span>      { <span class="kw">padding</span>: <span class="nm">10px 14px</span>; <span class="kw">border-radius</span>: <span class="nm">6px</span>;
+           <span class="kw">margin</span>: <span class="nm">10px 0</span>; <span class="kw">font-size</span>: <span class="nm">.85rem</span>; }
+.<span class="cn">msg-info</span> { <span class="kw">background</span>: <span class="st">#dbeafe</span>; <span class="kw">color</span>: <span class="st">#1a3a5c</span>; }
+.<span class="cn">msg-warn</span> { <span class="kw">background</span>: <span class="st">#fef3c7</span>; <span class="kw">color</span>: <span class="st">#92400e</span>; }
+.<span class="cn">msg-error</span>{ <span class="kw">background</span>: <span class="st">#fee2e2</span>; <span class="kw">color</span>: <span class="st">#991b1b</span>; }<span class="cl">estilos.css</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>h:outputStylesheet:</strong> Se coloca dentro de <code>&lt;h:head&gt;</code>. El atributo <code>library="css"</code> indica la carpeta dentro de <code>resources/</code> y <code>name="estilos.css"</code> el archivo. JSF genera el link autom&#xE1;ticamente con la ruta correcta.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 9: AppVeterinaria04 completo -->
+<div class="sec" id="s9">
+  <div class="sec-hdr"><div class="sec-num">9</div><div class="sec-titulo">AppVeterinaria04 completo</div></div>
+
+  <div class="dn">DIAPOSITIVA 21 &#x2014; Estructura del proyecto</div>
+  <div class="tree">
+<span class="tree-dir">AppVeterinaria04/</span>
+&#x251C;&#x2500;&#x2500; <span class="tree-file">pom.xml</span>
+&#x2514;&#x2500;&#x2500; <span class="tree-dir">src/main/</span>
+    &#x251C;&#x2500;&#x2500; <span class="tree-dir">java/com/veterinaria/</span>
+    &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-dir">controlador/</span>
+    &#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">ClienteBean.java</span>     <span class="tree-desc">&#x2190; @Named @ViewScoped, b&#xFA;squeda</span>
+    &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-dir">dao/</span>
+    &#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-file">GenericDAO.java</span>      <span class="tree-desc">&#x2190; CRUD gen&#xE9;rico</span>
+    &#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">ClienteDAO.java</span>      <span class="tree-desc">&#x2190; JPQL b&#xFA;squedas</span>
+    &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-dir">modelo/</span>
+    &#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">Cliente.java</span>         <span class="tree-desc">&#x2190; @Entity + @NamedQuery + Bean Validation</span>
+    &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-dir">servicio/</span>
+    &#x2502;       &#x2514;&#x2500;&#x2500; <span class="tree-file">ClienteServicio.java</span> <span class="tree-desc">&#x2190; validaci&#xF3;n unicidad</span>
+    &#x251C;&#x2500;&#x2500; <span class="tree-dir">resources/META-INF/</span>
+    &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">persistence.xml</span>
+    &#x2514;&#x2500;&#x2500; <span class="tree-dir">webapp/</span>
+        &#x251C;&#x2500;&#x2500; <span class="tree-file">plantilla.xhtml</span>          <span class="tree-desc">&#x2190; template con nav + footer</span>
+        &#x251C;&#x2500;&#x2500; <span class="tree-file">index.xhtml</span>              <span class="tree-desc">&#x2190; dashboard inicio</span>
+        &#x251C;&#x2500;&#x2500; <span class="tree-dir">clientes/</span>
+        &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">abm.xhtml</span>            <span class="tree-desc">&#x2190; ABM con validaciones + b&#xFA;squeda</span>
+        &#x251C;&#x2500;&#x2500; <span class="tree-dir">resources/css/</span>
+        &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">estilos.css</span>          <span class="tree-desc">&#x2190; estilos profesionales</span>
+        &#x2514;&#x2500;&#x2500; <span class="tree-dir">WEB-INF/</span>
+            &#x251C;&#x2500;&#x2500; <span class="tree-file">web.xml</span>
+            &#x2514;&#x2500;&#x2500; <span class="tree-file">beans.xml</span>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 22 &#x2014; clientes/abm.xhtml completo</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; clientes/abm.xhtml &#x2014; Con plantilla y validaciones</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="an">&lt;ui:composition</span> template=<span class="st">"/plantilla.xhtml"</span>
+    xmlns=<span class="st">"http://www.w3.org/1999/xhtml"</span>
+    xmlns:h=<span class="st">"jakarta.faces.html"</span>
+    xmlns:f=<span class="st">"jakarta.faces.core"</span>
+    xmlns:ui=<span class="st">"jakarta.faces.facelets"</span>
+    xmlns:pt=<span class="st">"jakarta.faces.passthrough"</span><span class="kw">&gt;</span>
+
+<span class="an">&lt;ui:define name=<span class="st">"titulo"</span>&gt;</span>Gesti&#xF3;n de Clientes<span class="an">&lt;/ui:define&gt;</span>
+<span class="an">&lt;ui:define name=<span class="st">"contenido"</span>&gt;</span>
+
+  <span class="kw">&lt;h2&gt;</span>ABM de Clientes<span class="kw">&lt;/h2&gt;</span>
+  <span class="kw">&lt;h:messages</span> globalOnly=<span class="st">"true"</span> styleClass=<span class="st">"msg msg-error"</span> <span class="kw">/&gt;</span>
+
+  <span class="cm">&lt;!-- B&#xDA;SQUEDA --&gt;</span>
+  <span class="kw">&lt;h:form</span> id=<span class="st">"busquedaForm"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;h:inputText</span> value=<span class="st">"#{clienteBean.textoBusqueda}"</span>
+                 pt:placeholder=<span class="st">"Buscar por nombre o documento..."</span>
+                 styleClass=<span class="st">"form-control"</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Buscar"</span> action=<span class="st">"#{clienteBean.buscar}"</span>
+                     styleClass=<span class="st">"btn btn-primario"</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Limpiar"</span> action=<span class="st">"#{clienteBean.listar}"</span>
+                     styleClass=<span class="st">"btn btn-secundario"</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;/h:form&gt;</span>
+
+  <span class="cm">&lt;!-- FORMULARIO --&gt;</span>
+  <span class="kw">&lt;h:form</span> id=<span class="st">"clienteForm"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;label</span> class=<span class="st">"form-label"</span><span class="kw">&gt;</span>Documento:<span class="kw">&lt;/label&gt;</span>
+    <span class="kw">&lt;h:inputText</span> id=<span class="st">"doc"</span> value=<span class="st">"#{clienteBean.cliente.documento}"</span>
+        required=<span class="st">"true"</span> requiredMessage=<span class="st">"Documento obligatorio"</span>
+        validatorMessage=<span class="st">"7-8 d&#xED;gitos num&#xE9;ricos"</span>
+        styleClass=<span class="st">"form-control"</span> pt:placeholder=<span class="st">"12345678"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;f:validateRegex</span> pattern=<span class="st">"^[0-9]{7,8}$"</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/h:inputText&gt;</span>
+    <span class="kw">&lt;h:message</span> for=<span class="st">"doc"</span> styleClass=<span class="st">"form-error"</span> <span class="kw">/&gt;</span>
+
+    <span class="kw">&lt;label</span> class=<span class="st">"form-label"</span><span class="kw">&gt;</span>Nombre:<span class="kw">&lt;/label&gt;</span>
+    <span class="kw">&lt;h:inputText</span> id=<span class="st">"nom"</span> value=<span class="st">"#{clienteBean.cliente.nombre}"</span>
+        required=<span class="st">"true"</span> requiredMessage=<span class="st">"Nombre obligatorio"</span>
+        styleClass=<span class="st">"form-control"</span> pt:placeholder=<span class="st">"Nombre completo"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;f:validateLength</span> minimum=<span class="st">"2"</span> maximum=<span class="st">"100"</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/h:inputText&gt;</span>
+    <span class="kw">&lt;h:message</span> for=<span class="st">"nom"</span> styleClass=<span class="st">"form-error"</span> <span class="kw">/&gt;</span>
+
+    <span class="kw">&lt;label</span> class=<span class="st">"form-label"</span><span class="kw">&gt;</span>Correo:<span class="kw">&lt;/label&gt;</span>
+    <span class="kw">&lt;h:inputText</span> id=<span class="st">"correo"</span> value=<span class="st">"#{clienteBean.cliente.correo}"</span>
+        required=<span class="st">"true"</span> requiredMessage=<span class="st">"Correo obligatorio"</span>
+        validatorMessage=<span class="st">"Formato de email inv&#xE1;lido"</span>
+        styleClass=<span class="st">"form-control"</span> pt:placeholder=<span class="st">"ejemplo@correo.com"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;f:validateRegex</span> pattern=<span class="st">"^[^@]+@[^@]+\.[^@]+$"</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/h:inputText&gt;</span>
+    <span class="kw">&lt;h:message</span> for=<span class="st">"correo"</span> styleClass=<span class="st">"form-error"</span> <span class="kw">/&gt;</span>
+
+    <span class="kw">&lt;label</span> class=<span class="st">"form-label"</span><span class="kw">&gt;</span>Fecha Nacimiento:<span class="kw">&lt;/label&gt;</span>
+    <span class="kw">&lt;h:inputText</span> id=<span class="st">"fechaNac"</span> value=<span class="st">"#{clienteBean.cliente.fechaNacimiento}"</span>
+        converterMessage=<span class="st">"Formato: dd/MM/yyyy"</span>
+        styleClass=<span class="st">"form-control"</span> pt:placeholder=<span class="st">"dd/MM/yyyy"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;f:convertDateTime</span> pattern=<span class="st">"dd/MM/yyyy"</span> type=<span class="st">"localDate"</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/h:inputText&gt;</span>
+    <span class="kw">&lt;h:message</span> for=<span class="st">"fechaNac"</span> styleClass=<span class="st">"form-error"</span> <span class="kw">/&gt;</span>
+
+    <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Guardar"</span> action=<span class="st">"#{clienteBean.guardar}"</span>
+                     styleClass=<span class="st">"btn btn-primario"</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Cancelar"</span> action=<span class="st">"#{clienteBean.cancelar}"</span>
+                     immediate=<span class="st">"true"</span> styleClass=<span class="st">"btn btn-secundario"</span> <span class="kw">/&gt;</span>
+  <span class="kw">&lt;/h:form&gt;</span>
+
+  <span class="cm">&lt;!-- TABLA --&gt;</span>
+  <span class="kw">&lt;h:dataTable</span> value=<span class="st">"#{clienteBean.clientes}"</span> var=<span class="st">"c"</span>
+              styleClass=<span class="st">"tabla"</span> headerClass=<span class="st">"tabla-header"</span>
+              rowClasses=<span class="st">"fila-par,fila-impar"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;h:column&gt;</span><span class="kw">&lt;f:facet name=<span class="st">"header"</span>&gt;</span>ID<span class="kw">&lt;/f:facet&gt;</span>#{c.id}<span class="kw">&lt;/h:column&gt;</span>
+    <span class="kw">&lt;h:column&gt;</span><span class="kw">&lt;f:facet name=<span class="st">"header"</span>&gt;</span>Documento<span class="kw">&lt;/f:facet&gt;</span>#{c.documento}<span class="kw">&lt;/h:column&gt;</span>
+    <span class="kw">&lt;h:column&gt;</span><span class="kw">&lt;f:facet name=<span class="st">"header"</span>&gt;</span>Nombre<span class="kw">&lt;/f:facet&gt;</span>#{c.nombre}<span class="kw">&lt;/h:column&gt;</span>
+    <span class="kw">&lt;h:column&gt;</span><span class="kw">&lt;f:facet name=<span class="st">"header"</span>&gt;</span>Correo<span class="kw">&lt;/f:facet&gt;</span>#{c.correo}<span class="kw">&lt;/h:column&gt;</span>
+    <span class="kw">&lt;h:column&gt;</span><span class="kw">&lt;f:facet name=<span class="st">"header"</span>&gt;</span>Acciones<span class="kw">&lt;/f:facet&gt;</span>
+      <span class="kw">&lt;h:form&gt;</span>
+        <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Editar"</span>
+            action=<span class="st">"#{clienteBean.editar(c)}"</span> styleClass=<span class="st">"btn btn-secundario"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Eliminar"</span>
+            action=<span class="st">"#{clienteBean.eliminar(c)}"</span> styleClass=<span class="st">"btn btn-peligro"</span>
+            onclick=<span class="st">"return confirm('&#xBF;Eliminar?')"</span> <span class="kw">/&gt;</span>
+      <span class="kw">&lt;/h:form&gt;</span>
+    <span class="kw">&lt;/h:column&gt;</span>
+  <span class="kw">&lt;/h:dataTable&gt;</span>
+
+<span class="an">&lt;/ui:define&gt;</span>
+<span class="an">&lt;/ui:composition&gt;</span><span class="cl">clientes/abm.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 23 &#x2014; ClienteBean completo</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; controlador/ClienteBean.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.controlador;
+
+<span class="kw">import</span> com.veterinaria.modelo.Cliente;
+<span class="kw">import</span> com.veterinaria.servicio.ClienteServicio;
+<span class="kw">import</span> jakarta.annotation.PostConstruct;
+<span class="kw">import</span> jakarta.faces.application.FacesMessage;
+<span class="kw">import</span> jakarta.faces.context.FacesContext;
+<span class="kw">import</span> jakarta.faces.view.ViewScoped;
+<span class="kw">import</span> jakarta.inject.Inject;
+<span class="kw">import</span> jakarta.inject.Named;
+<span class="kw">import</span> java.io.Serializable;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@Named</span>
+<span class="an">@ViewScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteBean</span> <span class="kw">implements</span> Serializable {
+
+    <span class="an">@Inject</span>
+    <span class="kw">private</span> <span class="cn">ClienteServicio</span> clienteServicio;
+
+    <span class="kw">private</span> <span class="cn">Cliente</span> cliente = <span class="kw">new</span> <span class="cn">Cliente</span>();
+    <span class="kw">private</span> List&lt;Cliente&gt; clientes;
+    <span class="kw">private</span> <span class="cn">String</span> textoBusqueda;
+
+    <span class="an">@PostConstruct</span>
+    <span class="kw">public void</span> <span class="mt">init</span>() { listar(); }
+
+    <span class="kw">public void</span> <span class="mt">listar</span>() {
+        clientes = clienteServicio.listarTodos();
+        textoBusqueda = <span class="nm">null</span>;
+    }
+
+    <span class="kw">public void</span> <span class="mt">buscar</span>() {
+        <span class="kw">if</span> (textoBusqueda != <span class="nm">null</span> &amp;&amp; !textoBusqueda.isBlank()) {
+            clientes = clienteServicio.buscar(textoBusqueda);
+        } <span class="kw">else</span> {
+            listar();
+        }
+    }
+
+    <span class="kw">public void</span> <span class="mt">guardar</span>() {
+        <span class="kw">try</span> {
+            clienteServicio.guardar(cliente);
+            FacesContext.getCurrentInstance().addMessage(<span class="nm">null</span>,
+                <span class="kw">new</span> <span class="cn">FacesMessage</span>(FacesMessage.SEVERITY_INFO,
+                    <span class="st">"Cliente guardado correctamente"</span>, <span class="nm">null</span>));
+            cliente = <span class="kw">new</span> <span class="cn">Cliente</span>();
+            listar();
+        } <span class="kw">catch</span> (<span class="cn">IllegalArgumentException</span> e) {
+            FacesContext.getCurrentInstance().addMessage(<span class="nm">null</span>,
+                <span class="kw">new</span> <span class="cn">FacesMessage</span>(FacesMessage.SEVERITY_ERROR,
+                    e.getMessage(), <span class="nm">null</span>));
+        }
+    }
+
+    <span class="kw">public void</span> <span class="mt">editar</span>(<span class="cn">Cliente</span> c) { <span class="kw">this</span>.cliente = c; }
+
+    <span class="kw">public void</span> <span class="mt">eliminar</span>(<span class="cn">Cliente</span> c) {
+        clienteServicio.eliminar(c.getId());
+        listar();
+    }
+
+    <span class="kw">public void</span> <span class="mt">cancelar</span>() { cliente = <span class="kw">new</span> <span class="cn">Cliente</span>(); }
+
+    <span class="cm">// Getters y Setters</span>
+    <span class="kw">public</span> <span class="cn">Cliente</span> <span class="mt">getCliente</span>() { <span class="kw">return</span> cliente; }
+    <span class="kw">public void</span> <span class="mt">setCliente</span>(<span class="cn">Cliente</span> c) { <span class="kw">this</span>.cliente = c; }
+    <span class="kw">public</span> List&lt;Cliente&gt; <span class="mt">getClientes</span>() { <span class="kw">return</span> clientes; }
+    <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getTextoBusqueda</span>() { <span class="kw">return</span> textoBusqueda; }
+    <span class="kw">public void</span> <span class="mt">setTextoBusqueda</span>(<span class="cn">String</span> t) { <span class="kw">this</span>.textoBusqueda = t; }
+}<span class="cl">ClienteBean.java</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- RESUMEN Y ACTIVIDAD PRACTICA -->
+<div class="sec" id="res">
+  <div class="sec-hdr"><div class="sec-num">&#x2705;</div><div class="sec-titulo">Resumen y actividad pr&#xE1;ctica</div></div>
+
+  <div class="dn">DIAPOSITIVA 24 &#x2014; Resumen de la clase</div>
+  <table>
+    <thead><tr><th>Tema</th><th>Concepto clave</th><th>Tecnolog&#xED;a</th></tr></thead>
+    <tbody>
+      <tr><td>Modelo ampliado</td><td>Nuevos campos: correo (String) y fechaNacimiento (LocalDate)</td><td>JPA 3.1</td></tr>
+      <tr><td>Validaci&#xF3;n Vista</td><td>required, f:validateRegex, f:convertDateTime, pt:placeholder</td><td>JSF 4.0</td></tr>
+      <tr><td>Bean Validation</td><td>@NotBlank, @Email, @Size, @Past en la entidad</td><td>Jakarta Validation 3.0</td></tr>
+      <tr><td>Validaci&#xF3;n Servicio</td><td>Unicidad de documento y correo con IllegalArgumentException</td><td>CDI + JPA</td></tr>
+      <tr><td>JPQL</td><td>@NamedQuery, TypedQuery, LIKE + LOWER para b&#xFA;squeda</td><td>JPA 3.1</td></tr>
+      <tr><td>Plantilla Facelets</td><td>ui:composition + ui:insert/ui:define para layout compartido</td><td>Facelets</td></tr>
+      <tr><td>Men&#xFA; navegaci&#xF3;n</td><td>h:link con outcome (GET) para navegaci&#xF3;n entre p&#xE1;ginas</td><td>JSF 4.0</td></tr>
+      <tr><td>CSS profesional</td><td>estilos.css con clases para forms, tablas, botones, mensajes</td><td>h:outputStylesheet</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 25 &#x2014; Actividad pr&#xE1;ctica</div>
+  <div class="card c-verde">
+    <div class="card-hdr">&#x1F3C6; Actividad pr&#xE1;ctica &#x2014; AppVeterinaria04</div>
+    <div class="card-body">
+      <div class="paso">
+        <div class="paso-n">1</div>
+        <div class="paso-body">
+          <h4>Actualizar la base de datos</h4>
+          <p>Ejecutar el nuevo script SQL que agrega las columnas <code>correo</code> y <code>fecha_nacimiento</code> a la tabla <code>clientes</code>.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">2</div>
+        <div class="paso-body">
+          <h4>Actualizar Cliente.java</h4>
+          <p>Agregar los nuevos campos con <code>@Column</code>, <code>@NamedQueries</code> y todas las anotaciones de Bean Validation.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">3</div>
+        <div class="paso-body">
+          <h4>Crear ClienteDAO con JPQL</h4>
+          <p>Implementar <code>buscarPorDocumento()</code>, <code>buscarPorEmail()</code> y <code>buscarPorTexto()</code> usando <code>TypedQuery</code> y <code>@NamedQuery</code>.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">4</div>
+        <div class="paso-body">
+          <h4>Implementar ClienteServicio con validaciones de unicidad</h4>
+          <p>Verificar documento y correo &#xFA;nicos antes de guardar. Lanzar <code>IllegalArgumentException</code> si ya existen.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">5</div>
+        <div class="paso-body">
+          <h4>Crear plantilla.xhtml y estilos.css</h4>
+          <p>Crear la plantilla con men&#xFA; de navegaci&#xF3;n y el archivo CSS con las clases definidas en la clase.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">6</div>
+        <div class="paso-body">
+          <h4>Implementar clientes/abm.xhtml con b&#xFA;squeda</h4>
+          <p>Usar <code>ui:composition</code>, agregar validaciones JSF a cada campo, incluir el buscador y la tabla con acciones.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-viol">
+    <span class="a-ico">&#x1F4CC;</span>
+    <div><strong>Entregable:</strong> AppVeterinaria04 completa con plantilla Facelets, men&#xFA; de navegaci&#xF3;n, validaciones en los 3 niveles, b&#xFA;squeda JPQL y estilos CSS profesionales. Probar que la validaci&#xF3;n de unicidad funcione al intentar duplicar un documento o correo.</div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>Pr&#xF3;xima clase:</strong> Relaciones JPA &#x2014; @OneToMany y @ManyToOne entre Cliente y Mascota. Cascade, fetch, y formularios con selectores dependientes.</div>
+  </div>
+</div>
+
+
+<!-- FOOTER -->
+<footer>
+  Programaci&#xF3;n Web Avanzada &#x2014; Backend &nbsp;&#x7C;&nbsp; Clase 04: JPA Avanzado: Validaciones, JPQL y Navegaci&#xF3;n &nbsp;&#x7C;&nbsp; Jakarta EE 10 &#xB7; GlassFish 7 &#xB7; JDK 21
+</footer>
+
+</body>
+</html>

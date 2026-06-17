@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clase 03 — Introducción a JPA: Persistencia y CRUD</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1a3a5c;--azul2:#2563a8;--azul3:#3b82d1;--azul-cl:#dbeafe;
+  --verde:#166534;--verde-cl:#dcfce7;--verde2:#16a34a;
+  --naranja:#92400e;--naranja-cl:#fef3c7;--naranja2:#d97706;
+  --rojo:#991b1b;--rojo-cl:#fee2e2;--rojo2:#dc2626;
+  --violeta:#4c1d95;--violeta-cl:#ede9fe;--violeta2:#7c3aed;
+  --gris:#f1f5f9;--gris2:#e2e8f0;--gris3:#94a3b8;--gris4:#475569;--texto:#0f172a;
+  --fuente:"Segoe UI",system-ui,sans-serif;
+}
+body{font-family:var(--fuente);background:#f8fafc;color:var(--texto);font-size:15px;line-height:1.6}
+a{color:var(--azul2);text-decoration:none}
+code{font-family:"Cascadia Code","Fira Code","Consolas",monospace;font-size:.92em}
+
+/* PORTADA */
+.portada{background:linear-gradient(135deg,#0f172a 0%,var(--azul) 45%,var(--azul2) 80%,var(--azul3) 100%);
+  color:#fff;padding:70px 40px;text-align:center;border-radius:0 0 28px 28px;
+  box-shadow:0 8px 40px rgba(0,0,0,.35);margin-bottom:40px}
+.portada-badge{display:inline-block;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);padding:6px 20px;border-radius:20px;
+  font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+.portada-num{font-size:5rem;font-weight:900;line-height:1;opacity:.18;margin-bottom:-10px}
+.portada h1{font-size:2.3rem;font-weight:800;margin-bottom:8px;line-height:1.2}
+.portada h2{font-size:1.05rem;font-weight:400;opacity:.8;margin-bottom:24px}
+.portada-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.tag{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:16px;font-size:11px;font-weight:600}
+
+/* INDICE */
+.indice{max-width:880px;margin:0 auto 40px;background:#fff;border-radius:14px;
+  border:1px solid var(--gris2);box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
+.indice-hdr{background:var(--azul);color:#fff;padding:13px 22px;font-size:.95rem;font-weight:700}
+.indice-lista{list-style:none;display:grid;grid-template-columns:1fr 1fr}
+.indice-lista li{border-bottom:1px solid var(--gris2);border-right:1px solid var(--gris2)}
+.indice-lista a{display:flex;align-items:center;gap:11px;padding:11px 17px;
+  color:var(--texto);font-size:.86rem;transition:background .15s}
+.indice-lista a:hover{background:var(--azul-cl)}
+.ind-n{width:26px;height:26px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+@media(max-width:580px){.indice-lista{grid-template-columns:1fr}}
+
+/* SECCIONES */
+.sec{max-width:880px;margin:0 auto 50px;scroll-margin-top:20px;padding:0 20px}
+.sec-hdr{display:flex;align-items:center;gap:13px;margin-bottom:20px;
+  padding-bottom:11px;border-bottom:3px solid var(--azul2)}
+.sec-num{width:44px;height:44px;background:linear-gradient(135deg,var(--azul),var(--azul2));
+  color:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:.97rem;font-weight:800;flex-shrink:0}
+.sec-titulo{font-size:1.38rem;font-weight:800;color:var(--azul)}
+.dn{display:inline-block;background:var(--azul2);color:#fff;
+  font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:10px;
+  margin-bottom:8px;letter-spacing:.5px}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--gris2);border-radius:11px;
+  box-shadow:0 1px 5px rgba(0,0,0,.06);margin-bottom:14px;overflow:hidden}
+.card-hdr{padding:11px 17px;font-weight:700;font-size:.88rem;border-bottom:1px solid var(--gris2)}
+.card-body{padding:16px}
+.c-azul   .card-hdr{background:var(--azul-cl);color:var(--azul)}
+.c-verde  .card-hdr{background:var(--verde-cl);color:var(--verde)}
+.c-naranja .card-hdr{background:var(--naranja-cl);color:var(--naranja)}
+.c-rojo   .card-hdr{background:var(--rojo-cl);color:var(--rojo)}
+.c-violeta .card-hdr{background:var(--violeta-cl);color:var(--violeta)}
+
+/* ALERTAS */
+.alerta{display:flex;gap:11px;padding:12px 15px;border-radius:9px;margin:12px 0;font-size:.87rem}
+.a-info {background:var(--azul-cl);border-left:4px solid var(--azul2)}
+.a-ok   {background:var(--verde-cl);border-left:4px solid var(--verde2)}
+.a-warn {background:var(--naranja-cl);border-left:4px solid var(--naranja2)}
+.a-err  {background:var(--rojo-cl);border-left:4px solid var(--rojo2)}
+.a-viol {background:var(--violeta-cl);border-left:4px solid var(--violeta2)}
+.a-ico  {font-size:1.15rem;flex-shrink:0;margin-top:2px}
+
+/* CODIGO */
+pre{background:#0f172a;color:#e2e8f0;padding:18px 20px;border-radius:10px;
+  overflow-x:auto;font-size:12.5px;line-height:1.8;margin:10px 0;
+  border:1px solid #1e293b;position:relative}
+.cl{background:#1e293b;border-radius:5px;padding:2px 8px;font-size:10px;
+  color:#94a3b8;font-family:var(--fuente);position:absolute;top:7px;right:9px}
+.kw{color:#93c5fd}.an{color:#86efac}.st{color:#fca5a5}
+.cm{color:#64748b;font-style:italic}.cn{color:#fde68a}.mt{color:#c4b5fd}.nm{color:#fdba74}
+.ok{color:#86efac}.bad{color:#fca5a5}
+
+/* TABLA */
+table{width:100%;border-collapse:collapse;font-size:.87rem;margin:10px 0}
+th{background:var(--azul);color:#fff;padding:8px 12px;text-align:left;
+  font-size:.76rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:8px 12px;border-bottom:1px solid var(--gris2);vertical-align:top}
+tr:nth-child(even) td{background:var(--gris)}
+tr:hover td{background:var(--azul-cl)}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:10px 0}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-verde  {background:var(--verde-cl);color:var(--verde)}
+.b-rojo   {background:var(--rojo-cl);color:var(--rojo)}
+.b-azul   {background:var(--azul-cl);color:var(--azul2)}
+.b-naranja{background:var(--naranja-cl);color:var(--naranja)}
+.b-violeta{background:var(--violeta-cl);color:var(--violeta2)}
+
+/* CAPAS VISUAL */
+.capas{background:#0f172a;border-radius:14px;padding:24px 20px;
+  margin:14px 0;display:flex;flex-direction:column;align-items:center;gap:0}
+.capa{width:100%;max-width:540px;display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-radius:9px;border:1px solid;transition:transform .15s}
+.capa:hover{transform:translateX(4px)}
+.capa-ico{font-size:1.3rem;width:30px;text-align:center;flex-shrink:0}
+.capa-info{flex:1}
+.capa-nom{font-weight:700;font-size:.87rem}
+.capa-det{font-size:.74rem;opacity:.75;margin-top:1px}
+.capa-tag{font-size:.67rem;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.capa-arr{color:#334155;font-size:.72rem;padding:3px 0;
+  display:flex;align-items:center;gap:8px;width:100%;max-width:540px;padding-left:42px}
+.cp-jsf {background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe}
+.cp-jsf .capa-tag{background:#2563a8;color:#fff}
+.cp-bean{background:#312e81;border-color:#818cf8;color:#e0e7ff}
+.cp-bean .capa-tag{background:#4f46e5;color:#fff}
+.cp-serv{background:#14532d;border-color:#4ade80;color:#bbf7d0}
+.cp-serv .capa-tag{background:#16a34a;color:#fff}
+.cp-dao {background:#3b0764;border-color:#a855f7;color:#f3e8ff}
+.cp-dao .capa-tag{background:#9333ea;color:#fff}
+.cp-db  {background:#1c1917;border-color:#78716c;color:#e7e5e4}
+.cp-db  .capa-tag{background:#57534e;color:#fff}
+
+/* OBJETIVOS */
+.obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+@media(max-width:560px){.obj-grid{grid-template-columns:1fr}}
+.obj-item{background:#fff;border:1px solid var(--gris2);
+  border-left:4px solid var(--azul2);border-radius:8px;
+  padding:10px 13px;font-size:.87rem;display:flex;align-items:flex-start;gap:9px}
+
+/* PASOS */
+.paso{display:flex;gap:13px;margin-bottom:13px;align-items:flex-start}
+.paso-n{width:32px;height:32px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.83rem;flex-shrink:0;margin-top:2px}
+.paso-body h4{font-size:.88rem;color:var(--azul);margin-bottom:3px;font-weight:700}
+.paso-body p{font-size:.83rem;color:var(--gris4)}
+
+/* DIAGRAMA FLUJO */
+.flujo{background:#0f172a;border-radius:14px;padding:24px 20px;margin:14px 0;
+  display:flex;flex-direction:column;align-items:center;gap:0}
+.flujo-paso{width:100%;max-width:480px;display:flex;align-items:center;gap:12px;
+  padding:11px 16px;border-radius:9px;border:1px solid;background:#1e293b;border-color:#334155;color:#e2e8f0}
+.flujo-num{width:28px;height:28px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0}
+.flujo-txt{font-size:.82rem;font-weight:600}
+.flujo-arr{color:#475569;font-size:1.2rem;padding:2px 0;text-align:center;width:100%;max-width:480px}
+
+/* ARBOL ARCHIVOS */
+.tree{background:#0f172a;color:#e2e8f0;padding:20px 24px;border-radius:10px;
+  font-family:"Cascadia Code","Fira Code",monospace;font-size:12.5px;line-height:1.9;margin:10px 0}
+.tree-dir{color:#93c5fd;font-weight:700}
+.tree-file{color:#fde68a}
+.tree-desc{color:#64748b;font-style:italic}
+
+/* SEP / FOOTER */
+.sep{height:2px;background:linear-gradient(90deg,var(--azul2),transparent);
+  max-width:880px;margin:0 auto 50px;border-radius:2px}
+footer{background:var(--azul);color:rgba(255,255,255,.65);text-align:center;
+  padding:20px;font-size:.79rem;margin-top:56px}
+</style>
+</head>
+
+
+<body>
+
+<!-- PORTADA -->
+<div class="portada">
+  <div class="portada-badge">Programación Web Avanzada — Backend</div>
+  <div class="portada-num">03</div>
+  <h1>Introducción a JPA: Persistencia y CRUD</h1>
+  <h2>JPA · EntityManager · persistence.xml · MySQL · CRUD Cliente sin plantilla</h2>
+  <div class="portada-tags">
+    <span class="tag">JPA 3.1</span><span class="tag">EclipseLink</span>
+    <span class="tag">EntityManager</span><span class="tag">MySQL 8</span>
+    <span class="tag">CRUD</span><span class="tag">DAO Pattern</span>
+    <span class="tag">GlassFish 7</span><span class="tag">CDI 4.0</span>
+  </div>
+</div>
+
+
+<!-- INDICE -->
+<div style="max-width:880px;margin:0 auto;padding:0 20px">
+<div class="indice">
+  <div class="indice-hdr">📚 Clase 03 — Índice de contenidos</div>
+  <ul class="indice-lista">
+    <li><a href="#obj"><span class="ind-n">🎯</span>Objetivos</a></li>
+    <li><a href="#s1"><span class="ind-n">1</span>El problema de la persistencia</a></li>
+    <li><a href="#s2"><span class="ind-n">2</span>Crear la base de datos MySQL</a></li>
+    <li><a href="#s3"><span class="ind-n">3</span>Configurar DataSource en GlassFish</a></li>
+    <li><a href="#s4"><span class="ind-n">4</span>persistence.xml</a></li>
+    <li><a href="#s5"><span class="ind-n">5</span>Entidad Cliente con @Entity</a></li>
+    <li><a href="#s6"><span class="ind-n">6</span>GenericDAO abstracto</a></li>
+    <li><a href="#s7"><span class="ind-n">7</span>ClienteDAO</a></li>
+    <li><a href="#s8"><span class="ind-n">8</span>ClienteServicio</a></li>
+    <li><a href="#s9"><span class="ind-n">9</span>ClienteBean actualizado (usa DAO)</a></li>
+    <li><a href="#s10"><span class="ind-n">10</span>index.xhtml — CRUD sin plantilla</a></li>
+    <li><a href="#res"><span class="ind-n">✅</span>Resumen y actividad práctica</a></li>
+  </ul>
+</div>
+</div>
+
+
+<!-- OBJETIVOS -->
+<div class="sec" id="obj">
+  <div class="sec-hdr"><div class="sec-num">🎯</div><div class="sec-titulo">Objetivos de la clase</div></div>
+  <div class="obj-grid">
+    <div class="obj-item"><span>💾</span>Comprender el problema que resuelve JPA (persistencia de objetos Java)</div>
+    <div class="obj-item"><span>🗄️</span>Configurar DataSource en GlassFish (jdbc/VeterinariaDB)</div>
+    <div class="obj-item"><span>🏷️</span>Mapear la entidad Cliente con anotaciones JPA</div>
+    <div class="obj-item"><span>⚙️</span>Configurar persistence.xml correctamente</div>
+    <div class="obj-item"><span>🧩</span>Implementar el patrón DAO con GenericDAO</div>
+    <div class="obj-item"><span>📝</span>Dominar EntityManager: persist, merge, remove, find</div>
+    <div class="obj-item"><span>🚀</span>Implementar CRUD básico de Cliente en una sola página index.xhtml</div>
+  </div>
+  <div class="alerta a-info">
+    <span class="a-ico">💡</span>
+    <div><strong>Contexto:</strong> En la Clase 02 usamos un ArrayList dentro del Bean para almacenar clientes. El problema: al reiniciar GlassFish, ¡los datos se perdían! Hoy solucionamos eso con JPA + MySQL.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 1: El problema de la persistencia -->
+<div class="sec" id="s1">
+  <div class="sec-hdr"><div class="sec-num">1</div><div class="sec-titulo">El problema de la persistencia</div></div>
+
+  <div class="dn">DIAPOSITIVA 1 &#x2014; Antes vs Despu&#xE9;s</div>
+  <div class="g2">
+    <div class="card c-rojo">
+      <div class="card-hdr">&#x274C; ANTES &#x2014; Clase 02 (ArrayList en Bean)</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Datos guardados en <code>ArrayList&lt;Cliente&gt;</code></li>
+          <li>Viven en la <strong>memoria RAM</strong> del servidor</li>
+          <li>Al reiniciar GlassFish: <span class="badge b-rojo">&#xA1;datos perdidos!</span></li>
+          <li>No soporta m&#xFA;ltiples usuarios concurrentes</li>
+          <li>No hay b&#xFA;squedas eficientes</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">&#x2705; DESPU&#xC9;S &#x2014; Clase 03 (JPA + MySQL)</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Datos guardados en <strong>tablas MySQL</strong></li>
+          <li>Persisten en el <strong>disco duro</strong></li>
+          <li>Reiniciar GlassFish: <span class="badge b-verde">&#xA1;datos intactos!</span></li>
+          <li>Soporte completo para concurrencia</li>
+          <li>B&#xFA;squedas con SQL/JPQL optimizado</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 2 &#x2014; &#xBF;Qu&#xE9; es ORM?</div>
+  <p style="margin-bottom:14px"><strong>ORM</strong> (Object-Relational Mapping) es una t&#xE9;cnica que mapea autom&#xE1;ticamente objetos Java a tablas de base de datos. No escribimos SQL manual: JPA lo genera por nosotros.</p>
+
+  <div style="background:#0f172a;border-radius:14px;padding:28px 20px;margin:14px 0;display:flex;flex-direction:column;align-items:center;gap:0">
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center;width:100%">
+      <div style="background:#312e81;border:2px solid #818cf8;border-radius:11px;padding:16px 22px;text-align:center;color:#e0e7ff;min-width:160px">
+        <div style="font-size:1.5rem">&#x2615;</div>
+        <div style="font-weight:700;font-size:.85rem;margin-top:4px">Objeto Java</div>
+        <div style="font-size:.7rem;opacity:.7">Cliente cliente = new Cliente()</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="background:#16a34a;color:#fff;padding:4px 14px;border-radius:20px;font-size:.7rem;font-weight:700">JPA/EclipseLink &#x2194;</div>
+        <div style="font-size:.65rem;color:#94a3b8">Mapeo autom&#xE1;tico</div>
+      </div>
+      <div style="background:#422006;border:2px solid #fb923c;border-radius:11px;padding:16px 22px;text-align:center;color:#ffedd5;min-width:160px">
+        <div style="font-size:1.5rem">&#x1F5C4;&#xFE0F;</div>
+        <div style="font-weight:700;font-size:.85rem;margin-top:4px">Tabla MySQL</div>
+        <div style="font-size:.7rem;opacity:.7">INSERT INTO cliente (...)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 3 &#x2014; JPA vs JDBC manual</div>
+  <table>
+    <thead><tr><th>Caracter&#xED;stica</th><th>&#x1F6AB; JDBC manual</th><th>&#x2705; JPA (EclipseLink)</th></tr></thead>
+    <tbody>
+      <tr><td>C&#xF3;digo SQL</td><td>Lo escribimos nosotros a mano</td><td>Lo genera JPA autom&#xE1;ticamente</td></tr>
+      <tr><td>Mapeo de datos</td><td>ResultSet &#x2192; objeto manualmente</td><td>Autom&#xE1;tico con @Entity, @Column</td></tr>
+      <tr><td>Conexi&#xF3;n BD</td><td>Abrir/cerrar manualmente</td><td>GlassFish gestiona el pool</td></tr>
+      <tr><td>Transacciones</td><td>commit/rollback manual</td><td>@Transactional (autom&#xE1;tico)</td></tr>
+      <tr><td>Mantenimiento</td><td>Mucho c&#xF3;digo repetitivo</td><td>C&#xF3;digo limpio y reutilizable</td></tr>
+      <tr><td>Portabilidad</td><td>SQL espec&#xED;fico del motor</td><td>JPQL portable entre motores</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>Clave:</strong> JPA es una <em>especificaci&#xF3;n</em> (interfaz). <strong>EclipseLink</strong> es la <em>implementaci&#xF3;n</em> que viene incluida en GlassFish 7. Nosotros programamos contra la API de JPA, no contra EclipseLink directamente.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 2: Crear la base de datos MySQL -->
+<div class="sec" id="s2">
+  <div class="sec-hdr"><div class="sec-num">2</div><div class="sec-titulo">Crear la base de datos MySQL</div></div>
+
+  <div class="dn">DIAPOSITIVA 4 &#x2014; Script SQL completo</div>
+  <p style="margin-bottom:14px">Antes de programar, necesitamos la base de datos y la tabla <code>cliente</code> en MySQL. Ejecutar este script en MySQL Workbench o l&#xED;nea de comandos:</p>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; veterinariadb.sql</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">-- Crear la base de datos</span>
+<span class="kw">CREATE DATABASE IF NOT EXISTS</span> <span class="cn">veterinariadb</span>
+    <span class="kw">CHARACTER SET</span> utf8mb4
+    <span class="kw">COLLATE</span> utf8mb4_unicode_ci;
+
+<span class="kw">USE</span> <span class="cn">veterinariadb</span>;
+
+<span class="cm">-- Crear la tabla cliente</span>
+<span class="kw">CREATE TABLE</span> <span class="cn">cliente</span> (
+    <span class="an">id</span>        <span class="mt">INT</span> <span class="kw">NOT NULL AUTO_INCREMENT</span>,
+    <span class="an">documento</span> <span class="mt">VARCHAR(20)</span> <span class="kw">NOT NULL UNIQUE</span>,
+    <span class="an">nombre</span>    <span class="mt">VARCHAR(100)</span> <span class="kw">NOT NULL</span>,
+    <span class="kw">PRIMARY KEY</span> (<span class="an">id</span>)
+);
+
+<span class="cm">-- Insertar datos de prueba</span>
+<span class="kw">INSERT INTO</span> <span class="cn">cliente</span> (documento, nombre) <span class="kw">VALUES</span>
+    (<span class="st">'30123456'</span>, <span class="st">'Mar&#xED;a Gonz&#xE1;lez'</span>),
+    (<span class="st">'28987654'</span>, <span class="st">'Carlos P&#xE9;rez'</span>),
+    (<span class="st">'35456789'</span>, <span class="st">'Ana Mart&#xED;nez'</span>);
+
+<span class="cm">-- Verificar</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="cn">cliente</span>;<span class="cl">veterinariadb.sql</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 5 &#x2014; Detalle de la tabla</div>
+  <table>
+    <thead><tr><th>Columna</th><th>Tipo</th><th>Restricciones</th><th>Descripci&#xF3;n</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td><span class="badge b-azul">INT</span></td><td>PK, AUTO_INCREMENT</td><td>Clave primaria generada autom&#xE1;ticamente</td></tr>
+      <tr><td><code>documento</code></td><td><span class="badge b-verde">VARCHAR(20)</span></td><td>NOT NULL, UNIQUE</td><td>DNI/CUIL del cliente (no se repite)</td></tr>
+      <tr><td><code>nombre</code></td><td><span class="badge b-verde">VARCHAR(100)</span></td><td>NOT NULL</td><td>Nombre completo del cliente</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">&#x26A0;&#xFE0F;</span>
+    <div><strong>Importante:</strong> Usamos <code>INT AUTO_INCREMENT</code> para el id (NO BIGINT). En JPA esto se mapea a <code>int</code> (primitivo) o <code>Integer</code> (wrapper). Esto mantiene el c&#xF3;digo simple para el curso.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 3: Configurar DataSource en GlassFish -->
+<div class="sec" id="s3">
+  <div class="sec-hdr"><div class="sec-num">3</div><div class="sec-titulo">Configurar DataSource en GlassFish</div></div>
+
+  <div class="dn">DIAPOSITIVA 6 &#x2014; &#xBF;Qu&#xE9; es un DataSource?</div>
+  <p style="margin-bottom:14px">Un <strong>DataSource</strong> es un pool de conexiones gestionado por GlassFish. La aplicaci&#xF3;n NO se conecta directamente a MySQL; solicita conexiones al pool, que las reutiliza eficientemente.</p>
+
+  <div style="background:#0f172a;border-radius:14px;padding:28px 20px;margin:14px 0;display:flex;flex-direction:column;align-items:center;gap:0">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;width:100%">
+      <div style="background:#312e81;border:2px solid #818cf8;border-radius:11px;padding:14px 18px;text-align:center;color:#e0e7ff;min-width:120px">
+        <div style="font-size:1.3rem">&#x2615;</div>
+        <div style="font-weight:700;font-size:.8rem;margin-top:4px">App JPA</div>
+        <div style="font-size:.65rem;opacity:.7">EntityManager</div>
+      </div>
+      <div style="color:#94a3b8;font-size:.7rem;font-weight:700">&#x2192;</div>
+      <div style="background:#14532d;border:2px solid #4ade80;border-radius:11px;padding:14px 18px;text-align:center;color:#bbf7d0;min-width:140px">
+        <div style="font-size:1.3rem">&#x1F3CA;</div>
+        <div style="font-weight:700;font-size:.8rem;margin-top:4px">Connection Pool</div>
+        <div style="font-size:.65rem;opacity:.7">VeterinariaPool</div>
+      </div>
+      <div style="color:#94a3b8;font-size:.7rem;font-weight:700">&#x2192;</div>
+      <div style="background:#1e3a5f;border:2px solid #3b82d1;border-radius:11px;padding:14px 18px;text-align:center;color:#bfdbfe;min-width:140px">
+        <div style="font-size:1.3rem">&#x1F517;</div>
+        <div style="font-weight:700;font-size:.8rem;margin-top:4px">JDBC Resource</div>
+        <div style="font-size:.65rem;opacity:.7">jdbc/VeterinariaDB</div>
+      </div>
+      <div style="color:#94a3b8;font-size:.7rem;font-weight:700">&#x2192;</div>
+      <div style="background:#422006;border:2px solid #fb923c;border-radius:11px;padding:14px 18px;text-align:center;color:#ffedd5;min-width:120px">
+        <div style="font-size:1.3rem">&#x1F5C4;&#xFE0F;</div>
+        <div style="font-weight:700;font-size:.8rem;margin-top:4px">MySQL</div>
+        <div style="font-size:.65rem;opacity:.7">veterinariadb</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 7 &#x2014; Paso a paso en Admin Console</div>
+  <p style="margin-bottom:10px">Abrir <code>http://localhost:4848</code> (Admin Console de GlassFish):</p>
+
+  <div class="paso">
+    <div class="paso-n">1</div>
+    <div class="paso-body">
+      <h4>Crear Connection Pool</h4>
+      <p>Resources &#x2192; JDBC &#x2192; JDBC Connection Pools &#x2192; New</p>
+    </div>
+  </div>
+  <div class="paso">
+    <div class="paso-n">2</div>
+    <div class="paso-body">
+      <h4>Configurar el Pool</h4>
+      <p>Pool Name: <code>VeterinariaPool</code> | Resource Type: <code>javax.sql.DataSource</code> | Database Driver: <code>com.mysql.cj.jdbc.MysqlDataSource</code></p>
+    </div>
+  </div>
+  <div class="paso">
+    <div class="paso-n">3</div>
+    <div class="paso-body">
+      <h4>Propiedades del Pool (Additional Properties)</h4>
+      <p><code>URL=jdbc:mysql://localhost:3306/veterinariadb</code>, <code>User=root</code>, <code>Password=root</code></p>
+    </div>
+  </div>
+  <div class="paso">
+    <div class="paso-n">4</div>
+    <div class="paso-body">
+      <h4>Ping para verificar</h4>
+      <p>Click en el bot&#xF3;n <strong>Ping</strong>. Debe mostrar: <span class="badge b-verde">Ping Succeeded</span></p>
+    </div>
+  </div>
+  <div class="paso">
+    <div class="paso-n">5</div>
+    <div class="paso-body">
+      <h4>Crear JDBC Resource</h4>
+      <p>Resources &#x2192; JDBC &#x2192; JDBC Resources &#x2192; New | JNDI Name: <code>jdbc/VeterinariaDB</code> | Pool: <code>VeterinariaPool</code></p>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>Resultado:</strong> Ahora GlassFish tiene un recurso JNDI llamado <code>jdbc/VeterinariaDB</code> que apunta a nuestra base MySQL. La aplicaci&#xF3;n usar&#xE1; este nombre en persistence.xml.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 4: persistence.xml -->
+<div class="sec" id="s4">
+  <div class="sec-hdr"><div class="sec-num">4</div><div class="sec-titulo">persistence.xml</div></div>
+
+  <div class="dn">DIAPOSITIVA 8 &#x2014; Archivo completo</div>
+  <p style="margin-bottom:14px">Este archivo le dice a JPA c&#xF3;mo conectarse a la base de datos y c&#xF3;mo comportarse. Se ubica en <code>src/main/resources/META-INF/persistence.xml</code>.</p>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; META-INF/persistence.xml</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;?xml version=</span><span class="st">"1.0"</span> <span class="kw">encoding=</span><span class="st">"UTF-8"</span><span class="kw">?&gt;</span>
+<span class="kw">&lt;persistence</span> xmlns=<span class="st">"https://jakarta.ee/xml/ns/persistence"</span>
+             version=<span class="st">"3.0"</span><span class="kw">&gt;</span>
+
+    <span class="kw">&lt;persistence-unit</span> name=<span class="st">"VeterinariaPU"</span>
+                      transaction-type=<span class="st">"JTA"</span><span class="kw">&gt;</span>
+
+        <span class="cm">&lt;!-- DataSource configurado en GlassFish --&gt;</span>
+        <span class="kw">&lt;jta-data-source&gt;</span><span class="cn">jdbc/VeterinariaDB</span><span class="kw">&lt;/jta-data-source&gt;</span>
+
+        <span class="cm">&lt;!-- Propiedades de EclipseLink --&gt;</span>
+        <span class="kw">&lt;properties&gt;</span>
+            <span class="cm">&lt;!-- Mostrar SQL generado en consola --&gt;</span>
+            <span class="kw">&lt;property</span> name=<span class="st">"eclipselink.logging.level.sql"</span>
+                      value=<span class="st">"FINE"</span><span class="kw">/&gt;</span>
+
+            <span class="cm">&lt;!-- Mostrar par&#xE1;metros de las queries --&gt;</span>
+            <span class="kw">&lt;property</span> name=<span class="st">"eclipselink.logging.parameters"</span>
+                      value=<span class="st">"true"</span><span class="kw">/&gt;</span>
+
+            <span class="cm">&lt;!-- NO crear/modificar tablas autom&#xE1;ticamente --&gt;</span>
+            <span class="kw">&lt;property</span> name=<span class="st">"eclipselink.ddl-generation"</span>
+                      value=<span class="st">"none"</span><span class="kw">/&gt;</span>
+        <span class="kw">&lt;/properties&gt;</span>
+
+    <span class="kw">&lt;/persistence-unit&gt;</span>
+<span class="kw">&lt;/persistence&gt;</span><span class="cl">persistence.xml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 9 &#x2014; Explicaci&#xF3;n de cada elemento</div>
+  <table>
+    <thead><tr><th>Elemento / Propiedad</th><th>Valor</th><th>Explicaci&#xF3;n</th></tr></thead>
+    <tbody>
+      <tr><td><code>persistence-unit name</code></td><td><span class="badge b-azul">VeterinariaPU</span></td><td>Nombre l&#xF3;gico de la unidad de persistencia. Se usa en @PersistenceContext</td></tr>
+      <tr><td><code>transaction-type</code></td><td><span class="badge b-verde">JTA</span></td><td>Transacciones gestionadas por el servidor (GlassFish). Es lo est&#xE1;ndar en Jakarta EE</td></tr>
+      <tr><td><code>jta-data-source</code></td><td><span class="badge b-naranja">jdbc/VeterinariaDB</span></td><td>Nombre JNDI del DataSource que creamos en GlassFish</td></tr>
+      <tr><td><code>eclipselink.logging.level.sql</code></td><td>FINE</td><td>Muestra el SQL generado en la consola de GlassFish (&#xFA;til para debug)</td></tr>
+      <tr><td><code>eclipselink.logging.parameters</code></td><td>true</td><td>Muestra los valores de los par&#xE1;metros en las queries SQL</td></tr>
+      <tr><td><code>eclipselink.ddl-generation</code></td><td>none</td><td>NO crea ni modifica tablas. Nosotros las creamos manualmente con el script SQL</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">&#x26A0;&#xFE0F;</span>
+    <div><strong>Nota:</strong> Usamos <code>ddl-generation=none</code> porque preferimos control total sobre la estructura de la BD. En desarrollo podr&#xED;amos usar <code>create-or-extend-tables</code>, pero en producci&#xF3;n siempre debe ser <code>none</code>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 5: Entidad Cliente con @Entity -->
+<div class="sec" id="s5">
+  <div class="sec-hdr"><div class="sec-num">5</div><div class="sec-titulo">Entidad Cliente con @Entity</div></div>
+
+  <div class="dn">DIAPOSITIVA 10 &#x2014; Cliente.java completo</div>
+  <p style="margin-bottom:14px">Una <strong>entidad JPA</strong> es una clase Java normal (POJO) decorada con anotaciones que indican c&#xF3;mo se mapea a una tabla de la base de datos.</p>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; modelo/Cliente.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.modelo;
+
+<span class="kw">import</span> jakarta.persistence.*;
+<span class="kw">import</span> java.io.Serializable;
+
+<span class="an">@Entity</span>                          <span class="cm">// Marca la clase como entidad JPA</span>
+<span class="an">@Table</span>(name = <span class="st">"cliente"</span>)         <span class="cm">// Nombre de la tabla en MySQL</span>
+<span class="an">@NamedQuery</span>(
+    name = <span class="st">"Cliente.findAll"</span>,
+    query = <span class="st">"SELECT c FROM Cliente c ORDER BY c.nombre"</span>
+)
+<span class="kw">public class</span> <span class="cn">Cliente</span> <span class="kw">implements</span> Serializable {
+
+    <span class="an">@Id</span>                                      <span class="cm">// Clave primaria</span>
+    <span class="an">@GeneratedValue</span>(strategy = GenerationType.<span class="cn">IDENTITY</span>)  <span class="cm">// AUTO_INCREMENT</span>
+    <span class="kw">private int</span> id;
+
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, unique = <span class="kw">true</span>, length = <span class="nm">20</span>)
+    <span class="kw">private</span> String documento;
+
+    <span class="an">@Column</span>(nullable = <span class="kw">false</span>, length = <span class="nm">100</span>)
+    <span class="kw">private</span> String nombre;
+
+    <span class="cm">// Constructor vac&#xED;o (requerido por JPA)</span>
+    <span class="kw">public</span> <span class="mt">Cliente</span>() {}
+
+    <span class="cm">// Constructor con par&#xE1;metros</span>
+    <span class="kw">public</span> <span class="mt">Cliente</span>(String documento, String nombre) {
+        <span class="kw">this</span>.documento = documento;
+        <span class="kw">this</span>.nombre = nombre;
+    }
+
+    <span class="cm">// Getters y Setters</span>
+    <span class="kw">public int</span> <span class="mt">getId</span>()                    { <span class="kw">return</span> id; }
+    <span class="kw">public void</span> <span class="mt">setId</span>(<span class="kw">int</span> id)             { <span class="kw">this</span>.id = id; }
+    <span class="kw">public</span> String <span class="mt">getDocumento</span>()          { <span class="kw">return</span> documento; }
+    <span class="kw">public void</span> <span class="mt">setDocumento</span>(String d)    { <span class="kw">this</span>.documento = d; }
+    <span class="kw">public</span> String <span class="mt">getNombre</span>()             { <span class="kw">return</span> nombre; }
+    <span class="kw">public void</span> <span class="mt">setNombre</span>(String n)       { <span class="kw">this</span>.nombre = n; }
+}<span class="cl">Cliente.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 11 &#x2014; Explicaci&#xF3;n de anotaciones</div>
+  <table>
+    <thead><tr><th>Anotaci&#xF3;n</th><th>Ubicaci&#xF3;n</th><th>Funci&#xF3;n</th></tr></thead>
+    <tbody>
+      <tr><td><code>@Entity</code></td><td>Clase</td><td>Indica que esta clase se persiste en una tabla</td></tr>
+      <tr><td><code>@Table(name="cliente")</code></td><td>Clase</td><td>Especifica el nombre de la tabla (si difiere del nombre de la clase)</td></tr>
+      <tr><td><code>@Id</code></td><td>Campo</td><td>Marca el campo como clave primaria</td></tr>
+      <tr><td><code>@GeneratedValue(IDENTITY)</code></td><td>Campo</td><td>El valor lo genera MySQL con AUTO_INCREMENT</td></tr>
+      <tr><td><code>@Column(nullable, unique, length)</code></td><td>Campo</td><td>Restricciones de la columna: NOT NULL, UNIQUE, tama&#xF1;o</td></tr>
+      <tr><td><code>@NamedQuery</code></td><td>Clase</td><td>Query JPQL predefinida reutilizable (compilada al iniciar)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>&#xBF;Por qu&#xE9; <code>int</code> y no <code>Long</code>?</strong> Nuestra tabla usa <code>INT AUTO_INCREMENT</code>. Para mantener coherencia, usamos <code>int</code> (primitivo) en Java. Si la tabla usara BIGINT, usar&#xED;amos <code>long</code> o <code>Long</code>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 6: GenericDAO abstracto -->
+<div class="sec" id="s6">
+  <div class="sec-hdr"><div class="sec-num">6</div><div class="sec-titulo">GenericDAO abstracto</div></div>
+
+  <div class="dn">DIAPOSITIVA 12 &#x2014; &#xBF;Qu&#xE9; es el patr&#xF3;n DAO?</div>
+  <p style="margin-bottom:14px">El patr&#xF3;n <strong>DAO</strong> (Data Access Object) separa la l&#xF3;gica de acceso a datos del resto de la aplicaci&#xF3;n. Usamos <strong>gen&#xE9;ricos</strong> para no repetir c&#xF3;digo en cada entidad.</p>
+
+  <div class="g2">
+    <div class="card c-violeta">
+      <div class="card-hdr">&#x1F9E9; &#xBF;Por qu&#xE9; Gen&#xE9;ricos?</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Un solo DAO base para <strong>todas</strong> las entidades</li>
+          <li><code>GenericDAO&lt;T, ID&gt;</code> donde T=Entidad, ID=tipo de clave</li>
+          <li>ClienteDAO extiende GenericDAO&lt;Cliente, Integer&gt;</li>
+          <li>MascotaDAO extiende GenericDAO&lt;Mascota, Integer&gt;</li>
+          <li>Evita duplicar persist, merge, remove, find en cada DAO</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-azul">
+      <div class="card-hdr">&#x1F4BE; EntityManager &#x2014; M&#xE9;todos clave</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li><code>persist(entity)</code> &#x2014; INSERT (guardar nuevo)</li>
+          <li><code>merge(entity)</code> &#x2014; UPDATE (actualizar existente)</li>
+          <li><code>remove(entity)</code> &#x2014; DELETE (eliminar)</li>
+          <li><code>find(Class, id)</code> &#x2014; SELECT por PK (buscar por id)</li>
+          <li><code>createQuery(jpql)</code> &#x2014; SELECT personalizado</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 13 &#x2014; GenericDAO.java completo</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; dao/GenericDAO.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.dao;
+
+<span class="kw">import</span> jakarta.persistence.EntityManager;
+<span class="kw">import</span> jakarta.persistence.PersistenceContext;
+<span class="kw">import</span> jakarta.transaction.Transactional;
+<span class="kw">import</span> java.util.List;
+
+<span class="kw">public abstract class</span> <span class="cn">GenericDAO</span>&lt;<span class="mt">T</span>, <span class="mt">ID</span>&gt; {
+
+    <span class="an">@PersistenceContext</span>(unitName = <span class="st">"VeterinariaPU"</span>)
+    <span class="kw">protected</span> EntityManager em;
+
+    <span class="kw">private</span> Class&lt;T&gt; entityClass;
+
+    <span class="cm">// El hijo debe pasar la clase en su constructor</span>
+    <span class="kw">public</span> <span class="mt">GenericDAO</span>(Class&lt;T&gt; entityClass) {
+        <span class="kw">this</span>.entityClass = entityClass;
+    }
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">guardar</span>(T entidad) {
+        em.persist(entidad);           <span class="cm">// INSERT INTO ...</span>
+    }
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public</span> T <span class="mt">actualizar</span>(T entidad) {
+        <span class="kw">return</span> em.merge(entidad);      <span class="cm">// UPDATE ... SET ...</span>
+    }
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">eliminar</span>(ID id) {
+        T entidad = em.find(entityClass, id);  <span class="cm">// Buscar primero</span>
+        <span class="kw">if</span> (entidad != <span class="kw">null</span>) {
+            em.remove(entidad);        <span class="cm">// DELETE FROM ...</span>
+        }
+    }
+
+    <span class="kw">public</span> T <span class="mt">buscarPorId</span>(ID id) {
+        <span class="kw">return</span> em.find(entityClass, id);  <span class="cm">// SELECT ... WHERE id = ?</span>
+    }
+
+    <span class="kw">public</span> List&lt;T&gt; <span class="mt">listarTodos</span>() {
+        <span class="kw">return</span> em.createQuery(
+            <span class="st">"SELECT e FROM "</span> + entityClass.getSimpleName() + <span class="st">" e"</span>,
+            entityClass
+        ).getResultList();
+    }
+}<span class="cl">GenericDAO.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>@PersistenceContext:</strong> GlassFish inyecta autom&#xE1;ticamente el EntityManager. No necesitamos crear ni cerrar conexiones manualmente. <strong>@Transactional:</strong> GlassFish abre y cierra la transacci&#xF3;n autom&#xE1;ticamente (commit si todo sale bien, rollback si hay error).</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 7: ClienteDAO -->
+<div class="sec" id="s7">
+  <div class="sec-hdr"><div class="sec-num">7</div><div class="sec-titulo">ClienteDAO</div></div>
+
+  <div class="dn">DIAPOSITIVA 14 &#x2014; ClienteDAO.java completo</div>
+  <p style="margin-bottom:14px">El <code>ClienteDAO</code> extiende <code>GenericDAO</code> y agrega m&#xE9;todos espec&#xED;ficos de la entidad Cliente.</p>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; dao/ClienteDAO.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.dao;
+
+<span class="kw">import</span> com.veterinaria.modelo.Cliente;
+<span class="kw">import</span> jakarta.enterprise.context.ApplicationScoped;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteDAO</span> <span class="kw">extends</span> GenericDAO&lt;Cliente, Integer&gt; {
+
+    <span class="kw">public</span> <span class="mt">ClienteDAO</span>() {
+        <span class="kw">super</span>(Cliente.<span class="kw">class</span>);
+    }
+
+    <span class="cm">// Usa la @NamedQuery definida en la entidad</span>
+    <span class="an">@Override</span>
+    <span class="kw">public</span> List&lt;Cliente&gt; <span class="mt">listarTodos</span>() {
+        <span class="kw">return</span> em.createNamedQuery(<span class="st">"Cliente.findAll"</span>, Cliente.<span class="kw">class</span>)
+                  .getResultList();
+    }
+
+    <span class="cm">// M&#xE9;todo espec&#xED;fico: buscar por documento</span>
+    <span class="kw">public</span> Cliente <span class="mt">buscarPorDocumento</span>(String documento) {
+        List&lt;Cliente&gt; resultados = em.createQuery(
+            <span class="st">"SELECT c FROM Cliente c WHERE c.documento = :doc"</span>,
+            Cliente.<span class="kw">class</span>
+        ).setParameter(<span class="st">"doc"</span>, documento)
+         .getResultList();
+
+        <span class="kw">return</span> resultados.isEmpty() ? <span class="kw">null</span> : resultados.get(<span class="nm">0</span>);
+    }
+}<span class="cl">ClienteDAO.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">&#x1F4CB; @ApplicationScoped</div>
+      <div class="card-body" style="font-size:.84rem">
+        Una sola instancia para toda la aplicaci&#xF3;n. Los DAOs no guardan estado del usuario, as&#xED; que una instancia compartida es eficiente.
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">&#x1F504; Herencia Gen&#xE9;rica</div>
+      <div class="card-body" style="font-size:.84rem">
+        <code>GenericDAO&lt;Cliente, Integer&gt;</code> significa: entidad <strong>Cliente</strong>, clave primaria tipo <strong>Integer</strong>. Hereda guardar, actualizar, eliminar, buscarPorId.
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 8: ClienteServicio -->
+<div class="sec" id="s8">
+  <div class="sec-hdr"><div class="sec-num">8</div><div class="sec-titulo">ClienteServicio</div></div>
+
+  <div class="dn">DIAPOSITIVA 15 &#x2014; Capa de servicio</div>
+  <p style="margin-bottom:14px">La <strong>capa de servicio</strong> contiene la l&#xF3;gica de negocio. Valida datos antes de llamar al DAO. El Bean nunca accede al DAO directamente.</p>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; servicio/ClienteServicio.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.servicio;
+
+<span class="kw">import</span> com.veterinaria.dao.ClienteDAO;
+<span class="kw">import</span> com.veterinaria.modelo.Cliente;
+<span class="kw">import</span> jakarta.enterprise.context.ApplicationScoped;
+<span class="kw">import</span> jakarta.inject.Inject;
+<span class="kw">import</span> jakarta.transaction.Transactional;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@ApplicationScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteServicio</span> {
+
+    <span class="an">@Inject</span>
+    <span class="kw">private</span> ClienteDAO clienteDAO;
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">guardar</span>(Cliente cliente) {
+        <span class="cm">// Validar que no exista otro con el mismo documento</span>
+        Cliente existente = clienteDAO.buscarPorDocumento(
+            cliente.getDocumento()
+        );
+        <span class="kw">if</span> (existente != <span class="kw">null</span> &amp;&amp; existente.getId() != cliente.getId()) {
+            <span class="kw">throw new</span> RuntimeException(
+                <span class="st">"Ya existe un cliente con documento: "</span>
+                + cliente.getDocumento()
+            );
+        }
+
+        <span class="kw">if</span> (cliente.getId() == <span class="nm">0</span>) {
+            clienteDAO.guardar(cliente);       <span class="cm">// INSERT (nuevo)</span>
+        } <span class="kw">else</span> {
+            clienteDAO.actualizar(cliente);    <span class="cm">// UPDATE (existente)</span>
+        }
+    }
+
+    <span class="kw">public</span> List&lt;Cliente&gt; <span class="mt">listarTodos</span>() {
+        <span class="kw">return</span> clienteDAO.listarTodos();
+    }
+
+    <span class="kw">public</span> Cliente <span class="mt">buscarPorId</span>(<span class="kw">int</span> id) {
+        <span class="kw">return</span> clienteDAO.buscarPorId(id);
+    }
+
+    <span class="an">@Transactional</span>
+    <span class="kw">public void</span> <span class="mt">eliminar</span>(<span class="kw">int</span> id) {
+        clienteDAO.eliminar(id);
+    }
+}<span class="cl">ClienteServicio.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>&#xBF;Por qu&#xE9; @Transactional en el Servicio?</strong> La transacci&#xF3;n debe abarcar toda la operaci&#xF3;n de negocio. Si la validaci&#xF3;n falla despu&#xE9;s de una escritura, se hace rollback completo. El servicio es el due&#xF1;o de la transacci&#xF3;n.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 9: ClienteBean actualizado -->
+<div class="sec" id="s9">
+  <div class="sec-hdr"><div class="sec-num">9</div><div class="sec-titulo">ClienteBean actualizado (usa DAO)</div></div>
+
+  <div class="dn">DIAPOSITIVA 16 &#x2014; Comparaci&#xF3;n ANTES vs DESPU&#xC9;S</div>
+  <div class="g2">
+    <div class="card c-rojo">
+      <div class="card-hdr">&#x274C; ANTES (Clase 02) &#x2014; ArrayList</div>
+      <div class="card-body" style="font-size:.82rem">
+<pre><code><span class="cm">// Datos en memoria (se pierden)</span>
+<span class="kw">private</span> List&lt;Cliente&gt; clientes = <span class="kw">new</span> ArrayList&lt;&gt;();
+
+<span class="kw">public void</span> guardar() {
+    clientes.add(<span class="kw">new</span> Cliente(...));
+}</code></pre>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">&#x2705; DESPU&#xC9;S (Clase 03) &#x2014; Servicio + DAO</div>
+      <div class="card-body" style="font-size:.82rem">
+<pre><code><span class="cm">// Datos en MySQL (persisten)</span>
+<span class="an">@Inject</span>
+<span class="kw">private</span> ClienteServicio servicio;
+
+<span class="kw">public void</span> guardar() {
+    servicio.guardar(cliente);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 17 &#x2014; ClienteBean.java completo</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; controlador/ClienteBean.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.controlador;
+
+<span class="kw">import</span> com.veterinaria.modelo.Cliente;
+<span class="kw">import</span> com.veterinaria.servicio.ClienteServicio;
+<span class="kw">import</span> jakarta.annotation.PostConstruct;
+<span class="kw">import</span> jakarta.faces.application.FacesMessage;
+<span class="kw">import</span> jakarta.faces.context.FacesContext;
+<span class="kw">import</span> jakarta.faces.view.ViewScoped;
+<span class="kw">import</span> jakarta.inject.Inject;
+<span class="kw">import</span> jakarta.inject.Named;
+<span class="kw">import</span> java.io.Serializable;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@Named</span>                           <span class="cm">// Accesible desde JSF: #{clienteBean}</span>
+<span class="an">@ViewScoped</span>                      <span class="cm">// Vive mientras el usuario est&#xE9; en la p&#xE1;gina</span>
+<span class="kw">public class</span> <span class="cn">ClienteBean</span> <span class="kw">implements</span> Serializable {
+
+    <span class="an">@Inject</span>
+    <span class="kw">private</span> ClienteServicio servicio;
+
+    <span class="kw">private</span> Cliente cliente = <span class="kw">new</span> Cliente();
+    <span class="kw">private</span> List&lt;Cliente&gt; clientes;
+
+    <span class="an">@PostConstruct</span>
+    <span class="kw">public void</span> <span class="mt">init</span>() {
+        clientes = servicio.listarTodos();  <span class="cm">// Carga desde MySQL</span>
+    }
+
+    <span class="kw">public void</span> <span class="mt">guardar</span>() {
+        <span class="kw">try</span> {
+            servicio.guardar(cliente);
+            cliente = <span class="kw">new</span> Cliente();          <span class="cm">// Limpiar formulario</span>
+            clientes = servicio.listarTodos(); <span class="cm">// Refrescar lista</span>
+            addMessage(FacesMessage.SEVERITY_INFO,
+                <span class="st">"&#xC9;xito"</span>, <span class="st">"Cliente guardado correctamente"</span>);
+        } <span class="kw">catch</span> (Exception e) {
+            addMessage(FacesMessage.SEVERITY_ERROR,
+                <span class="st">"Error"</span>, e.getMessage());
+        }
+    }
+
+    <span class="kw">public void</span> <span class="mt">eliminar</span>(Cliente c) {
+        <span class="kw">try</span> {
+            servicio.eliminar(c.getId());
+            clientes = servicio.listarTodos();
+            addMessage(FacesMessage.SEVERITY_INFO,
+                <span class="st">"&#xC9;xito"</span>, <span class="st">"Cliente eliminado"</span>);
+        } <span class="kw">catch</span> (Exception e) {
+            addMessage(FacesMessage.SEVERITY_ERROR,
+                <span class="st">"Error"</span>, e.getMessage());
+        }
+    }
+
+    <span class="kw">public void</span> <span class="mt">prepararEdicion</span>(Cliente c) {
+        <span class="kw">this</span>.cliente = c;  <span class="cm">// Carga el cliente en el formulario</span>
+    }
+
+    <span class="kw">public void</span> <span class="mt">cancelar</span>() {
+        <span class="kw">this</span>.cliente = <span class="kw">new</span> Cliente();  <span class="cm">// Limpia el formulario</span>
+    }
+
+    <span class="kw">private void</span> <span class="mt">addMessage</span>(FacesMessage.Severity sev,
+                            String titulo, String detalle) {
+        FacesContext.getCurrentInstance().addMessage(<span class="kw">null</span>,
+            <span class="kw">new</span> FacesMessage(sev, titulo, detalle));
+    }
+
+    <span class="cm">// Getters y Setters</span>
+    <span class="kw">public</span> Cliente <span class="mt">getCliente</span>()              { <span class="kw">return</span> cliente; }
+    <span class="kw">public void</span> <span class="mt">setCliente</span>(Cliente c)       { <span class="kw">this</span>.cliente = c; }
+    <span class="kw">public</span> List&lt;Cliente&gt; <span class="mt">getClientes</span>()     { <span class="kw">return</span> clientes; }
+}<span class="cl">ClienteBean.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">&#x26A0;&#xFE0F;</span>
+    <div><strong>@ViewScoped:</strong> El bean vive mientras el usuario est&#xE9; en la misma p&#xE1;gina. Esto permite editar un cliente sin perder el estado del formulario. Requiere <code>implements Serializable</code>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 10: index.xhtml CRUD sin plantilla -->
+<div class="sec" id="s10">
+  <div class="sec-hdr"><div class="sec-num">10</div><div class="sec-titulo">index.xhtml &#x2014; CRUD sin plantilla</div></div>
+
+  <div class="dn">DIAPOSITIVA 18 &#x2014; P&#xE1;gina completa (sin template)</div>
+  <p style="margin-bottom:14px">Una sola p&#xE1;gina <code>index.xhtml</code> con todo: formulario para agregar/editar, tabla con la lista, y botones de acci&#xF3;n. <strong>Sin usar plantilla</strong> (ui:composition).</p>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; webapp/index.xhtml</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;?xml version=</span><span class="st">"1.0"</span> <span class="kw">encoding=</span><span class="st">"UTF-8"</span><span class="kw">?&gt;</span>
+<span class="kw">&lt;!DOCTYPE html&gt;</span>
+<span class="kw">&lt;html</span> xmlns=<span class="st">"http://www.w3.org/1999/xhtml"</span>
+      xmlns:h=<span class="st">"jakarta.faces.html"</span>
+      xmlns:f=<span class="st">"jakarta.faces.core"</span>
+      xmlns:pt=<span class="st">"jakarta.faces.passthrough"</span><span class="kw">&gt;</span>
+
+<span class="kw">&lt;h:head&gt;</span>
+    <span class="kw">&lt;title&gt;</span>CRUD Clientes &#x2014; Veterinaria<span class="kw">&lt;/title&gt;</span>
+    <span class="kw">&lt;style&gt;</span>
+        body { font-family: 'Segoe UI', sans-serif; margin: 30px; background: #f8fafc; }
+        h1 { color: #1a3a5c; margin-bottom: 20px; }
+        .form-row { margin-bottom: 12px; }
+        label { display: inline-block; width: 100px; font-weight: bold; }
+        input[type="text"] { padding: 8px; border: 1px solid #cbd5e1;
+            border-radius: 6px; width: 250px; }
+        .btn { padding: 8px 18px; border: none; border-radius: 6px;
+            cursor: pointer; font-weight: bold; color: #fff; margin-right: 6px; }
+        .btn-primary { background: #2563a8; }
+        .btn-danger { background: #dc2626; }
+        .btn-secondary { background: #64748b; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #1a3a5c; color: #fff; padding: 10px; text-align: left; }
+        td { padding: 9px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover td { background: #dbeafe; }
+        .msg-info { color: #166534; background: #dcfce7; padding: 10px;
+            border-radius: 6px; margin: 10px 0; }
+        .msg-error { color: #991b1b; background: #fee2e2; padding: 10px;
+            border-radius: 6px; margin: 10px 0; }
+    <span class="kw">&lt;/style&gt;</span>
+<span class="kw">&lt;/h:head&gt;</span>
+
+<span class="kw">&lt;h:body&gt;</span>
+    <span class="kw">&lt;h1&gt;</span>&#x1F3E5; Gesti&#xF3;n de Clientes<span class="kw">&lt;/h1&gt;</span>
+
+    <span class="kw">&lt;h:messages</span> globalOnly=<span class="st">"true"</span>
+               infoClass=<span class="st">"msg-info"</span>
+               errorClass=<span class="st">"msg-error"</span> <span class="kw">/&gt;</span>
+
+    <span class="kw">&lt;h:form&gt;</span>
+        <span class="cm">&lt;!-- Formulario de alta/edici&#xF3;n --&gt;</span>
+        <span class="kw">&lt;div</span> class=<span class="st">"form-row"</span><span class="kw">&gt;</span>
+            <span class="kw">&lt;label&gt;</span>Documento:<span class="kw">&lt;/label&gt;</span>
+            <span class="kw">&lt;h:inputText</span> value=<span class="st">"#{clienteBean.cliente.documento}"</span>
+                         <span class="an">pt:placeholder</span>=<span class="st">"Ej: 30123456"</span>
+                         required=<span class="st">"true"</span>
+                         requiredMessage=<span class="st">"Documento es obligatorio"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;/div&gt;</span>
+        <span class="kw">&lt;div</span> class=<span class="st">"form-row"</span><span class="kw">&gt;</span>
+            <span class="kw">&lt;label&gt;</span>Nombre:<span class="kw">&lt;/label&gt;</span>
+            <span class="kw">&lt;h:inputText</span> value=<span class="st">"#{clienteBean.cliente.nombre}"</span>
+                         <span class="an">pt:placeholder</span>=<span class="st">"Ej: Mar&#xED;a Gonz&#xE1;lez"</span>
+                         required=<span class="st">"true"</span>
+                         requiredMessage=<span class="st">"Nombre es obligatorio"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;/div&gt;</span>
+        <span class="kw">&lt;div</span> class=<span class="st">"form-row"</span><span class="kw">&gt;</span>
+            <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Guardar"</span>
+                             action=<span class="st">"#{clienteBean.guardar}"</span>
+                             styleClass=<span class="st">"btn btn-primary"</span> <span class="kw">/&gt;</span>
+            <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Cancelar"</span>
+                             action=<span class="st">"#{clienteBean.cancelar}"</span>
+                             styleClass=<span class="st">"btn btn-secondary"</span>
+                             immediate=<span class="st">"true"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;/div&gt;</span>
+
+        <span class="cm">&lt;!-- Tabla de clientes --&gt;</span>
+        <span class="kw">&lt;h:dataTable</span> value=<span class="st">"#{clienteBean.clientes}"</span>
+                     var=<span class="st">"c"</span>
+                     rendered=<span class="st">"#{not empty clienteBean.clientes}"</span><span class="kw">&gt;</span>
+
+            <span class="kw">&lt;h:column&gt;</span>
+                <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>ID<span class="kw">&lt;/f:facet&gt;</span>
+                #{c.id}
+            <span class="kw">&lt;/h:column&gt;</span>
+            <span class="kw">&lt;h:column&gt;</span>
+                <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>Documento<span class="kw">&lt;/f:facet&gt;</span>
+                #{c.documento}
+            <span class="kw">&lt;/h:column&gt;</span>
+            <span class="kw">&lt;h:column&gt;</span>
+                <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>Nombre<span class="kw">&lt;/f:facet&gt;</span>
+                #{c.nombre}
+            <span class="kw">&lt;/h:column&gt;</span>
+            <span class="kw">&lt;h:column&gt;</span>
+                <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>Acciones<span class="kw">&lt;/f:facet&gt;</span>
+                <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Editar"</span>
+                    action=<span class="st">"#{clienteBean.prepararEdicion(c)}"</span>
+                    styleClass=<span class="st">"btn btn-primary"</span> <span class="kw">/&gt;</span>
+                <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Eliminar"</span>
+                    action=<span class="st">"#{clienteBean.eliminar(c)}"</span>
+                    styleClass=<span class="st">"btn btn-danger"</span>
+                    onclick=<span class="st">"return confirm('&#xBF;Eliminar este cliente?')"</span> <span class="kw">/&gt;</span>
+            <span class="kw">&lt;/h:column&gt;</span>
+        <span class="kw">&lt;/h:dataTable&gt;</span>
+    <span class="kw">&lt;/h:form&gt;</span>
+<span class="kw">&lt;/h:body&gt;</span>
+<span class="kw">&lt;/html&gt;</span><span class="cl">index.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 19 &#x2014; Puntos clave del index.xhtml</div>
+  <table>
+    <thead><tr><th>Elemento</th><th>Prop&#xF3;sito</th></tr></thead>
+    <tbody>
+      <tr><td><code>xmlns:pt="jakarta.faces.passthrough"</code></td><td>Habilita atributos HTML5 como <code>pt:placeholder</code> en componentes JSF</td></tr>
+      <tr><td><code>pt:placeholder="Ej: 30123456"</code></td><td>Agrega placeholder HTML5 al input generado (mejora UX)</td></tr>
+      <tr><td><code>h:messages globalOnly="true"</code></td><td>Muestra mensajes globales (&#xE9;xito o error) arriba de la p&#xE1;gina</td></tr>
+      <tr><td><code>h:dataTable rendered="..."</code></td><td>Solo muestra la tabla si hay clientes en la lista</td></tr>
+      <tr><td><code>immediate="true"</code> en Cancelar</td><td>Salta las validaciones (no exige campos obligatorios)</td></tr>
+      <tr><td><code>onclick="return confirm(...)"</code></td><td>Pide confirmaci&#xF3;n antes de eliminar (JavaScript nativo)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>Sin plantilla:</strong> Esta p&#xE1;gina NO usa <code>ui:composition</code> ni <code>ui:define</code>. Es un archivo HTML completo e independiente. En clases posteriores agregaremos plantillas para reutilizar layout.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- RESUMEN Y ACTIVIDAD PRACTICA -->
+<div class="sec" id="res">
+  <div class="sec-hdr"><div class="sec-num">&#x2705;</div><div class="sec-titulo">Resumen y actividad pr&#xE1;ctica</div></div>
+
+  <div class="dn">DIAPOSITIVA 20 &#x2014; Arquitectura completa de la Clase 03</div>
+  <div class="capas">
+    <div class="capa cp-jsf">
+      <div class="capa-ico">&#x1F3A8;</div>
+      <div class="capa-info">
+        <div class="capa-nom">index.xhtml (Vista)</div>
+        <div class="capa-det">Formulario + h:dataTable &#x2014; sin plantilla, todo en un archivo</div>
+      </div>
+      <div class="capa-tag">JSF 4.0</div>
+    </div>
+    <div class="capa-arr">&#x2193; &#x2191; #{clienteBean.guardar}</div>
+    <div class="capa cp-bean">
+      <div class="capa-ico">&#x1F3AE;</div>
+      <div class="capa-info">
+        <div class="capa-nom">ClienteBean (@Named @ViewScoped)</div>
+        <div class="capa-det">Controlador &#x2014; conecta la vista con el servicio</div>
+      </div>
+      <div class="capa-tag">CDI 4.0</div>
+    </div>
+    <div class="capa-arr">&#x2193; &#x2191; @Inject servicio.guardar()</div>
+    <div class="capa cp-serv">
+      <div class="capa-ico">&#x2699;&#xFE0F;</div>
+      <div class="capa-info">
+        <div class="capa-nom">ClienteServicio (@ApplicationScoped)</div>
+        <div class="capa-det">Validaciones de negocio + @Transactional</div>
+      </div>
+      <div class="capa-tag">Negocio</div>
+    </div>
+    <div class="capa-arr">&#x2193; &#x2191; @Inject clienteDAO.guardar()</div>
+    <div class="capa cp-dao">
+      <div class="capa-ico">&#x1F4BE;</div>
+      <div class="capa-info">
+        <div class="capa-nom">ClienteDAO extends GenericDAO&lt;Cliente, Integer&gt;</div>
+        <div class="capa-det">EntityManager: persist, merge, remove, find</div>
+      </div>
+      <div class="capa-tag">JPA 3.1</div>
+    </div>
+    <div class="capa-arr">&#x2193; &#x2191; SQL autom&#xE1;tico (EclipseLink)</div>
+    <div class="capa cp-db">
+      <div class="capa-ico">&#x1F5C4;&#xFE0F;</div>
+      <div class="capa-info">
+        <div class="capa-nom">MySQL &#x2014; veterinariadb.cliente</div>
+        <div class="capa-det">INT AUTO_INCREMENT | VARCHAR(20) UNIQUE | VARCHAR(100)</div>
+      </div>
+      <div class="capa-tag">MySQL 8</div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 21 &#x2014; Resumen de conceptos</div>
+  <table>
+    <thead><tr><th>Tema</th><th>Concepto clave</th><th>Archivo / Clase</th></tr></thead>
+    <tbody>
+      <tr><td>Persistencia</td><td>JPA reemplaza ArrayList &#x2014; datos sobreviven reinicios</td><td>EntityManager</td></tr>
+      <tr><td>DataSource</td><td>Pool de conexiones gestionado por GlassFish</td><td>jdbc/VeterinariaDB</td></tr>
+      <tr><td>persistence.xml</td><td>Configura JPA: unidad, DataSource, propiedades EclipseLink</td><td>META-INF/persistence.xml</td></tr>
+      <tr><td>@Entity</td><td>Mapea clase Java &#x2194; tabla MySQL autom&#xE1;ticamente</td><td>Cliente.java</td></tr>
+      <tr><td>GenericDAO</td><td>CRUD gen&#xE9;rico reutilizable para cualquier entidad</td><td>GenericDAO&lt;T, ID&gt;</td></tr>
+      <tr><td>Servicio</td><td>L&#xF3;gica de negocio + validaciones + @Transactional</td><td>ClienteServicio.java</td></tr>
+      <tr><td>Bean</td><td>@Named @ViewScoped + @Inject + FacesMessage</td><td>ClienteBean.java</td></tr>
+      <tr><td>Vista</td><td>Una sola p&#xE1;gina con form + dataTable (sin template)</td><td>index.xhtml</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 22 &#x2014; Flujo completo de una operaci&#xF3;n CRUD</div>
+  <div class="flujo">
+    <div class="flujo-paso">
+      <div class="flujo-num">1</div>
+      <div class="flujo-txt">&#x1F464; Usuario completa formulario y click en &quot;Guardar&quot;</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">2</div>
+      <div class="flujo-txt">&#x1F3AE; ClienteBean.guardar() recibe los datos del formulario</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">3</div>
+      <div class="flujo-txt">&#x2699;&#xFE0F; ClienteServicio.guardar() valida documento &#xFA;nico</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">4</div>
+      <div class="flujo-txt">&#x1F4BE; ClienteDAO.guardar() &#x2192; em.persist(cliente)</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">5</div>
+      <div class="flujo-txt">&#x1F5C4;&#xFE0F; EclipseLink genera: INSERT INTO cliente (documento, nombre) VALUES (?, ?)</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">6</div>
+      <div class="flujo-txt">&#x2705; FacesMessage &quot;Cliente guardado correctamente&quot; + tabla actualizada</div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 23 &#x2014; Estructura de archivos del proyecto</div>
+  <div class="tree">
+<span class="tree-dir">AppVeterinaria03/</span>
+&#x251C;&#x2500;&#x2500; <span class="tree-file">pom.xml</span>                               <span class="tree-desc">&#x2190; jakarta.jakartaee-web-api (provided)</span>
+&#x2514;&#x2500;&#x2500; <span class="tree-dir">src/main/</span>
+    &#x251C;&#x2500;&#x2500; <span class="tree-dir">java/com/veterinaria/</span>
+    &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-dir">modelo/</span>
+    &#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">Cliente.java</span>              <span class="tree-desc">&#x2190; @Entity @Table @Id @Column</span>
+    &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-dir">dao/</span>
+    &#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-file">GenericDAO.java</span>           <span class="tree-desc">&#x2190; @PersistenceContext, CRUD gen&#xE9;rico</span>
+    &#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">ClienteDAO.java</span>           <span class="tree-desc">&#x2190; @ApplicationScoped, extends GenericDAO</span>
+    &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-dir">servicio/</span>
+    &#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">ClienteServicio.java</span>      <span class="tree-desc">&#x2190; @Transactional, validaciones</span>
+    &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-dir">controlador/</span>
+    &#x2502;       &#x2514;&#x2500;&#x2500; <span class="tree-file">ClienteBean.java</span>          <span class="tree-desc">&#x2190; @Named @ViewScoped</span>
+    &#x251C;&#x2500;&#x2500; <span class="tree-dir">resources/META-INF/</span>
+    &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">persistence.xml</span>               <span class="tree-desc">&#x2190; JTA, jdbc/VeterinariaDB</span>
+    &#x2514;&#x2500;&#x2500; <span class="tree-dir">webapp/</span>
+        &#x251C;&#x2500;&#x2500; <span class="tree-dir">WEB-INF/</span>
+        &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-file">web.xml</span>                   <span class="tree-desc">&#x2190; Faces Servlet</span>
+        &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">beans.xml</span>                 <span class="tree-desc">&#x2190; CDI activado</span>
+        &#x2514;&#x2500;&#x2500; <span class="tree-file">index.xhtml</span>                   <span class="tree-desc">&#x2190; CRUD completo en una p&#xE1;gina</span>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 24 &#x2014; Actividad pr&#xE1;ctica</div>
+  <div class="card c-verde">
+    <div class="card-hdr">&#x1F3C6; Actividad pr&#xE1;ctica &#x2014; CRUD Cliente con JPA</div>
+    <div class="card-body">
+      <div class="paso">
+        <div class="paso-n">1</div>
+        <div class="paso-body">
+          <h4>Crear la base de datos</h4>
+          <p>Ejecutar el script SQL para crear <code>veterinariadb</code> y la tabla <code>cliente</code> en MySQL.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">2</div>
+        <div class="paso-body">
+          <h4>Configurar DataSource en GlassFish</h4>
+          <p>Crear Connection Pool (<code>VeterinariaPool</code>) y JDBC Resource (<code>jdbc/VeterinariaDB</code>). Hacer Ping para verificar.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">3</div>
+        <div class="paso-body">
+          <h4>Crear proyecto AppVeterinaria03</h4>
+          <p>Maven Web Application, Jakarta EE 10, GlassFish 7. Crear los paquetes: modelo, dao, servicio, controlador.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">4</div>
+        <div class="paso-body">
+          <h4>Crear las clases Java</h4>
+          <p>Crear en orden: Cliente.java &#x2192; GenericDAO.java &#x2192; ClienteDAO.java &#x2192; ClienteServicio.java &#x2192; ClienteBean.java</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">5</div>
+        <div class="paso-body">
+          <h4>Configurar persistence.xml y crear index.xhtml</h4>
+          <p>Copiar persistence.xml en META-INF. Crear el index.xhtml con formulario y tabla CRUD.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">6</div>
+        <div class="paso-body">
+          <h4>Probar el CRUD completo</h4>
+          <p>Desplegar en GlassFish. Verificar: agregar clientes, editar, eliminar. Reiniciar GlassFish y verificar que los datos persisten.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-viol">
+    <span class="a-ico">&#x1F4CC;</span>
+    <div><strong>Entregable:</strong> Proyecto <code>AppVeterinaria03</code> funcionando con CRUD de clientes contra MySQL. Los datos deben persistir despu&#xE9;s de reiniciar GlassFish.</div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>Pr&#xF3;xima clase:</strong> Agregaremos la entidad Mascota con relaci&#xF3;n @ManyToOne hacia Cliente, validaciones con Bean Validation, y plantillas con Facelets.</div>
+  </div>
+</div>
+
+
+
+<!-- FOOTER -->
+<footer>
+  Programaci&#xF3;n Web Avanzada &#x2014; Backend &nbsp;&#x7C;&nbsp; Clase 03: Introducci&#xF3;n a JPA: Persistencia y CRUD &nbsp;&#x7C;&nbsp; Jakarta EE 10 &#xB7; JPA 3.1 &#xB7; EclipseLink &#xB7; MySQL 8 &#xB7; GlassFish 7
+</footer>
+
+</body>
+</html>

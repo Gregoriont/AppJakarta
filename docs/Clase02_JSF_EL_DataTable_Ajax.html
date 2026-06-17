@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clase 02 — JSF: Expression Language, DataTable y Ajax</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1a3a5c;--azul2:#2563a8;--azul3:#3b82d1;--azul-cl:#dbeafe;
+  --verde:#166534;--verde-cl:#dcfce7;--verde2:#16a34a;
+  --naranja:#92400e;--naranja-cl:#fef3c7;--naranja2:#d97706;
+  --rojo:#991b1b;--rojo-cl:#fee2e2;--rojo2:#dc2626;
+  --violeta:#4c1d95;--violeta-cl:#ede9fe;--violeta2:#7c3aed;
+  --gris:#f1f5f9;--gris2:#e2e8f0;--gris3:#94a3b8;--gris4:#475569;--texto:#0f172a;
+  --fuente:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--fuente);background:#f8fafc;color:var(--texto);font-size:15px;line-height:1.6}
+a{color:var(--azul2);text-decoration:none}
+code{font-family:'Cascadia Code','Fira Code','Consolas',monospace;font-size:.92em}
+.portada{background:linear-gradient(135deg,#0f172a 0%,var(--azul) 45%,var(--azul2) 80%,var(--azul3) 100%);color:#fff;padding:70px 40px;text-align:center;border-radius:0 0 28px 28px;box-shadow:0 8px 40px rgba(0,0,0,.35);margin-bottom:40px}
+.portada-badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:6px 20px;border-radius:20px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+.portada-num{font-size:5rem;font-weight:900;line-height:1;opacity:.18;margin-bottom:-10px}
+.portada h1{font-size:2.3rem;font-weight:800;margin-bottom:8px;line-height:1.2}
+.portada h2{font-size:1.05rem;font-weight:400;opacity:.8;margin-bottom:24px}
+.portada-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.tag{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);padding:4px 12px;border-radius:16px;font-size:11px;font-weight:600}
+.indice{max-width:880px;margin:0 auto 40px;background:#fff;border-radius:14px;border:1px solid var(--gris2);box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
+.indice-hdr{background:var(--azul);color:#fff;padding:13px 22px;font-size:.95rem;font-weight:700}
+.indice-lista{list-style:none;display:grid;grid-template-columns:1fr 1fr}
+.indice-lista li{border-bottom:1px solid var(--gris2);border-right:1px solid var(--gris2)}
+.indice-lista a{display:flex;align-items:center;gap:11px;padding:11px 17px;color:var(--texto);font-size:.86rem;transition:background .15s}
+.indice-lista a:hover{background:var(--azul-cl)}
+.ind-n{width:26px;height:26px;background:var(--azul2);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+@media(max-width:580px){.indice-lista{grid-template-columns:1fr}}
+.sec{max-width:880px;margin:0 auto 50px;scroll-margin-top:20px;padding:0 20px}
+.sec-hdr{display:flex;align-items:center;gap:13px;margin-bottom:20px;padding-bottom:11px;border-bottom:3px solid var(--azul2)}
+.sec-num{width:44px;height:44px;background:linear-gradient(135deg,var(--azul),var(--azul2));color:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:.97rem;font-weight:800;flex-shrink:0}
+.sec-titulo{font-size:1.38rem;font-weight:800;color:var(--azul)}
+.dn{display:inline-block;background:var(--azul2);color:#fff;font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:10px;margin-bottom:8px;letter-spacing:.5px}
+.card{background:#fff;border:1px solid var(--gris2);border-radius:11px;box-shadow:0 1px 5px rgba(0,0,0,.06);margin-bottom:14px;overflow:hidden}
+.card-hdr{padding:11px 17px;font-weight:700;font-size:.88rem;border-bottom:1px solid var(--gris2)}
+.card-body{padding:16px}
+.c-azul .card-hdr{background:var(--azul-cl);color:var(--azul)}
+.c-verde .card-hdr{background:var(--verde-cl);color:var(--verde)}
+.c-naranja .card-hdr{background:var(--naranja-cl);color:var(--naranja)}
+.c-rojo .card-hdr{background:var(--rojo-cl);color:var(--rojo)}
+.c-violeta .card-hdr{background:var(--violeta-cl);color:var(--violeta)}
+.alerta{display:flex;gap:11px;padding:12px 15px;border-radius:9px;margin:12px 0;font-size:.87rem}
+.a-info{background:var(--azul-cl);border-left:4px solid var(--azul2)}
+.a-ok{background:var(--verde-cl);border-left:4px solid var(--verde2)}
+.a-warn{background:var(--naranja-cl);border-left:4px solid var(--naranja2)}
+.a-err{background:var(--rojo-cl);border-left:4px solid var(--rojo2)}
+.a-viol{background:var(--violeta-cl);border-left:4px solid var(--violeta2)}
+.a-ico{font-size:1.15rem;flex-shrink:0;margin-top:2px}
+pre{background:#0f172a;color:#e2e8f0;padding:18px 20px;border-radius:10px;overflow-x:auto;font-size:12.5px;line-height:1.8;margin:10px 0;border:1px solid #1e293b;position:relative}
+.cl{background:#1e293b;border-radius:5px;padding:2px 8px;font-size:10px;color:#94a3b8;font-family:var(--fuente);position:absolute;top:7px;right:9px}
+.kw{color:#93c5fd}.an{color:#86efac}.st{color:#fca5a5}.cm{color:#64748b;font-style:italic}.cn{color:#fde68a}.mt{color:#c4b5fd}.nm{color:#fdba74}
+table{width:100%;border-collapse:collapse;font-size:.87rem;margin:10px 0}
+th{background:var(--azul);color:#fff;padding:8px 12px;text-align:left;font-size:.76rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:8px 12px;border-bottom:1px solid var(--gris2);vertical-align:top}
+tr:nth-child(even) td{background:var(--gris)}
+tr:hover td{background:var(--azul-cl)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:10px 0}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-verde{background:var(--verde-cl);color:var(--verde)}
+.b-rojo{background:var(--rojo-cl);color:var(--rojo)}
+.b-azul{background:var(--azul-cl);color:var(--azul2)}
+.b-naranja{background:var(--naranja-cl);color:var(--naranja)}
+.b-violeta{background:var(--violeta-cl);color:var(--violeta2)}
+.obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+@media(max-width:560px){.obj-grid{grid-template-columns:1fr}}
+.obj-item{background:#fff;border:1px solid var(--gris2);border-left:4px solid var(--azul2);border-radius:8px;padding:10px 13px;font-size:.87rem;display:flex;align-items:flex-start;gap:9px}
+.paso{display:flex;gap:13px;margin-bottom:13px;align-items:flex-start}
+.paso-n{width:32px;height:32px;background:var(--azul2);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.83rem;flex-shrink:0;margin-top:2px}
+.paso-body h4{font-size:.88rem;color:var(--azul);margin-bottom:3px;font-weight:700}
+.paso-body p{font-size:.83rem;color:var(--gris4)}
+.flujo{background:#0f172a;border-radius:14px;padding:24px 20px;margin:14px 0;display:flex;flex-direction:column;align-items:center;gap:0}
+.flujo-paso{width:100%;max-width:480px;display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:9px;border:1px solid;background:#1e293b;border-color:#334155;color:#e2e8f0}
+.flujo-num{width:28px;height:28px;background:var(--azul2);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0}
+.flujo-txt{font-size:.82rem;font-weight:600}
+.flujo-arr{color:#475569;font-size:1.2rem;padding:2px 0;text-align:center;width:100%;max-width:480px}
+.sep{height:2px;background:linear-gradient(90deg,var(--azul2),transparent);max-width:880px;margin:0 auto 50px;border-radius:2px}
+footer{background:var(--azul);color:rgba(255,255,255,.65);text-align:center;padding:20px;font-size:.79rem;margin-top:56px}
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="portada">
+  <div class="portada-badge">Programaci&#xF3;n Web Avanzada &#x2014; Backend</div>
+  <div class="portada-num">02</div>
+  <h1>JSF: Expression Language, DataTable y Ajax</h1>
+  <h2>EL &#xB7; @Named @ViewScoped &#xB7; h:dataTable &#xB7; FacesMessage &#xB7; f:ajax &#xB7; Ciclo de Vida</h2>
+  <div class="portada-tags">
+    <span class="tag">Expression Language</span><span class="tag">h:dataTable</span>
+    <span class="tag">f:ajax</span><span class="tag">@Named</span>
+    <span class="tag">@ViewScoped</span><span class="tag">FacesMessage</span>
+    <span class="tag">JSF Lifecycle</span><span class="tag">CDI 4.0</span>
+  </div>
+</div>
+
+
+<!-- INDICE -->
+<div style="max-width:880px;margin:0 auto;padding:0 20px">
+<div class="indice">
+  <div class="indice-hdr">&#x1F4DA; Clase 02 &#x2014; &#xCD;ndice de contenidos</div>
+  <ul class="indice-lista">
+    <li><a href="#obj"><span class="ind-n">&#x1F3AF;</span>Objetivos</a></li>
+    <li><a href="#s1"><span class="ind-n">1</span>Expression Language (EL)</a></li>
+    <li><a href="#s2"><span class="ind-n">2</span>Managed Bean con CDI</a></li>
+    <li><a href="#s3"><span class="ind-n">3</span>h:dataTable</a></li>
+    <li><a href="#s4"><span class="ind-n">4</span>FacesMessage &#x2014; feedback al usuario</a></li>
+    <li><a href="#s5"><span class="ind-n">5</span>f:ajax &#x2014; actualizaciones parciales</a></li>
+    <li><a href="#s6"><span class="ind-n">6</span>Ciclo de Vida de JSF (6 fases)</a></li>
+    <li><a href="#s7"><span class="ind-n">7</span>AppVeterinaria02 completo</a></li>
+    <li><a href="#res"><span class="ind-n">&#x2705;</span>Resumen y actividad pr&#xE1;ctica</a></li>
+  </ul>
+</div>
+</div>
+
+
+<!-- OBJETIVOS -->
+<div class="sec" id="obj">
+  <div class="sec-hdr"><div class="sec-num">&#x1F3AF;</div><div class="sec-titulo">Objetivos de la clase</div></div>
+  <div class="obj-grid">
+    <div class="obj-item"><span>&#x1F4DD;</span>Dominar Expression Language (EL) para conectar vista con beans</div>
+    <div class="obj-item"><span>&#x1F4CB;</span>Construir tablas din&#xE1;micas con h:dataTable</div>
+    <div class="obj-item"><span>&#x26A1;</span>Implementar actualizaciones parciales con f:ajax</div>
+    <div class="obj-item"><span>&#x1F3AE;</span>Configurar beans con @Named y @ViewScoped</div>
+    <div class="obj-item"><span>&#x1F4AC;</span>Mostrar mensajes de feedback con FacesMessage</div>
+    <div class="obj-item"><span>&#x1F504;</span>Comprender el ciclo de vida JSF (6 fases)</div>
+  </div>
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>Importante:</strong> En esta clase trabajamos con datos en memoria (ArrayList). A&#xFA;n no usamos base de datos &#x2014; eso ser&#xE1; en la Clase 03 con JPA y persistence.xml.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 1: Expression Language -->
+<div class="sec" id="s1">
+  <div class="sec-hdr"><div class="sec-num">1</div><div class="sec-titulo">Expression Language (EL)</div></div>
+
+  <div class="dn">DIAPOSITIVA 1 &#x2014; &#xBF;Qu&#xE9; es Expression Language?</div>
+  <p style="margin-bottom:14px">Expression Language (EL) es el mecanismo que conecta las p&#xE1;ginas XHTML con los beans Java. Permite leer propiedades, ejecutar m&#xE9;todos y evaluar expresiones directamente en la vista.</p>
+
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">&#x1F517; Value Binding (lectura/escritura)</div>
+      <div class="card-body" style="font-size:.84rem">
+        <p><code>#{bean.propiedad}</code></p>
+        <ul style="padding-left:16px;margin-top:8px">
+          <li>Lee el valor: llama a <code>getPropiedad()</code></li>
+          <li>Escribe el valor: llama a <code>setPropiedad(valor)</code></li>
+          <li>Ejemplo: <code>#{clienteBean.nombre}</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">&#x1F3AF; Action Binding (ejecuci&#xF3;n)</div>
+      <div class="card-body" style="font-size:.84rem">
+        <p><code>#{bean.metodo()}</code></p>
+        <ul style="padding-left:16px;margin-top:8px">
+          <li>Ejecuta un m&#xE9;todo del bean</li>
+          <li>Usado en <code>action</code> y <code>actionListener</code></li>
+          <li>Ejemplo: <code>#{clienteBean.agregar()}</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 2 &#x2014; #{} vs ${}</div>
+  <div class="card c-naranja">
+    <div class="card-hdr">&#x26A0;&#xFE0F; Diferencia entre #{} y ${}</div>
+    <div class="card-body">
+      <table>
+        <thead><tr><th>Sintaxis</th><th>Tipo</th><th>Evaluaci&#xF3;n</th><th>&#xBF;Usar en JSF?</th></tr></thead>
+        <tbody>
+          <tr><td><code>#{expresion}</code></td><td>Deferred (diferida)</td><td>Se eval&#xFA;a cuando JSF lo necesita (get/set)</td><td><span class="badge b-verde">S&#xCD; &#x2014; siempre</span></td></tr>
+          <tr><td><code>${expresion}</code></td><td>Immediate (inmediata)</td><td>Se eval&#xFA;a una sola vez al renderizar</td><td><span class="badge b-rojo">NO &#x2014; solo lectura</span></td></tr>
+        </tbody>
+      </table>
+      <div class="alerta a-warn" style="margin-top:10px">
+        <span class="a-ico">&#x26A0;&#xFE0F;</span>
+        <div><strong>Regla:</strong> En JSF siempre usamos <code>#{}</code>. La sintaxis <code>${}</code> es de JSP/JSTL y en JSF solo funciona para lectura, no para escribir valores en el bean.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 3 &#x2014; Operadores EL</div>
+  <table>
+    <thead><tr><th>Operador</th><th>Descripci&#xF3;n</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><code>==</code> / <code>eq</code></td><td>Igualdad</td><td><code>#{cliente.tipo == 'VIP'}</code></td></tr>
+      <tr><td><code>!=</code> / <code>ne</code></td><td>Desigualdad</td><td><code>#{cliente.estado != 'inactivo'}</code></td></tr>
+      <tr><td><code>empty</code></td><td>Nulo, vac&#xED;o o colecci&#xF3;n sin elementos</td><td><code>#{empty clienteBean.clientes}</code></td></tr>
+      <tr><td><code>not empty</code></td><td>Tiene valor / colecci&#xF3;n con elementos</td><td><code>#{not empty clienteBean.mensaje}</code></td></tr>
+      <tr><td><code>and</code> / <code>&amp;&amp;</code></td><td>Y l&#xF3;gico</td><td><code>#{bean.activo and bean.verificado}</code></td></tr>
+      <tr><td><code>or</code> / <code>||</code></td><td>O l&#xF3;gico</td><td><code>#{bean.admin or bean.editor}</code></td></tr>
+      <tr><td><code>? :</code></td><td>Ternario (condicional)</td><td><code>#{bean.activo ? 'S&#xED;' : 'No'}</code></td></tr>
+      <tr><td><code>gt</code>, <code>lt</code>, <code>ge</code>, <code>le</code></td><td>Comparaci&#xF3;n num&#xE9;rica</td><td><code>#{bean.edad gt 18}</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 4 &#x2014; Ejemplos pr&#xE1;cticos de EL</div>
+  <table>
+    <thead><tr><th>Expresi&#xF3;n EL</th><th>&#xBF;Qu&#xE9; hace?</th><th>Contexto de uso</th></tr></thead>
+    <tbody>
+      <tr><td><code>#{clienteBean.clientes}</code></td><td>Obtiene la lista de clientes del bean</td><td>value de h:dataTable</td></tr>
+      <tr><td><code>#{clienteBean.clienteSeleccionado.nombre}</code></td><td>Accede al nombre del cliente seleccionado</td><td>value de h:inputText</td></tr>
+      <tr><td><code>#{clienteBean.agregar()}</code></td><td>Ejecuta el m&#xE9;todo agregar</td><td>action de h:commandButton</td></tr>
+      <tr><td><code>#{clienteBean.eliminar(c)}</code></td><td>Ejecuta eliminar pasando el objeto c</td><td>action con par&#xE1;metro</td></tr>
+      <tr><td><code>#{empty clienteBean.clientes}</code></td><td>true si la lista est&#xE1; vac&#xED;a</td><td>rendered de h:panelGroup</td></tr>
+      <tr><td><code>#{c.documento}</code></td><td>Accede al documento de la variable de iteraci&#xF3;n</td><td>Dentro de h:dataTable var="c"</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 2: Managed Bean con CDI -->
+<div class="sec" id="s2">
+  <div class="sec-hdr"><div class="sec-num">2</div><div class="sec-titulo">Managed Bean con CDI</div></div>
+
+  <div class="dn">DIAPOSITIVA 5 &#x2014; Anotaciones CDI principales</div>
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">@Named</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Hace que el bean sea accesible desde EL</li>
+          <li>El nombre por defecto es la clase con min&#xFA;scula inicial</li>
+          <li><code>@Named("clienteBean")</code> &#x2192; <code>#{clienteBean.xxx}</code></li>
+          <li>Pertenece a <code>jakarta.inject.Named</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">@ViewScoped</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>El bean vive mientras el usuario permanezca en la misma p&#xE1;gina</li>
+          <li>Sobrevive a peticiones Ajax y postbacks</li>
+          <li>Se destruye al navegar a otra p&#xE1;gina</li>
+          <li>La clase <strong>debe implementar Serializable</strong></li>
+          <li>Pertenece a <code>jakarta.faces.view.ViewScoped</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card c-naranja">
+      <div class="card-hdr">@RequestScoped</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>El bean vive solo durante UNA petici&#xF3;n HTTP</li>
+          <li>Se crea y destruye en cada request</li>
+          <li>&#xDA;til para formularios simples sin tabla</li>
+          <li>Pertenece a <code>jakarta.enterprise.context.RequestScoped</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-violeta">
+      <div class="card-hdr">@PostConstruct</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>M&#xE9;todo que se ejecuta despu&#xE9;s de crear el bean</li>
+          <li>Ideal para cargar datos iniciales</li>
+          <li>Se ejecuta UNA vez por instancia del bean</li>
+          <li>Pertenece a <code>jakarta.annotation.PostConstruct</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>&#xBF;Cu&#xE1;ndo usar @ViewScoped?</strong> Siempre que la p&#xE1;gina tenga una tabla con datos y formulario de edici&#xF3;n. Si us&#xE1;ramos @RequestScoped, la lista se perder&#xED;a entre cada click de bot&#xF3;n.</div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 6 &#x2014; Cliente.java (POJO simple)</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; modelo/Cliente.java &#x2014; POJO simple (sin @Entity)</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.modelo;
+
+<span class="cm">// POJO simple &#x2014; NO es @Entity todav&#xED;a (eso ser&#xE1; en Clase 03)</span>
+<span class="kw">public class</span> <span class="cn">Cliente</span> {
+
+    <span class="kw">private int</span> id;
+    <span class="kw">private</span> <span class="cn">String</span> documento;
+    <span class="kw">private</span> <span class="cn">String</span> nombre;
+
+    <span class="cm">// Constructor vac&#xED;o</span>
+    <span class="kw">public</span> <span class="mt">Cliente</span>() {}
+
+    <span class="cm">// Constructor con par&#xE1;metros</span>
+    <span class="kw">public</span> <span class="mt">Cliente</span>(<span class="kw">int</span> id, <span class="cn">String</span> documento, <span class="cn">String</span> nombre) {
+        <span class="kw">this</span>.id = id;
+        <span class="kw">this</span>.documento = documento;
+        <span class="kw">this</span>.nombre = nombre;
+    }
+
+    <span class="cm">// Getters y Setters</span>
+    <span class="kw">public int</span> <span class="mt">getId</span>()                        { <span class="kw">return</span> id; }
+    <span class="kw">public void</span> <span class="mt">setId</span>(<span class="kw">int</span> id)                  { <span class="kw">this</span>.id = id; }
+    <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getDocumento</span>()               { <span class="kw">return</span> documento; }
+    <span class="kw">public void</span> <span class="mt">setDocumento</span>(<span class="cn">String</span> documento) { <span class="kw">this</span>.documento = documento; }
+    <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getNombre</span>()                  { <span class="kw">return</span> nombre; }
+    <span class="kw">public void</span> <span class="mt">setNombre</span>(<span class="cn">String</span> nombre)      { <span class="kw">this</span>.nombre = nombre; }
+}<span class="cl">Cliente.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 7 &#x2014; ClienteBean.java completo</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; controlador/ClienteBean.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.controlador;
+
+<span class="kw">import</span> com.veterinaria.modelo.Cliente;
+<span class="kw">import</span> jakarta.annotation.PostConstruct;
+<span class="kw">import</span> jakarta.faces.application.FacesMessage;
+<span class="kw">import</span> jakarta.faces.context.FacesContext;
+<span class="kw">import</span> jakarta.faces.view.ViewScoped;
+<span class="kw">import</span> jakarta.inject.Named;
+<span class="kw">import</span> java.io.Serializable;
+<span class="kw">import</span> java.util.ArrayList;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@Named</span>(<span class="st">"clienteBean"</span>)
+<span class="an">@ViewScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteBean</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="kw">private</span> List&lt;Cliente&gt; clientes = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">private</span> Cliente clienteSeleccionado = <span class="kw">new</span> Cliente();
+    <span class="kw">private int</span> proximoId = <span class="nm">1</span>;
+
+    <span class="an">@PostConstruct</span>
+    <span class="kw">public void</span> <span class="mt">init</span>() {
+        <span class="cm">// Datos de ejemplo en memoria</span>
+        clientes.add(<span class="kw">new</span> Cliente(<span class="nm">1</span>, <span class="st">"30123456"</span>, <span class="st">"Mar&#xED;a G&#xF3;mez"</span>));
+        clientes.add(<span class="kw">new</span> Cliente(<span class="nm">2</span>, <span class="st">"28987654"</span>, <span class="st">"Carlos L&#xF3;pez"</span>));
+        proximoId = <span class="nm">3</span>;
+    }
+
+    <span class="kw">public void</span> <span class="mt">agregar</span>() {
+        clienteSeleccionado.setId(proximoId++);
+        clientes.add(clienteSeleccionado);
+        addMsg(FacesMessage.SEVERITY_INFO, <span class="st">"Cliente agregado correctamente"</span>);
+        clienteSeleccionado = <span class="kw">new</span> Cliente();
+    }
+
+    <span class="kw">public void</span> <span class="mt">eliminar</span>(Cliente c) {
+        clientes.remove(c);
+        addMsg(FacesMessage.SEVERITY_WARN, <span class="st">"Cliente eliminado: "</span> + c.getNombre());
+    }
+
+    <span class="kw">public void</span> <span class="mt">prepararEdicion</span>(Cliente c) {
+        clienteSeleccionado = c;
+    }
+
+    <span class="kw">private void</span> <span class="mt">addMsg</span>(FacesMessage.Severity severity, <span class="cn">String</span> texto) {
+        FacesContext.getCurrentInstance()
+            .addMessage(<span class="kw">null</span>, <span class="kw">new</span> FacesMessage(severity, texto, <span class="kw">null</span>));
+    }
+
+    <span class="cm">// Getters y Setters</span>
+    <span class="kw">public</span> List&lt;Cliente&gt; <span class="mt">getClientes</span>()                     { <span class="kw">return</span> clientes; }
+    <span class="kw">public void</span> <span class="mt">setClientes</span>(List&lt;Cliente&gt; clientes)        { <span class="kw">this</span>.clientes = clientes; }
+    <span class="kw">public</span> Cliente <span class="mt">getClienteSeleccionado</span>()                 { <span class="kw">return</span> clienteSeleccionado; }
+    <span class="kw">public void</span> <span class="mt">setClienteSeleccionado</span>(Cliente c)         { <span class="kw">this</span>.clienteSeleccionado = c; }
+}<span class="cl">ClienteBean.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>Dato clave:</strong> Los datos se almacenan en un <code>ArrayList</code> en memoria. Cada vez que se reinicia el servidor, se pierden. En la Clase 03 reemplazaremos esto por JPA + base de datos.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 3: h:dataTable -->
+<div class="sec" id="s3">
+  <div class="sec-hdr"><div class="sec-num">3</div><div class="sec-titulo">h:dataTable &#x2014; Tablas din&#xE1;micas</div></div>
+
+  <div class="dn">DIAPOSITIVA 8 &#x2014; Estructura de h:dataTable</div>
+  <p style="margin-bottom:14px">El componente <code>&lt;h:dataTable&gt;</code> itera autom&#xE1;ticamente sobre una lista del bean y genera una tabla HTML con filas din&#xE1;micas.</p>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; h:dataTable &#x2014; C&#xF3;digo completo</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;h:dataTable</span> value=<span class="st">"#{clienteBean.clientes}"</span> var=<span class="st">"c"</span>
+             styleClass=<span class="st">"tabla-clientes"</span>
+             headerClass=<span class="st">"tabla-header"</span>
+             rowClasses=<span class="st">"fila-par,fila-impar"</span><span class="kw">&gt;</span>
+
+    <span class="kw">&lt;h:column&gt;</span>
+        <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>ID<span class="kw">&lt;/f:facet&gt;</span>
+        <span class="an">#{c.id}</span>
+    <span class="kw">&lt;/h:column&gt;</span>
+
+    <span class="kw">&lt;h:column&gt;</span>
+        <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>Documento<span class="kw">&lt;/f:facet&gt;</span>
+        <span class="an">#{c.documento}</span>
+    <span class="kw">&lt;/h:column&gt;</span>
+
+    <span class="kw">&lt;h:column&gt;</span>
+        <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>Nombre<span class="kw">&lt;/f:facet&gt;</span>
+        <span class="an">#{c.nombre}</span>
+    <span class="kw">&lt;/h:column&gt;</span>
+
+    <span class="kw">&lt;h:column&gt;</span>
+        <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>Acciones<span class="kw">&lt;/f:facet&gt;</span>
+        <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Editar"</span>
+            action=<span class="st">"#{clienteBean.prepararEdicion(c)}"</span><span class="kw">&gt;</span>
+            <span class="kw">&lt;f:ajax</span> render=<span class="st">"@form"</span><span class="kw"> /&gt;</span>
+        <span class="kw">&lt;/h:commandButton&gt;</span>
+        <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Eliminar"</span>
+            action=<span class="st">"#{clienteBean.eliminar(c)}"</span>
+            styleClass=<span class="st">"btn-danger"</span><span class="kw">&gt;</span>
+            <span class="kw">&lt;f:ajax</span> render=<span class="st">"@form"</span><span class="kw"> /&gt;</span>
+        <span class="kw">&lt;/h:commandButton&gt;</span>
+    <span class="kw">&lt;/h:column&gt;</span>
+
+<span class="kw">&lt;/h:dataTable&gt;</span><span class="cl">dataTable</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 9 &#x2014; Atributos principales</div>
+  <table>
+    <thead><tr><th>Atributo</th><th>Descripci&#xF3;n</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><code>value</code></td><td>Lista del bean a iterar</td><td><code>#{clienteBean.clientes}</code></td></tr>
+      <tr><td><code>var</code></td><td>Variable de iteraci&#xF3;n (cada fila)</td><td><code>"c"</code></td></tr>
+      <tr><td><code>styleClass</code></td><td>Clase CSS para la tabla</td><td><code>"tabla-clientes"</code></td></tr>
+      <tr><td><code>headerClass</code></td><td>Clase CSS para los encabezados</td><td><code>"tabla-header"</code></td></tr>
+      <tr><td><code>rowClasses</code></td><td>Clases CSS alternadas para filas</td><td><code>"fila-par,fila-impar"</code></td></tr>
+      <tr><td><code>rendered</code></td><td>Condicional para mostrar/ocultar</td><td><code>#{not empty clienteBean.clientes}</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 10 &#x2014; Mensaje cuando la lista est&#xE1; vac&#xED;a</div>
+  <div class="card c-naranja">
+    <div class="card-hdr">&#x1F4AD; Mostrar mensaje si no hay datos</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- Se muestra solo si la lista est&#xE1; vac&#xED;a --&gt;</span>
+<span class="kw">&lt;h:panelGroup</span> rendered=<span class="st">"#{empty clienteBean.clientes}"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;div</span> class=<span class="st">"alerta-info"</span><span class="kw">&gt;</span>
+        No hay clientes registrados. Agreg&#xE1; uno usando el formulario.
+    <span class="kw">&lt;/div&gt;</span>
+<span class="kw">&lt;/h:panelGroup&gt;</span>
+
+<span class="cm">&lt;!-- La tabla solo se muestra si HAY datos --&gt;</span>
+<span class="kw">&lt;h:dataTable</span> value=<span class="st">"#{clienteBean.clientes}"</span> var=<span class="st">"c"</span>
+             rendered=<span class="st">"#{not empty clienteBean.clientes}"</span><span class="kw">&gt;</span>
+    ...
+<span class="kw">&lt;/h:dataTable&gt;</span><span class="cl">rendered</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>Recuerda:</strong> La lista es un <code>ArrayList&lt;Cliente&gt;</code> en el bean. No hay base de datos a&#xFA;n. Cada vez que el servidor se reinicia, los datos vuelven al estado inicial del <code>@PostConstruct</code>.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 4: FacesMessage -->
+<div class="sec" id="s4">
+  <div class="sec-hdr"><div class="sec-num">4</div><div class="sec-titulo">FacesMessage &#x2014; Feedback al usuario</div></div>
+
+  <div class="dn">DIAPOSITIVA 11 &#x2014; Niveles de severidad</div>
+  <p style="margin-bottom:14px">JSF provee un sistema de mensajes integrado. Desde el bean podemos enviar mensajes que se muestran autom&#xE1;ticamente en la vista con componentes espec&#xED;ficos.</p>
+
+  <div class="g3">
+    <div class="card c-verde">
+      <div class="card-hdr">&#x2705; SEVERITY_INFO</div>
+      <div class="card-body" style="font-size:.84rem">
+        <p><strong>&#xC9;xito / Confirmaci&#xF3;n</strong></p>
+        <p>Operaci&#xF3;n completada correctamente.</p>
+        <p style="margin-top:6px"><code>"Cliente agregado"</code></p>
+      </div>
+    </div>
+    <div class="card c-naranja">
+      <div class="card-hdr">&#x26A0;&#xFE0F; SEVERITY_WARN</div>
+      <div class="card-body" style="font-size:.84rem">
+        <p><strong>Advertencia / Error de negocio</strong></p>
+        <p>Algo no est&#xE1; bien pero no es cr&#xED;tico.</p>
+        <p style="margin-top:6px"><code>"Documento duplicado"</code></p>
+      </div>
+    </div>
+    <div class="card c-rojo">
+      <div class="card-hdr">&#x274C; SEVERITY_ERROR</div>
+      <div class="card-body" style="font-size:.84rem">
+        <p><strong>Error t&#xE9;cnico / grave</strong></p>
+        <p>Algo fall&#xF3; y la operaci&#xF3;n no se complet&#xF3;.</p>
+        <p style="margin-top:6px"><code>"Error al guardar"</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 12 &#x2014; Componentes para mostrar mensajes</div>
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">h:messages &#x2014; Mensajes globales</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- Muestra TODOS los mensajes globales --&gt;</span>
+<span class="kw">&lt;h:messages</span> globalOnly=<span class="st">"true"</span>
+    infoClass=<span class="st">"msg-info"</span>
+    warnClass=<span class="st">"msg-warn"</span>
+    errorClass=<span class="st">"msg-error"</span><span class="kw"> /&gt;</span><span class="cl">h:messages</span></code></pre>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">h:message &#x2014; Mensaje por campo</div>
+      <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- Mensaje espec&#xED;fico para un campo --&gt;</span>
+<span class="kw">&lt;h:inputText</span> id=<span class="st">"nombre"</span>
+    value=<span class="st">"#{clienteBean.clienteSeleccionado.nombre}"</span>
+    required=<span class="st">"true"</span>
+    requiredMessage=<span class="st">"El nombre es obligatorio"</span><span class="kw"> /&gt;</span>
+<span class="kw">&lt;h:message</span> for=<span class="st">"nombre"</span>
+    styleClass=<span class="st">"msg-field-error"</span><span class="kw"> /&gt;</span><span class="cl">h:message</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 13 &#x2014; Patr&#xF3;n addMsg() en el Bean</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; M&#xE9;todo helper addMsg()</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">// M&#xE9;todo auxiliar para agregar mensajes f&#xE1;cilmente</span>
+<span class="kw">private void</span> <span class="mt">addMsg</span>(FacesMessage.Severity severity, <span class="cn">String</span> texto) {
+    FacesContext.getCurrentInstance()
+        .addMessage(<span class="kw">null</span>, <span class="kw">new</span> FacesMessage(severity, texto, <span class="kw">null</span>));
+}
+
+<span class="cm">// Uso en los m&#xE9;todos del bean:</span>
+<span class="kw">public void</span> <span class="mt">agregar</span>() {
+    <span class="kw">if</span> (documentoExiste(clienteSeleccionado.getDocumento())) {
+        addMsg(FacesMessage.SEVERITY_WARN, <span class="st">"El documento ya existe"</span>);
+        <span class="kw">return</span>;
+    }
+    clienteSeleccionado.setId(proximoId++);
+    clientes.add(clienteSeleccionado);
+    addMsg(FacesMessage.SEVERITY_INFO, <span class="st">"Cliente agregado correctamente"</span>);
+    clienteSeleccionado = <span class="kw">new</span> Cliente();  <span class="cm">// limpiar formulario</span>
+}
+
+<span class="kw">public void</span> <span class="mt">eliminar</span>(Cliente c) {
+    clientes.remove(c);
+    addMsg(FacesMessage.SEVERITY_WARN, <span class="st">"Cliente eliminado: "</span> + c.getNombre());
+}<span class="cl">FacesMessage</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">&#x26A0;&#xFE0F;</span>
+    <div><strong>Primer par&#xE1;metro null:</strong> Cuando pasamos <code>null</code> como clientId en <code>addMessage(null, ...)</code>, el mensaje es <strong>global</strong> y se muestra en <code>&lt;h:messages globalOnly="true"&gt;</code>. Si pas&#xE1;ramos un id de componente, se mostrar&#xED;a en el <code>&lt;h:message for="id"&gt;</code> correspondiente.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 5: f:ajax -->
+<div class="sec" id="s5">
+  <div class="sec-hdr"><div class="sec-num">5</div><div class="sec-titulo">f:ajax &#x2014; Actualizaciones parciales</div></div>
+
+  <div class="dn">DIAPOSITIVA 14 &#x2014; &#xBF;Qu&#xE9; es Ajax en JSF?</div>
+  <div class="card c-azul">
+    <div class="card-hdr">&#x26A1; Ajax = Actualizar parte de la p&#xE1;gina sin recargar</div>
+    <div class="card-body" style="font-size:.84rem">
+      <p>Sin Ajax, cada bot&#xF3;n recarga TODA la p&#xE1;gina. Con <code>&lt;f:ajax&gt;</code> podemos:</p>
+      <ul style="padding-left:16px;margin-top:8px">
+        <li>Enviar solo parte del formulario al servidor</li>
+        <li>Actualizar solo la secci&#xF3;n de la p&#xE1;gina que cambi&#xF3;</li>
+        <li>Mantener la posici&#xF3;n de scroll del usuario</li>
+        <li>Experiencia m&#xE1;s fluida, similar a aplicaciones de escritorio</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 15 &#x2014; Patr&#xF3;n m&#xE1;s com&#xFA;n</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; f:ajax execute + render</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- Patr&#xF3;n m&#xE1;s com&#xFA;n: enviar y actualizar todo el formulario --&gt;</span>
+<span class="kw">&lt;h:commandButton</span> value=<span class="st">"Guardar"</span>
+    action=<span class="st">"#{clienteBean.agregar()}"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;f:ajax</span> execute=<span class="st">"@form"</span> render=<span class="st">"@form"</span><span class="kw"> /&gt;</span>
+<span class="kw">&lt;/h:commandButton&gt;</span>
+
+<span class="cm">&lt;!-- Actualizar otro formulario (el listado) --&gt;</span>
+<span class="kw">&lt;h:commandButton</span> value=<span class="st">"Guardar"</span>
+    action=<span class="st">"#{clienteBean.agregar()}"</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;f:ajax</span> execute=<span class="st">"@form"</span> render=<span class="st">"@form :frmListado"</span><span class="kw"> /&gt;</span>
+<span class="kw">&lt;/h:commandButton&gt;</span>
+
+<span class="cm">&lt;!-- B&#xFA;squeda en tiempo real con evento keyup --&gt;</span>
+<span class="kw">&lt;h:inputText</span> value=<span class="st">"#{clienteBean.filtro}"</span>
+    pt:placeholder=<span class="st">"Buscar cliente..."</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;f:ajax</span> event=<span class="st">"keyup"</span>
+        execute=<span class="st">"@this"</span>
+        render=<span class="st">"tablaClientes"</span>
+        listener=<span class="st">"#{clienteBean.filtrar()}"</span><span class="kw"> /&gt;</span>
+<span class="kw">&lt;/h:inputText&gt;</span><span class="cl">f:ajax</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>xmlns:pt</strong> &#x2014; Para usar atributos HTML como <code>placeholder</code> en componentes JSF, necesitamos el namespace passthrough: <code>xmlns:pt="jakarta.faces.passthrough"</code> en el html tag.</div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 16 &#x2014; execute vs render</div>
+  <table>
+    <thead><tr><th>Atributo</th><th>&#xBF;Qu&#xE9; hace?</th><th>Valores comunes</th><th>Direcci&#xF3;n</th></tr></thead>
+    <tbody>
+      <tr><td><code>execute</code></td><td>Qu&#xE9; componentes se ENV&#xCD;AN al servidor</td><td><code>@form</code>, <code>@this</code>, <code>@all</code>, <code>id</code></td><td>&#x1F4E4; Cliente &#x2192; Servidor</td></tr>
+      <tr><td><code>render</code></td><td>Qu&#xE9; componentes se ACTUALIZAN en pantalla</td><td><code>@form</code>, <code>@this</code>, <code>@all</code>, <code>:id</code></td><td>&#x1F4E5; Servidor &#x2192; Cliente</td></tr>
+    </tbody>
+  </table>
+
+  <div class="g2">
+    <div class="card c-verde">
+      <div class="card-hdr">&#x1F4E4; Valores de execute</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li><code>@form</code> &#x2014; todos los campos del formulario actual</li>
+          <li><code>@this</code> &#x2014; solo el componente que dispar&#xF3; el evento</li>
+          <li><code>@all</code> &#x2014; toda la p&#xE1;gina (raro, evitar)</li>
+          <li><code>campo1 campo2</code> &#x2014; IDs espec&#xED;ficos separados por espacio</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-azul">
+      <div class="card-hdr">&#x1F4E5; Valores de render</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li><code>@form</code> &#x2014; re-renderizar el formulario actual</li>
+          <li><code>@this</code> &#x2014; solo el componente actual</li>
+          <li><code>@none</code> &#x2014; no actualizar nada visible</li>
+          <li><code>:frmListado</code> &#x2014; ID absoluto (dos puntos = ra&#xED;z)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 17 &#x2014; Ejemplo: filtro en tiempo real</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; B&#xFA;squeda con f:ajax event="keyup"</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="cm">&lt;!-- En el XHTML --&gt;</span>
+<span class="kw">&lt;h:inputText</span> id=<span class="st">"buscar"</span> value=<span class="st">"#{clienteBean.filtro}"</span>
+    pt:placeholder=<span class="st">"Escriba para buscar..."</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;f:ajax</span> event=<span class="st">"keyup"</span> execute=<span class="st">"@this"</span>
+        render=<span class="st">"tablaClientes"</span>
+        listener=<span class="st">"#{clienteBean.filtrar()}"</span><span class="kw"> /&gt;</span>
+<span class="kw">&lt;/h:inputText&gt;</span>
+
+<span class="kw">&lt;h:dataTable</span> id=<span class="st">"tablaClientes"</span>
+    value=<span class="st">"#{clienteBean.clientesFiltrados}"</span> var=<span class="st">"c"</span><span class="kw">&gt;</span>
+    ...
+<span class="kw">&lt;/h:dataTable&gt;</span><span class="cl">filtro ajax</span></code></pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; M&#xE9;todo filtrar() en el Bean</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">private</span> <span class="cn">String</span> filtro = <span class="st">""</span>;
+<span class="kw">private</span> List&lt;Cliente&gt; clientesFiltrados = <span class="kw">new</span> ArrayList&lt;&gt;();
+
+<span class="kw">public void</span> <span class="mt">filtrar</span>() {
+    <span class="kw">if</span> (filtro == <span class="kw">null</span> || filtro.isBlank()) {
+        clientesFiltrados = <span class="kw">new</span> ArrayList&lt;&gt;(clientes);
+    } <span class="kw">else</span> {
+        clientesFiltrados = clientes.stream()
+            .filter(c -&gt; c.getNombre().toLowerCase()
+                .contains(filtro.toLowerCase()))
+            .toList();
+    }
+}<span class="cl">filtrar()</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 6: Ciclo de Vida de JSF -->
+<div class="sec" id="s6">
+  <div class="sec-hdr"><div class="sec-num">6</div><div class="sec-titulo">Ciclo de Vida de JSF (6 fases)</div></div>
+
+  <div class="dn">DIAPOSITIVA 18 &#x2014; Las 6 fases del ciclo de vida</div>
+  <p style="margin-bottom:14px">Cada vez que el usuario env&#xED;a un formulario JSF, el Faces Servlet ejecuta un ciclo de <strong>6 fases</strong> en orden. Entender este ciclo es clave para depurar errores.</p>
+
+  <table>
+    <thead><tr><th>Fase</th><th>Nombre</th><th>&#xBF;Qu&#xE9; hace?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge b-azul">1</span></td><td>Restore View</td><td>Reconstruye el &#xE1;rbol de componentes de la p&#xE1;gina</td></tr>
+      <tr><td><span class="badge b-verde">2</span></td><td>Apply Request Values</td><td>Toma los valores enviados por el navegador y los asigna a los componentes</td></tr>
+      <tr><td><span class="badge b-naranja">3</span></td><td>Process Validations</td><td>Ejecuta validaciones (required, @Size, convertidores)</td></tr>
+      <tr><td><span class="badge b-violeta">4</span></td><td>Update Model Values</td><td>Copia los valores validados a las propiedades del bean (setters)</td></tr>
+      <tr><td><span class="badge b-rojo">5</span></td><td>Invoke Application</td><td>Ejecuta el m&#xE9;todo action del bot&#xF3;n (ej: agregar())</td></tr>
+      <tr><td><span class="badge b-azul">6</span></td><td>Render Response</td><td>Genera el HTML de respuesta y lo env&#xED;a al navegador</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 19 &#x2014; Diagrama visual del ciclo</div>
+  <div class="flujo">
+    <div class="flujo-paso" style="background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe">
+      <div class="flujo-num">1</div>
+      <div class="flujo-txt">Restore View &#x2014; reconstruir el &#xE1;rbol de componentes</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso" style="background:#14532d;border-color:#4ade80;color:#bbf7d0">
+      <div class="flujo-num">2</div>
+      <div class="flujo-txt">Apply Request Values &#x2014; leer datos del formulario</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso" style="background:#422006;border-color:#fb923c;color:#ffedd5">
+      <div class="flujo-num">3</div>
+      <div class="flujo-txt">Process Validations &#x2014; validar campos (si falla &#x2192; fase 6)</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso" style="background:#312e81;border-color:#818cf8;color:#e0e7ff">
+      <div class="flujo-num">4</div>
+      <div class="flujo-txt">Update Model Values &#x2014; escribir valores en el bean (setters)</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso" style="background:#450a0a;border-color:#f87171;color:#fecaca">
+      <div class="flujo-num">5</div>
+      <div class="flujo-txt">Invoke Application &#x2014; ejecutar action="#{bean.metodo()}"</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso" style="background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe">
+      <div class="flujo-num">6</div>
+      <div class="flujo-txt">Render Response &#x2014; generar HTML y enviar al navegador</div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 20 &#x2014; immediate=true y validaci&#xF3;n fallida</div>
+  <div class="g2">
+    <div class="card c-rojo">
+      <div class="card-hdr">&#x274C; Cuando la validaci&#xF3;n falla</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Si un campo con <code>required="true"</code> est&#xE1; vac&#xED;o, la validaci&#xF3;n falla en <strong>fase 3</strong></li>
+          <li>JSF salta directamente a la <strong>fase 6</strong> (Render Response)</li>
+          <li>Las fases 4 y 5 <strong>NO se ejecutan</strong></li>
+          <li>El m&#xE9;todo action del bot&#xF3;n <strong>nunca se llama</strong></li>
+          <li>Se muestran los mensajes de error en <code>&lt;h:message&gt;</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-naranja">
+      <div class="card-hdr">&#x26A1; immediate="true"</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Salta las fases 2, 3 y 4</li>
+          <li>Ejecuta la acci&#xF3;n inmediatamente despu&#xE9;s de fase 1</li>
+          <li>&#xDA;til para botones <strong>Cancelar</strong> que no necesitan validar</li>
+          <li>Ejemplo: <code>&lt;h:commandButton value="Cancelar" immediate="true" action="#{bean.cancelar()}" /&gt;</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>Tip pr&#xE1;ctico:</strong> Si tu bot&#xF3;n "Guardar" no ejecuta el m&#xE9;todo, probablemente hay un error de validaci&#xF3;n. Agrega <code>&lt;h:messages /&gt;</code> en la p&#xE1;gina para ver qu&#xE9; campo est&#xE1; fallando.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- SECCION 7: AppVeterinaria02 completo -->
+<div class="sec" id="s7">
+  <div class="sec-hdr"><div class="sec-num">7</div><div class="sec-titulo">AppVeterinaria02 &#x2014; Aplicaci&#xF3;n completa</div></div>
+
+  <div class="dn">DIAPOSITIVA 21 &#x2014; index.xhtml completo</div>
+  <p style="margin-bottom:14px">A continuaci&#xF3;n la p&#xE1;gina completa que integra: formulario de alta/edici&#xF3;n, tabla de clientes, mensajes de feedback, y Ajax para actualizaciones parciales.</p>
+
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; webapp/index.xhtml &#x2014; ABM Cliente en memoria</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;?xml version=</span><span class="st">"1.0"</span> <span class="kw">encoding=</span><span class="st">"UTF-8"</span><span class="kw">?&gt;</span>
+<span class="kw">&lt;!DOCTYPE html&gt;</span>
+<span class="kw">&lt;html</span> xmlns=<span class="st">"http://www.w3.org/1999/xhtml"</span>
+      xmlns:h=<span class="st">"jakarta.faces.html"</span>
+      xmlns:f=<span class="st">"jakarta.faces.core"</span>
+      xmlns:pt=<span class="st">"jakarta.faces.passthrough"</span><span class="kw">&gt;</span>
+
+<span class="kw">&lt;h:head&gt;</span>
+    <span class="kw">&lt;title&gt;</span>AppVeterinaria02 &#x2014; Gesti&#xF3;n de Clientes<span class="kw">&lt;/title&gt;</span>
+    <span class="kw">&lt;style&gt;</span>
+        body { font-family: 'Segoe UI', sans-serif; margin: 30px; background: #f8fafc; }
+        h1 { color: #1a3a5c; margin-bottom: 20px; }
+        .form-group { margin: 10px 0; }
+        label { font-weight: bold; display: block; margin-bottom: 4px; color: #334155; }
+        input[type="text"] { padding: 8px 12px; border: 1px solid #cbd5e1;
+            border-radius: 6px; width: 280px; font-size: 14px; }
+        .btn { padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer;
+            font-size: 14px; font-weight: 600; margin-right: 6px; }
+        .btn-primary { background: #2563a8; color: #fff; }
+        .btn-secondary { background: #64748b; color: #fff; }
+        .btn-danger { background: #dc2626; color: #fff; }
+        .btn-warning { background: #d97706; color: #fff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th { background: #1a3a5c; color: #fff; padding: 10px; text-align: left; }
+        td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover td { background: #dbeafe; }
+        .msg-info { color: #166534; background: #dcfce7; padding: 8px 12px;
+            border-radius: 6px; margin: 8px 0; }
+        .msg-warn { color: #92400e; background: #fef3c7; padding: 8px 12px;
+            border-radius: 6px; margin: 8px 0; }
+        .msg-error { color: #991b1b; background: #fee2e2; padding: 8px 12px;
+            border-radius: 6px; margin: 8px 0; }
+        .alerta-info { background: #dbeafe; color: #1a3a5c; padding: 12px;
+            border-radius: 8px; margin: 12px 0; text-align: center; }
+    <span class="kw">&lt;/style&gt;</span>
+<span class="kw">&lt;/h:head&gt;</span>
+
+<span class="kw">&lt;h:body&gt;</span>
+    <span class="kw">&lt;h1&gt;</span>&#x1F3E5; Gesti&#xF3;n de Clientes &#x2014; AppVeterinaria02<span class="kw">&lt;/h1&gt;</span>
+
+    <span class="kw">&lt;h:form</span> id=<span class="st">"frmCliente"</span><span class="kw">&gt;</span>
+
+        <span class="cm">&lt;!-- Mensajes globales --&gt;</span>
+        <span class="kw">&lt;h:messages</span> globalOnly=<span class="st">"true"</span>
+            infoClass=<span class="st">"msg-info"</span>
+            warnClass=<span class="st">"msg-warn"</span>
+            errorClass=<span class="st">"msg-error"</span><span class="kw"> /&gt;</span>
+
+        <span class="cm">&lt;!-- FORMULARIO DE ALTA/EDICION --&gt;</span>
+        <span class="kw">&lt;fieldset</span> style=<span class="st">"border:1px solid #cbd5e1;border-radius:8px;padding:16px;margin-bottom:20px"</span><span class="kw">&gt;</span>
+            <span class="kw">&lt;legend</span> style=<span class="st">"font-weight:700;color:#1a3a5c"</span><span class="kw">&gt;</span>Datos del Cliente<span class="kw">&lt;/legend&gt;</span>
+
+            <span class="kw">&lt;div</span> class=<span class="st">"form-group"</span><span class="kw">&gt;</span>
+                <span class="kw">&lt;label&gt;</span>Documento:<span class="kw">&lt;/label&gt;</span>
+                <span class="kw">&lt;h:inputText</span> id=<span class="st">"documento"</span>
+                    value=<span class="st">"#{clienteBean.clienteSeleccionado.documento}"</span>
+                    required=<span class="st">"true"</span>
+                    requiredMessage=<span class="st">"El documento es obligatorio"</span>
+                    pt:placeholder=<span class="st">"Ej: 30123456"</span><span class="kw"> /&gt;</span>
+                <span class="kw">&lt;h:message</span> for=<span class="st">"documento"</span> style=<span class="st">"color:red;font-size:12px"</span><span class="kw"> /&gt;</span>
+            <span class="kw">&lt;/div&gt;</span>
+
+            <span class="kw">&lt;div</span> class=<span class="st">"form-group"</span><span class="kw">&gt;</span>
+                <span class="kw">&lt;label&gt;</span>Nombre:<span class="kw">&lt;/label&gt;</span>
+                <span class="kw">&lt;h:inputText</span> id=<span class="st">"nombre"</span>
+                    value=<span class="st">"#{clienteBean.clienteSeleccionado.nombre}"</span>
+                    required=<span class="st">"true"</span>
+                    requiredMessage=<span class="st">"El nombre es obligatorio"</span>
+                    pt:placeholder=<span class="st">"Ej: Mar&#xED;a G&#xF3;mez"</span><span class="kw"> /&gt;</span>
+                <span class="kw">&lt;h:message</span> for=<span class="st">"nombre"</span> style=<span class="st">"color:red;font-size:12px"</span><span class="kw"> /&gt;</span>
+            <span class="kw">&lt;/div&gt;</span>
+
+            <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Guardar"</span> styleClass=<span class="st">"btn btn-primary"</span>
+                action=<span class="st">"#{clienteBean.agregar()}"</span><span class="kw">&gt;</span>
+                <span class="kw">&lt;f:ajax</span> execute=<span class="st">"@form"</span> render=<span class="st">"@form"</span><span class="kw"> /&gt;</span>
+            <span class="kw">&lt;/h:commandButton&gt;</span>
+
+            <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Cancelar"</span> styleClass=<span class="st">"btn btn-secondary"</span>
+                immediate=<span class="st">"true"</span>
+                action=<span class="st">"#{clienteBean.cancelar()}"</span><span class="kw">&gt;</span>
+                <span class="kw">&lt;f:ajax</span> render=<span class="st">"@form"</span><span class="kw"> /&gt;</span>
+            <span class="kw">&lt;/h:commandButton&gt;</span>
+        <span class="kw">&lt;/fieldset&gt;</span>
+
+        <span class="cm">&lt;!-- MENSAJE SI NO HAY DATOS --&gt;</span>
+        <span class="kw">&lt;h:panelGroup</span> rendered=<span class="st">"#{empty clienteBean.clientes}"</span><span class="kw">&gt;</span>
+            <span class="kw">&lt;div</span> class=<span class="st">"alerta-info"</span><span class="kw">&gt;</span>
+                No hay clientes registrados. Agreg&#xE1; uno usando el formulario.
+            <span class="kw">&lt;/div&gt;</span>
+        <span class="kw">&lt;/h:panelGroup&gt;</span>
+
+        <span class="cm">&lt;!-- TABLA DE CLIENTES --&gt;</span>
+        <span class="kw">&lt;h:dataTable</span> value=<span class="st">"#{clienteBean.clientes}"</span> var=<span class="st">"c"</span>
+            rendered=<span class="st">"#{not empty clienteBean.clientes}"</span>
+            styleClass=<span class="st">"tabla"</span><span class="kw">&gt;</span>
+
+            <span class="kw">&lt;h:column&gt;</span>
+                <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>ID<span class="kw">&lt;/f:facet&gt;</span>
+                <span class="an">#{c.id}</span>
+            <span class="kw">&lt;/h:column&gt;</span>
+
+            <span class="kw">&lt;h:column&gt;</span>
+                <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>Documento<span class="kw">&lt;/f:facet&gt;</span>
+                <span class="an">#{c.documento}</span>
+            <span class="kw">&lt;/h:column&gt;</span>
+
+            <span class="kw">&lt;h:column&gt;</span>
+                <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>Nombre<span class="kw">&lt;/f:facet&gt;</span>
+                <span class="an">#{c.nombre}</span>
+            <span class="kw">&lt;/h:column&gt;</span>
+
+            <span class="kw">&lt;h:column&gt;</span>
+                <span class="kw">&lt;f:facet</span> name=<span class="st">"header"</span><span class="kw">&gt;</span>Acciones<span class="kw">&lt;/f:facet&gt;</span>
+                <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Editar"</span> styleClass=<span class="st">"btn btn-warning"</span>
+                    action=<span class="st">"#{clienteBean.prepararEdicion(c)}"</span><span class="kw">&gt;</span>
+                    <span class="kw">&lt;f:ajax</span> render=<span class="st">"@form"</span><span class="kw"> /&gt;</span>
+                <span class="kw">&lt;/h:commandButton&gt;</span>
+                <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Eliminar"</span> styleClass=<span class="st">"btn btn-danger"</span>
+                    action=<span class="st">"#{clienteBean.eliminar(c)}"</span><span class="kw">&gt;</span>
+                    <span class="kw">&lt;f:ajax</span> render=<span class="st">"@form"</span><span class="kw"> /&gt;</span>
+                <span class="kw">&lt;/h:commandButton&gt;</span>
+            <span class="kw">&lt;/h:column&gt;</span>
+        <span class="kw">&lt;/h:dataTable&gt;</span>
+
+    <span class="kw">&lt;/h:form&gt;</span>
+<span class="kw">&lt;/h:body&gt;</span>
+<span class="kw">&lt;/html&gt;</span><span class="cl">index.xhtml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 22 &#x2014; ClienteBean.java completo (versi&#xF3;n final)</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; controlador/ClienteBean.java &#x2014; Versi&#xF3;n completa</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.controlador;
+
+<span class="kw">import</span> com.veterinaria.modelo.Cliente;
+<span class="kw">import</span> jakarta.annotation.PostConstruct;
+<span class="kw">import</span> jakarta.faces.application.FacesMessage;
+<span class="kw">import</span> jakarta.faces.context.FacesContext;
+<span class="kw">import</span> jakarta.faces.view.ViewScoped;
+<span class="kw">import</span> jakarta.inject.Named;
+<span class="kw">import</span> java.io.Serializable;
+<span class="kw">import</span> java.util.ArrayList;
+<span class="kw">import</span> java.util.List;
+
+<span class="an">@Named</span>(<span class="st">"clienteBean"</span>)
+<span class="an">@ViewScoped</span>
+<span class="kw">public class</span> <span class="cn">ClienteBean</span> <span class="kw">implements</span> <span class="cn">Serializable</span> {
+
+    <span class="kw">private</span> List&lt;Cliente&gt; clientes = <span class="kw">new</span> ArrayList&lt;&gt;();
+    <span class="kw">private</span> Cliente clienteSeleccionado = <span class="kw">new</span> Cliente();
+    <span class="kw">private int</span> proximoId = <span class="nm">1</span>;
+    <span class="kw">private boolean</span> editando = <span class="kw">false</span>;
+
+    <span class="an">@PostConstruct</span>
+    <span class="kw">public void</span> <span class="mt">init</span>() {
+        <span class="cm">// Datos iniciales de ejemplo (en memoria)</span>
+        clientes.add(<span class="kw">new</span> Cliente(<span class="nm">1</span>, <span class="st">"30123456"</span>, <span class="st">"Mar&#xED;a G&#xF3;mez"</span>));
+        clientes.add(<span class="kw">new</span> Cliente(<span class="nm">2</span>, <span class="st">"28987654"</span>, <span class="st">"Carlos L&#xF3;pez"</span>));
+        clientes.add(<span class="kw">new</span> Cliente(<span class="nm">3</span>, <span class="st">"35456789"</span>, <span class="st">"Ana Mart&#xED;nez"</span>));
+        proximoId = <span class="nm">4</span>;
+    }
+
+    <span class="kw">public void</span> <span class="mt">agregar</span>() {
+        <span class="kw">if</span> (editando) {
+            <span class="cm">// Ya se modific&#xF3; directamente el objeto en la lista</span>
+            addMsg(FacesMessage.SEVERITY_INFO, <span class="st">"Cliente actualizado correctamente"</span>);
+            editando = <span class="kw">false</span>;
+        } <span class="kw">else</span> {
+            clienteSeleccionado.setId(proximoId++);
+            clientes.add(clienteSeleccionado);
+            addMsg(FacesMessage.SEVERITY_INFO, <span class="st">"Cliente agregado correctamente"</span>);
+        }
+        clienteSeleccionado = <span class="kw">new</span> Cliente();
+    }
+
+    <span class="kw">public void</span> <span class="mt">eliminar</span>(Cliente c) {
+        clientes.remove(c);
+        addMsg(FacesMessage.SEVERITY_WARN, <span class="st">"Cliente eliminado: "</span> + c.getNombre());
+    }
+
+    <span class="kw">public void</span> <span class="mt">prepararEdicion</span>(Cliente c) {
+        clienteSeleccionado = c;
+        editando = <span class="kw">true</span>;
+    }
+
+    <span class="kw">public void</span> <span class="mt">cancelar</span>() {
+        clienteSeleccionado = <span class="kw">new</span> Cliente();
+        editando = <span class="kw">false</span>;
+    }
+
+    <span class="kw">private void</span> <span class="mt">addMsg</span>(FacesMessage.Severity severity, <span class="cn">String</span> texto) {
+        FacesContext.getCurrentInstance()
+            .addMessage(<span class="kw">null</span>, <span class="kw">new</span> FacesMessage(severity, texto, <span class="kw">null</span>));
+    }
+
+    <span class="cm">// ===== Getters y Setters =====</span>
+    <span class="kw">public</span> List&lt;Cliente&gt; <span class="mt">getClientes</span>()                     { <span class="kw">return</span> clientes; }
+    <span class="kw">public void</span> <span class="mt">setClientes</span>(List&lt;Cliente&gt; clientes)        { <span class="kw">this</span>.clientes = clientes; }
+    <span class="kw">public</span> Cliente <span class="mt">getClienteSeleccionado</span>()                 { <span class="kw">return</span> clienteSeleccionado; }
+    <span class="kw">public void</span> <span class="mt">setClienteSeleccionado</span>(Cliente c)         { <span class="kw">this</span>.clienteSeleccionado = c; }
+    <span class="kw">public boolean</span> <span class="mt">isEditando</span>()                           { <span class="kw">return</span> editando; }
+    <span class="kw">public void</span> <span class="mt">setEditando</span>(<span class="kw">boolean</span> editando)             { <span class="kw">this</span>.editando = editando; }
+}<span class="cl">ClienteBean.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-viol">
+    <span class="a-ico">&#x1F4CC;</span>
+    <div><strong>Estructura del proyecto AppVeterinaria02:</strong> Solo necesitamos 3 archivos: <code>Cliente.java</code> (POJO), <code>ClienteBean.java</code> (@Named @ViewScoped), e <code>index.xhtml</code> (formulario + tabla). No hay base de datos, no hay DAO, no hay persistence.xml.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+<!-- RESUMEN Y ACTIVIDAD PRACTICA -->
+<div class="sec" id="res">
+  <div class="sec-hdr"><div class="sec-num">&#x2705;</div><div class="sec-titulo">Resumen y actividad pr&#xE1;ctica</div></div>
+
+  <div class="dn">DIAPOSITIVA 23 &#x2014; Resumen de la clase</div>
+  <table>
+    <thead><tr><th>Tema</th><th>Concepto clave</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td>Expression Language</td><td>#{bean.propiedad} conecta vista con bean</td><td>#{clienteBean.nombre}</td></tr>
+      <tr><td>@Named</td><td>Hace el bean accesible desde EL</td><td>@Named("clienteBean")</td></tr>
+      <tr><td>@ViewScoped</td><td>Bean vive mientras el usuario est&#xE9; en la p&#xE1;gina</td><td>implements Serializable</td></tr>
+      <tr><td>@PostConstruct</td><td>Inicializar datos al crear el bean</td><td>Cargar lista inicial</td></tr>
+      <tr><td>h:dataTable</td><td>Tabla din&#xE1;mica que itera una lista</td><td>value="#{bean.lista}" var="c"</td></tr>
+      <tr><td>FacesMessage</td><td>Mensajes de feedback al usuario</td><td>SEVERITY_INFO, WARN, ERROR</td></tr>
+      <tr><td>f:ajax</td><td>Actualizaci&#xF3;n parcial sin recargar</td><td>execute="@form" render="@form"</td></tr>
+      <tr><td>Ciclo de vida JSF</td><td>6 fases: Restore &#x2192; Apply &#x2192; Validate &#x2192; Update &#x2192; Invoke &#x2192; Render</td><td>immediate="true" salta fases</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 24 &#x2014; Actividad pr&#xE1;ctica</div>
+  <div class="card c-verde">
+    <div class="card-hdr">&#x1F3C6; Actividad pr&#xE1;ctica &#x2014; ABM de Clientes en memoria</div>
+    <div class="card-body">
+      <div class="paso">
+        <div class="paso-n">1</div>
+        <div class="paso-body">
+          <h4>Crear el proyecto AppVeterinaria02</h4>
+          <p>Nuevo proyecto Maven Web Application. Group Id: <code>com.veterinaria</code>. Jakarta EE 10, GlassFish 7, JDK 21.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">2</div>
+        <div class="paso-body">
+          <h4>Crear Cliente.java</h4>
+          <p>POJO simple con: <code>int id</code>, <code>String documento</code>, <code>String nombre</code>. Constructor vac&#xED;o + constructor con par&#xE1;metros + getters/setters.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">3</div>
+        <div class="paso-body">
+          <h4>Crear ClienteBean.java</h4>
+          <p>Con @Named, @ViewScoped, implements Serializable. ArrayList de clientes. M&#xE9;todos: agregar(), eliminar(c), prepararEdicion(c), cancelar().</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">4</div>
+        <div class="paso-body">
+          <h4>Crear index.xhtml</h4>
+          <p>Formulario con documento + nombre. Botones Guardar y Cancelar con f:ajax. Tabla h:dataTable mostrando los clientes con botones Editar y Eliminar.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">5</div>
+        <div class="paso-body">
+          <h4>Agregar FacesMessage</h4>
+          <p>Mostrar mensajes de &#xE9;xito al agregar, advertencia al eliminar. Usar h:messages con clases CSS para cada severidad.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">6</div>
+        <div class="paso-body">
+          <h4>Desaf&#xED;o extra</h4>
+          <p>Agregar un campo de b&#xFA;squeda con <code>f:ajax event="keyup"</code> que filtre la tabla en tiempo real por nombre. Agregar validaci&#xF3;n para que el documento no se repita.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-viol">
+    <span class="a-ico">&#x1F4CC;</span>
+    <div><strong>Pr&#xF3;xima clase:</strong> Clase 03 &#x2014; JPA: Introducci&#xF3;n a la persistencia. Convertiremos el POJO <code>Cliente</code> en una entidad <code>@Entity</code>, configuraremos <code>persistence.xml</code> con MySQL, y reemplazaremos el ArrayList por consultas a la base de datos.</div>
+  </div>
+</div>
+
+
+<!-- FOOTER -->
+<footer>
+  Programaci&#xF3;n Web Avanzada &#x2014; Backend &nbsp;&#x7C;&nbsp; Clase 02: JSF &#x2014; Expression Language, DataTable y Ajax &nbsp;&#x7C;&nbsp; Jakarta EE 10 &#xB7; GlassFish 7 &#xB7; JDK 21
+</footer>
+
+</body>
+</html>
