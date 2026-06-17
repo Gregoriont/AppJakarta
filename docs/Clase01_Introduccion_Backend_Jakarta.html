@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clase 01 — Introducción al Backend Web con Java y Jakarta EE</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1a3a5c;--azul2:#2563a8;--azul3:#3b82d1;--azul-cl:#dbeafe;
+  --verde:#166534;--verde-cl:#dcfce7;--verde2:#16a34a;
+  --naranja:#92400e;--naranja-cl:#fef3c7;--naranja2:#d97706;
+  --rojo:#991b1b;--rojo-cl:#fee2e2;--rojo2:#dc2626;
+  --violeta:#4c1d95;--violeta-cl:#ede9fe;--violeta2:#7c3aed;
+  --gris:#f1f5f9;--gris2:#e2e8f0;--gris3:#94a3b8;--gris4:#475569;--texto:#0f172a;
+  --fuente:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--fuente);background:#f8fafc;color:var(--texto);font-size:15px;line-height:1.6}
+a{color:var(--azul2);text-decoration:none}
+code{font-family:'Cascadia Code','Fira Code','Consolas',monospace;font-size:.92em}
+
+
+/* PORTADA */
+.portada{background:linear-gradient(135deg,#0f172a 0%,var(--azul) 45%,var(--azul2) 80%,var(--azul3) 100%);
+  color:#fff;padding:70px 40px;text-align:center;border-radius:0 0 28px 28px;
+  box-shadow:0 8px 40px rgba(0,0,0,.35);margin-bottom:40px}
+.portada-badge{display:inline-block;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.3);padding:6px 20px;border-radius:20px;
+  font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+.portada-num{font-size:5rem;font-weight:900;line-height:1;opacity:.18;margin-bottom:-10px}
+.portada h1{font-size:2.3rem;font-weight:800;margin-bottom:8px;line-height:1.2}
+.portada h2{font-size:1.05rem;font-weight:400;opacity:.8;margin-bottom:24px}
+.portada-tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.tag{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);
+  padding:4px 12px;border-radius:16px;font-size:11px;font-weight:600}
+
+
+/* INDICE */
+.indice{max-width:880px;margin:0 auto 40px;background:#fff;border-radius:14px;
+  border:1px solid var(--gris2);box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden}
+.indice-hdr{background:var(--azul);color:#fff;padding:13px 22px;font-size:.95rem;font-weight:700}
+.indice-lista{list-style:none;display:grid;grid-template-columns:1fr 1fr}
+.indice-lista li{border-bottom:1px solid var(--gris2);border-right:1px solid var(--gris2)}
+.indice-lista a{display:flex;align-items:center;gap:11px;padding:11px 17px;
+  color:var(--texto);font-size:.86rem;transition:background .15s}
+.indice-lista a:hover{background:var(--azul-cl)}
+.ind-n{width:26px;height:26px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+@media(max-width:580px){.indice-lista{grid-template-columns:1fr}}
+
+
+/* SECCIONES */
+.sec{max-width:880px;margin:0 auto 50px;scroll-margin-top:20px;padding:0 20px}
+.sec-hdr{display:flex;align-items:center;gap:13px;margin-bottom:20px;
+  padding-bottom:11px;border-bottom:3px solid var(--azul2)}
+.sec-num{width:44px;height:44px;background:linear-gradient(135deg,var(--azul),var(--azul2));
+  color:#fff;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:.97rem;font-weight:800;flex-shrink:0}
+.sec-titulo{font-size:1.38rem;font-weight:800;color:var(--azul)}
+.dn{display:inline-block;background:var(--azul2);color:#fff;
+  font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:10px;
+  margin-bottom:8px;letter-spacing:.5px}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--gris2);border-radius:11px;
+  box-shadow:0 1px 5px rgba(0,0,0,.06);margin-bottom:14px;overflow:hidden}
+.card-hdr{padding:11px 17px;font-weight:700;font-size:.88rem;border-bottom:1px solid var(--gris2)}
+.card-body{padding:16px}
+.c-azul   .card-hdr{background:var(--azul-cl);color:var(--azul)}
+.c-verde  .card-hdr{background:var(--verde-cl);color:var(--verde)}
+.c-naranja .card-hdr{background:var(--naranja-cl);color:var(--naranja)}
+.c-rojo   .card-hdr{background:var(--rojo-cl);color:var(--rojo)}
+.c-violeta .card-hdr{background:var(--violeta-cl);color:var(--violeta)}
+
+
+/* ALERTAS */
+.alerta{display:flex;gap:11px;padding:12px 15px;border-radius:9px;margin:12px 0;font-size:.87rem}
+.a-info {background:var(--azul-cl);border-left:4px solid var(--azul2)}
+.a-ok   {background:var(--verde-cl);border-left:4px solid var(--verde2)}
+.a-warn {background:var(--naranja-cl);border-left:4px solid var(--naranja2)}
+.a-err  {background:var(--rojo-cl);border-left:4px solid var(--rojo2)}
+.a-viol {background:var(--violeta-cl);border-left:4px solid var(--violeta2)}
+.a-ico  {font-size:1.15rem;flex-shrink:0;margin-top:2px}
+
+/* CODIGO */
+pre{background:#0f172a;color:#e2e8f0;padding:18px 20px;border-radius:10px;
+  overflow-x:auto;font-size:12.5px;line-height:1.8;margin:10px 0;
+  border:1px solid #1e293b;position:relative}
+.cl{background:#1e293b;border-radius:5px;padding:2px 8px;font-size:10px;
+  color:#94a3b8;font-family:var(--fuente);position:absolute;top:7px;right:9px}
+.kw{color:#93c5fd}.an{color:#86efac}.st{color:#fca5a5}
+.cm{color:#64748b;font-style:italic}.cn{color:#fde68a}.mt{color:#c4b5fd}.nm{color:#fdba74}
+.ok{color:#86efac}.bad{color:#fca5a5}
+
+
+/* TABLA */
+table{width:100%;border-collapse:collapse;font-size:.87rem;margin:10px 0}
+th{background:var(--azul);color:#fff;padding:8px 12px;text-align:left;
+  font-size:.76rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:8px 12px;border-bottom:1px solid var(--gris2);vertical-align:top}
+tr:nth-child(even) td{background:var(--gris)}
+tr:hover td{background:var(--azul-cl)}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:10px 0}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr}}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.b-verde  {background:var(--verde-cl);color:var(--verde)}
+.b-rojo   {background:var(--rojo-cl);color:var(--rojo)}
+.b-azul   {background:var(--azul-cl);color:var(--azul2)}
+.b-naranja{background:var(--naranja-cl);color:var(--naranja)}
+.b-violeta{background:var(--violeta-cl);color:var(--violeta2)}
+
+
+/* CAPAS VISUAL */
+.capas{background:#0f172a;border-radius:14px;padding:24px 20px;
+  margin:14px 0;display:flex;flex-direction:column;align-items:center;gap:0}
+.capa{width:100%;max-width:540px;display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-radius:9px;border:1px solid;transition:transform .15s}
+.capa:hover{transform:translateX(4px)}
+.capa-ico{font-size:1.3rem;width:30px;text-align:center;flex-shrink:0}
+.capa-info{flex:1}
+.capa-nom{font-weight:700;font-size:.87rem}
+.capa-det{font-size:.74rem;opacity:.75;margin-top:1px}
+.capa-tag{font-size:.67rem;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.capa-arr{color:#334155;font-size:.72rem;padding:3px 0;
+  display:flex;align-items:center;gap:8px;width:100%;max-width:540px;padding-left:42px}
+.cp-jsf {background:#1e3a5f;border-color:#3b82d1;color:#bfdbfe}
+.cp-jsf .capa-tag{background:#2563a8;color:#fff}
+.cp-bean{background:#312e81;border-color:#818cf8;color:#e0e7ff}
+.cp-bean .capa-tag{background:#4f46e5;color:#fff}
+.cp-serv{background:#14532d;border-color:#4ade80;color:#bbf7d0}
+.cp-serv .capa-tag{background:#16a34a;color:#fff}
+.cp-dao {background:#3b0764;border-color:#a855f7;color:#f3e8ff}
+.cp-dao .capa-tag{background:#9333ea;color:#fff}
+.cp-db  {background:#1c1917;border-color:#78716c;color:#e7e5e4}
+.cp-db  .capa-tag{background:#57534e;color:#fff}
+
+
+/* OBJETIVOS */
+.obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:14px 0}
+@media(max-width:560px){.obj-grid{grid-template-columns:1fr}}
+.obj-item{background:#fff;border:1px solid var(--gris2);
+  border-left:4px solid var(--azul2);border-radius:8px;
+  padding:10px 13px;font-size:.87rem;display:flex;align-items:flex-start;gap:9px}
+
+/* PASOS */
+.paso{display:flex;gap:13px;margin-bottom:13px;align-items:flex-start}
+.paso-n{width:32px;height:32px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.83rem;flex-shrink:0;margin-top:2px}
+.paso-body h4{font-size:.88rem;color:var(--azul);margin-bottom:3px;font-weight:700}
+.paso-body p{font-size:.83rem;color:var(--gris4)}
+
+/* DIAGRAMA FLUJO */
+.flujo{background:#0f172a;border-radius:14px;padding:24px 20px;margin:14px 0;
+  display:flex;flex-direction:column;align-items:center;gap:0}
+.flujo-paso{width:100%;max-width:480px;display:flex;align-items:center;gap:12px;
+  padding:11px 16px;border-radius:9px;border:1px solid;background:#1e293b;border-color:#334155;color:#e2e8f0}
+.flujo-num{width:28px;height:28px;background:var(--azul2);color:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0}
+.flujo-txt{font-size:.82rem;font-weight:600}
+.flujo-arr{color:#475569;font-size:1.2rem;padding:2px 0;text-align:center;width:100%;max-width:480px}
+
+/* ARBOL ARCHIVOS */
+.tree{background:#0f172a;color:#e2e8f0;padding:20px 24px;border-radius:10px;
+  font-family:'Cascadia Code','Fira Code',monospace;font-size:12.5px;line-height:1.9;margin:10px 0}
+.tree-dir{color:#93c5fd;font-weight:700}
+.tree-file{color:#fde68a}
+.tree-desc{color:#64748b;font-style:italic}
+
+/* SEP / FOOTER */
+.sep{height:2px;background:linear-gradient(90deg,var(--azul2),transparent);
+  max-width:880px;margin:0 auto 50px;border-radius:2px}
+footer{background:var(--azul);color:rgba(255,255,255,.65);text-align:center;
+  padding:20px;font-size:.79rem;margin-top:56px}
+</style>
+</head>
+
+
+<body>
+
+<!-- PORTADA -->
+<div class="portada">
+  <div class="portada-badge">Programaci&#xF3;n Web Avanzada &#x2014; Backend</div>
+  <div class="portada-num">01</div>
+  <h1>Introducci&#xF3;n al Backend Web con Java y Jakarta EE</h1>
+  <h2>Arquitectura Web &#xB7; Jakarta EE 10 &#xB7; Primer Proyecto &#xB7; GlassFish 7</h2>
+  <div class="portada-tags">
+    <span class="tag">Jakarta EE 10</span><span class="tag">JSF 4.0</span>
+    <span class="tag">CDI 4.0</span><span class="tag">JPA 3.1</span>
+    <span class="tag">GlassFish 7</span><span class="tag">MySQL 8</span>
+    <span class="tag">JDK 21</span><span class="tag">NetBeans 25</span>
+  </div>
+</div>
+
+
+<!-- INDICE -->
+<div style="max-width:880px;margin:0 auto;padding:0 20px">
+<div class="indice">
+  <div class="indice-hdr">&#x1F4DA; Clase 01 &#x2014; &#xCD;ndice de contenidos</div>
+  <ul class="indice-lista">
+    <li><a href="#obj"><span class="ind-n">&#x1F3AF;</span>Objetivos</a></li>
+    <li><a href="#s1"><span class="ind-n">1</span>Arquitectura para Aplicaciones Web</a></li>
+    <li><a href="#s2"><span class="ind-n">2</span>Arquitectura Java para Aplicaciones Web</a></li>
+    <li><a href="#s3"><span class="ind-n">3</span>Componentes de Jakarta EE 10</a></li>
+    <li><a href="#s4"><span class="ind-n">4</span>Ciclo de vida de una aplicaci&#xF3;n Web</a></li>
+    <li><a href="#s5"><span class="ind-n">5</span>Introducci&#xF3;n a JSF</a></li>
+    <li><a href="#s6"><span class="ind-n">6</span>Crear el primer proyecto en NetBeans</a></li>
+    <li><a href="#s7"><span class="ind-n">7</span>Estructura del proyecto Maven Web</a></li>
+    <li><a href="#s8"><span class="ind-n">8</span>Archivos de configuraci&#xF3;n</a></li>
+    <li><a href="#s9"><span class="ind-n">9</span>Primera p&#xE1;gina index.xhtml</a></li>
+    <li><a href="#s10"><span class="ind-n">10</span>Desplegar en GlassFish</a></li>
+    <li><a href="#res"><span class="ind-n">&#x2705;</span>Resumen y actividad pr&#xE1;ctica</a></li>
+  </ul>
+</div>
+</div>
+
+
+<!-- OBJETIVOS -->
+<div class="sec" id="obj">
+  <div class="sec-hdr"><div class="sec-num">&#x1F3AF;</div><div class="sec-titulo">Objetivos de la clase</div></div>
+  <div class="obj-grid">
+    <div class="obj-item"><span>&#x1F310;</span>Comprender la arquitectura cliente-servidor para aplicaciones web</div>
+    <div class="obj-item"><span>&#x1F4E6;</span>Identificar los componentes de Jakarta EE 10 relevantes para el curso</div>
+    <div class="obj-item"><span>&#x1F504;</span>Conocer el ciclo de vida de una aplicaci&#xF3;n web Java</div>
+    <div class="obj-item"><span>&#x2699;&#xFE0F;</span>Configurar el entorno de desarrollo completo</div>
+    <div class="obj-item"><span>&#x1F4C1;</span>Crear el primer proyecto Maven Web Application</div>
+    <div class="obj-item"><span>&#x1F680;</span>Desplegar y verificar la aplicaci&#xF3;n en GlassFish 7</div>
+    <div class="obj-item"><span>&#x1F4DD;</span>Escribir la primera p&#xE1;gina JSF con formulario b&#xE1;sico</div>
+    <div class="obj-item"><span>&#x1F9E9;</span>Entender la diferencia entre aplicaciones de escritorio y web</div>
+  </div>
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>Punto de partida:</strong> Esta es la primera clase del curso. Asumimos conocimientos b&#xE1;sicos de Java (POO, colecciones) y de HTML. Al finalizar, tendr&#xE1;s tu primer proyecto Jakarta EE funcionando en el navegador.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 1: Arquitectura para Aplicaciones Web -->
+<div class="sec" id="s1">
+  <div class="sec-hdr"><div class="sec-num">1</div><div class="sec-titulo">Arquitectura para Aplicaciones Web</div></div>
+
+  <div class="dn">DIAPOSITIVA 1 &#x2014; Modelo Cliente-Servidor</div>
+  <p style="margin-bottom:14px">Las aplicaciones web siguen el modelo <strong>cliente-servidor</strong>. El navegador (cliente) env&#xED;a peticiones HTTP al servidor, que las procesa y responde con HTML, JSON u otro contenido.</p>
+
+  <!-- Diagrama visual cliente-servidor -->
+  <div style="background:#0f172a;border-radius:14px;padding:28px 20px;margin:14px 0;display:flex;flex-direction:column;align-items:center;gap:0">
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center;width:100%">
+      <div style="background:#1e3a5f;border:2px solid #3b82d1;border-radius:11px;padding:16px 22px;text-align:center;color:#bfdbfe;min-width:140px">
+        <div style="font-size:1.5rem">&#x1F4BB;</div>
+        <div style="font-weight:700;font-size:.85rem;margin-top:4px">Navegador</div>
+        <div style="font-size:.7rem;opacity:.7">Chrome, Firefox</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="background:#16a34a;color:#fff;padding:4px 14px;border-radius:20px;font-size:.7rem;font-weight:700">HTTP Request &#x2192;</div>
+        <div style="background:#dc2626;color:#fff;padding:4px 14px;border-radius:20px;font-size:.7rem;font-weight:700">&#x2190; HTTP Response</div>
+      </div>
+      <div style="background:#14532d;border:2px solid #4ade80;border-radius:11px;padding:16px 22px;text-align:center;color:#bbf7d0;min-width:140px">
+        <div style="font-size:1.5rem">&#x1F5A5;&#xFE0F;</div>
+        <div style="font-weight:700;font-size:.85rem;margin-top:4px">Servidor de Aplicaciones</div>
+        <div style="font-size:.7rem;opacity:.7">GlassFish 7</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="background:#d97706;color:#fff;padding:4px 14px;border-radius:20px;font-size:.7rem;font-weight:700">SQL &#x2194;</div>
+      </div>
+      <div style="background:#422006;border:2px solid #fb923c;border-radius:11px;padding:16px 22px;text-align:center;color:#ffedd5;min-width:140px">
+        <div style="font-size:1.5rem">&#x1F5C4;&#xFE0F;</div>
+        <div style="font-weight:700;font-size:.85rem;margin-top:4px">Base de Datos</div>
+        <div style="font-size:.7rem;opacity:.7">MySQL 8</div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="dn">DIAPOSITIVA 2 &#x2014; HTTP: Protocolo sin estado</div>
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">&#x1F4E4; Request (Petici&#xF3;n)</div>
+      <div class="card-body">
+        <ul style="font-size:.84rem;padding-left:16px">
+          <li><strong>M&#xE9;todo:</strong> GET, POST, PUT, DELETE</li>
+          <li><strong>URL:</strong> /AppVeterinaria01/index.xhtml</li>
+          <li><strong>Headers:</strong> Content-Type, Accept</li>
+          <li><strong>Body:</strong> datos del formulario (POST)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">&#x1F4E5; Response (Respuesta)</div>
+      <div class="card-body">
+        <ul style="font-size:.84rem;padding-left:16px">
+          <li><strong>Status:</strong> 200 OK, 404 Not Found, 500 Error</li>
+          <li><strong>Headers:</strong> Content-Type: text/html</li>
+          <li><strong>Body:</strong> HTML renderizado</li>
+          <li><strong>Stateless:</strong> cada petici&#xF3;n es independiente</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 3 &#x2014; Aplicaciones de escritorio vs Web</div>
+  <table>
+    <thead><tr><th>Caracter&#xED;stica</th><th>&#x1F5A5;&#xFE0F; Aplicaci&#xF3;n de Escritorio</th><th>&#x1F310; Aplicaci&#xF3;n Web</th></tr></thead>
+    <tbody>
+      <tr><td>Instalaci&#xF3;n</td><td>Se instala en cada PC</td><td>Solo se despliega en el servidor</td></tr>
+      <tr><td>Acceso</td><td>Solo desde la PC instalada</td><td>Desde cualquier dispositivo con navegador</td></tr>
+      <tr><td>Actualizaci&#xF3;n</td><td>Actualizar en cada PC</td><td>Se actualiza una vez en el servidor</td></tr>
+      <tr><td>Interfaz</td><td>Swing, JavaFX</td><td>HTML + CSS (JSF genera el HTML)</td></tr>
+      <tr><td>Conexi&#xF3;n BD</td><td>Directa (JDBC local)</td><td>A trav&#xE9;s del servidor de aplicaciones</td></tr>
+      <tr><td>Concurrencia</td><td>Un usuario por instancia</td><td>Miles de usuarios simult&#xE1;neos</td></tr>
+      <tr><td>Tecnolog&#xED;a Java</td><td>Java SE</td><td><span class="badge b-azul">Jakarta EE</span></td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 2: Arquitectura Java para Aplicaciones Web -->
+<div class="sec" id="s2">
+  <div class="sec-hdr"><div class="sec-num">2</div><div class="sec-titulo">Arquitectura Java para Aplicaciones Web</div></div>
+
+  <div class="dn">DIAPOSITIVA 4 &#x2014; Capas de la aplicaci&#xF3;n</div>
+  <p style="margin-bottom:14px">Una aplicaci&#xF3;n Jakarta EE bien dise&#xF1;ada se organiza en <strong>capas</strong>. Cada capa tiene una responsabilidad &#xFA;nica y se comunica solo con la capa adyacente.</p>
+
+  <div class="capas">
+    <div class="capa cp-jsf">
+      <div class="capa-ico">&#x1F3A8;</div>
+      <div class="capa-info">
+        <div class="capa-nom">Capa Presentaci&#xF3;n</div>
+        <div class="capa-det">P&#xE1;ginas XHTML + Facelets &#x2014; lo que ve el usuario</div>
+      </div>
+      <div class="capa-tag">JSF 4.0</div>
+    </div>
+    <div class="capa-arr">&#x2193; &#x2191; Eventos y datos</div>
+    <div class="capa cp-bean">
+      <div class="capa-ico">&#x1F3AE;</div>
+      <div class="capa-info">
+        <div class="capa-nom">Capa Controlador (Managed Beans)</div>
+        <div class="capa-det">@Named @RequestScoped &#x2014; conecta la vista con el negocio</div>
+      </div>
+      <div class="capa-tag">CDI 4.0</div>
+    </div>
+    <div class="capa-arr">&#x2193; &#x2191; Llamadas a m&#xE9;todos</div>
+    <div class="capa cp-serv">
+      <div class="capa-ico">&#x2699;&#xFE0F;</div>
+      <div class="capa-info">
+        <div class="capa-nom">Capa Negocio (Servicios)</div>
+        <div class="capa-det">L&#xF3;gica de negocio, validaciones, transacciones</div>
+      </div>
+      <div class="capa-tag">@Transactional</div>
+    </div>
+    <div class="capa-arr">&#x2193; &#x2191; Objetos entidad</div>
+    <div class="capa cp-dao">
+      <div class="capa-ico">&#x1F4BE;</div>
+      <div class="capa-info">
+        <div class="capa-nom">Capa Datos (DAO / Repository)</div>
+        <div class="capa-det">EntityManager, JPQL, persist, find, remove</div>
+      </div>
+      <div class="capa-tag">JPA 3.1</div>
+    </div>
+    <div class="capa-arr">&#x2193; &#x2191; SQL autom&#xE1;tico</div>
+    <div class="capa cp-db">
+      <div class="capa-ico">&#x1F5C4;&#xFE0F;</div>
+      <div class="capa-info">
+        <div class="capa-nom">Base de Datos</div>
+        <div class="capa-det">Tablas, registros, relaciones &#x2014; persistencia real</div>
+      </div>
+      <div class="capa-tag">MySQL 8</div>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>Principio clave:</strong> Cada capa tiene <em>una sola responsabilidad</em>. La vista no accede a la base de datos. El DAO no conoce el HTML. Esto permite cambiar una capa sin afectar las dem&#xE1;s.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 3: Componentes de Jakarta EE 10 -->
+<div class="sec" id="s3">
+  <div class="sec-hdr"><div class="sec-num">3</div><div class="sec-titulo">Componentes de Jakarta EE 10</div></div>
+
+  <div class="dn">DIAPOSITIVA 5 &#x2014; Tecnolog&#xED;as que usaremos</div>
+  <p style="margin-bottom:14px">Jakarta EE 10 es un conjunto de especificaciones. Nosotros usamos el <strong>Web Profile</strong> (perfil web), que incluye todo lo necesario para aplicaciones web sin la complejidad de la plataforma completa.</p>
+
+  <table>
+    <thead><tr><th>Tecnolog&#xED;a</th><th>&#xBF;Qu&#xE9; es?</th><th>&#xBF;Para qu&#xE9; la usamos en el curso?</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge b-azul">Jakarta Faces 4.0 (JSF)</span></td>
+        <td>Framework MVC basado en componentes para la capa de presentaci&#xF3;n</td>
+        <td>Crear las p&#xE1;ginas web (.xhtml) con formularios, tablas y navegaci&#xF3;n</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-violeta">CDI 4.0</span></td>
+        <td>Inyecci&#xF3;n de dependencias y contextos</td>
+        <td>Conectar beans con @Named, @Inject, @RequestScoped</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-verde">JPA 3.1</span></td>
+        <td>Mapeo objeto-relacional (ORM)</td>
+        <td>Mapear clases Java a tablas MySQL con @Entity, @Id, @Column</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-naranja">Bean Validation 3.0</span></td>
+        <td>Validaciones declarativas con anotaciones</td>
+        <td>Validar datos con @NotBlank, @Size, @Min, @Email</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-rojo">Jakarta Transactions</span></td>
+        <td>Manejo de transacciones</td>
+        <td>Asegurar integridad de datos con @Transactional</td>
+      </tr>
+      <tr>
+        <td><span class="badge b-azul">EclipseLink</span></td>
+        <td>Implementaci&#xF3;n de referencia de JPA</td>
+        <td>Motor que ejecuta el SQL real contra MySQL (viene con GlassFish)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alerta a-warn">
+    <span class="a-ico">&#x26A0;&#xFE0F;</span>
+    <div><strong>Nota:</strong> Usamos <em>Web Profile</em>, NO Full Platform. No necesitamos EJB, JMS, ni SOAP. El perfil web es m&#xE1;s liviano y suficiente para nuestras aplicaciones.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 4: Ciclo de vida -->
+<div class="sec" id="s4">
+  <div class="sec-hdr"><div class="sec-num">4</div><div class="sec-titulo">Ciclo de vida de una aplicaci&#xF3;n Web JEE</div></div>
+
+  <div class="dn">DIAPOSITIVA 6 &#x2014; Del c&#xF3;digo al navegador</div>
+  <p style="margin-bottom:14px">Desde que escribimos c&#xF3;digo hasta que el usuario ve la p&#xE1;gina, la aplicaci&#xF3;n pasa por varias etapas:</p>
+
+  <div class="flujo">
+    <div class="flujo-paso">
+      <div class="flujo-num">1</div>
+      <div class="flujo-txt">&#x1F4BB; Desarrollo &#x2014; Escribimos c&#xF3;digo en NetBeans 25 (Maven)</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">2</div>
+      <div class="flujo-txt">&#x1F4E6; Compilaci&#xF3;n &#x2014; mvn package genera el archivo .war</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">3</div>
+      <div class="flujo-txt">&#x1F680; Despliegue &#x2014; Deploy del .war en GlassFish 7</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">4</div>
+      <div class="flujo-txt">&#x2699;&#xFE0F; GlassFish arranca la app &#x2014; lee web.xml, beans.xml, persistence.xml</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">5</div>
+      <div class="flujo-txt">&#x1F310; Usuario accede &#x2014; http://localhost:8080/AppVeterinaria01/</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">6</div>
+      <div class="flujo-txt">&#x1F504; Faces Servlet procesa la petici&#xF3;n &#x2014; ejecuta el ciclo JSF</div>
+    </div>
+    <div class="flujo-arr">&#x25BC;</div>
+    <div class="flujo-paso">
+      <div class="flujo-num">7</div>
+      <div class="flujo-txt">&#x1F4E5; Respuesta HTML al navegador &#x2014; el usuario ve la p&#xE1;gina</div>
+    </div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>Archivo .war</strong> (Web Application Archive): es un ZIP que contiene todo el proyecto compilado: clases .class, p&#xE1;ginas .xhtml, configuraci&#xF3;n, y librer&#xED;as. GlassFish lo descomprime y lo ejecuta.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 5: Introduccion a JSF -->
+<div class="sec" id="s5">
+  <div class="sec-hdr"><div class="sec-num">5</div><div class="sec-titulo">Introducci&#xF3;n a JSF (Jakarta Server Faces)</div></div>
+
+  <div class="dn">DIAPOSITIVA 7 &#x2014; &#xBF;Qu&#xE9; es JSF?</div>
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">&#x1F3AF; &#xBF;Qu&#xE9; es JSF?</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Framework <strong>MVC basado en componentes</strong></li>
+          <li>Las p&#xE1;ginas se escriben en <strong>XHTML</strong> (no HTML puro)</li>
+          <li>Usa un <strong>Faces Servlet</strong> que intercepta todas las peticiones</li>
+          <li>Los componentes (h:inputText, h:dataTable) generan HTML autom&#xE1;ticamente</li>
+          <li>Se conecta con beans Java mediante <strong>Expression Language</strong>: #{bean.propiedad}</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">&#x1F504; &#xBF;C&#xF3;mo funciona?</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ol style="padding-left:16px">
+          <li>El usuario solicita <code>/index.xhtml</code></li>
+          <li>GlassFish redirige al <strong>Faces Servlet</strong></li>
+          <li>JSF lee el archivo .xhtml</li>
+          <li>Ejecuta el <strong>ciclo de vida</strong> (6 fases)</li>
+          <li>Genera HTML est&#xE1;ndar</li>
+          <li>Env&#xED;a la respuesta al navegador</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 8 &#x2014; Namespaces principales</div>
+  <div class="card c-violeta">
+    <div class="card-hdr">&#x1F4CB; Namespaces XML en p&#xE1;ginas JSF</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">xmlns:h</span>=<span class="st">"jakarta.faces.html"</span>       <span class="cm">&#x2190; componentes HTML (h:form, h:inputText...)</span>
+<span class="kw">xmlns:f</span>=<span class="st">"jakarta.faces.core"</span>       <span class="cm">&#x2190; funcionalidades core (f:viewParam, f:ajax...)</span>
+<span class="kw">xmlns:ui</span>=<span class="st">"jakarta.faces.facelets"</span>  <span class="cm">&#x2190; plantillas (ui:composition, ui:define...)</span></code></pre>
+    </div>
+  </div>
+
+
+  <div class="dn">DIAPOSITIVA 9 &#x2014; Componentes b&#xE1;sicos de JSF</div>
+  <table>
+    <thead><tr><th>Componente JSF</th><th>HTML que genera</th><th>Uso t&#xED;pico</th></tr></thead>
+    <tbody>
+      <tr><td><code>&lt;h:form&gt;</code></td><td><code>&lt;form&gt;</code></td><td>Contenedor de formulario (obligatorio para enviar datos)</td></tr>
+      <tr><td><code>&lt;h:inputText&gt;</code></td><td><code>&lt;input type="text"&gt;</code></td><td>Campo de texto ligado a un bean: value="#{bean.campo}"</td></tr>
+      <tr><td><code>&lt;h:commandButton&gt;</code></td><td><code>&lt;input type="submit"&gt;</code></td><td>Bot&#xF3;n que ejecuta un m&#xE9;todo: action="#{bean.metodo}"</td></tr>
+      <tr><td><code>&lt;h:outputText&gt;</code></td><td><code>&lt;span&gt;</code></td><td>Mostrar texto din&#xE1;mico: value="#{bean.resultado}"</td></tr>
+      <tr><td><code>&lt;h:dataTable&gt;</code></td><td><code>&lt;table&gt;</code></td><td>Tabla que itera una lista: value="#{bean.lista}" var="item"</td></tr>
+      <tr><td><code>&lt;h:message&gt;</code></td><td><code>&lt;span&gt;</code> con error</td><td>Muestra mensajes de validaci&#xF3;n para un campo espec&#xED;fico</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 10 &#x2014; Ejemplo m&#xED;nimo de p&#xE1;gina JSF</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; ejemplo-minimo.xhtml</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;?xml version=</span><span class="st">"1.0"</span> <span class="kw">encoding=</span><span class="st">"UTF-8"</span><span class="kw">?&gt;</span>
+<span class="kw">&lt;!DOCTYPE html&gt;</span>
+<span class="kw">&lt;html</span> xmlns=<span class="st">"http://www.w3.org/1999/xhtml"</span>
+      <span class="kw">xmlns:h</span>=<span class="st">"jakarta.faces.html"</span><span class="kw">&gt;</span>
+<span class="kw">&lt;h:head&gt;</span>
+    <span class="kw">&lt;title&gt;</span>Mi primera p&#xE1;gina JSF<span class="kw">&lt;/title&gt;</span>
+<span class="kw">&lt;/h:head&gt;</span>
+<span class="kw">&lt;h:body&gt;</span>
+    <span class="kw">&lt;h1&gt;</span>&#xA1;Hola Jakarta Faces!<span class="kw">&lt;/h1&gt;</span>
+    <span class="kw">&lt;h:form&gt;</span>
+        <span class="kw">&lt;h:inputText</span> value=<span class="st">"#{saludoBean.nombre}"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Saludar"</span>
+                         action=<span class="st">"#{saludoBean.saludar}"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;h:outputText</span> value=<span class="st">"#{saludoBean.mensaje}"</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/h:form&gt;</span>
+<span class="kw">&lt;/h:body&gt;</span>
+<span class="kw">&lt;/html&gt;</span><span class="cl">ejemplo-minimo.xhtml</span></code></pre>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 6: Crear el primer proyecto -->
+<div class="sec" id="s6">
+  <div class="sec-hdr"><div class="sec-num">6</div><div class="sec-titulo">Crear el primer proyecto en NetBeans 25</div></div>
+
+  <div class="dn">DIAPOSITIVA 11 &#x2014; Paso a paso</div>
+  <div class="paso">
+    <div class="paso-n">1</div>
+    <div class="paso-body">
+      <h4>File &#x2192; New Project</h4>
+      <p>Seleccionar categor&#xED;a: <strong>Java with Maven</strong> &#x2192; <strong>Web Application</strong></p>
+    </div>
+  </div>
+  <div class="paso">
+    <div class="paso-n">2</div>
+    <div class="paso-body">
+      <h4>Nombre y ubicaci&#xF3;n</h4>
+      <p>Project Name: <code>AppVeterinaria01</code> | Group Id: <code>com.veterinaria</code></p>
+    </div>
+  </div>
+  <div class="paso">
+    <div class="paso-n">3</div>
+    <div class="paso-body">
+      <h4>Servidor y versi&#xF3;n</h4>
+      <p>Server: <strong>GlassFish 7.0.25</strong> | Jakarta EE Version: <strong>10 (Web)</strong> | JDK: <strong>21</strong></p>
+    </div>
+  </div>
+  <div class="paso">
+    <div class="paso-n">4</div>
+    <div class="paso-body">
+      <h4>Finalizar</h4>
+      <p>NetBeans genera la estructura Maven con pom.xml configurado para Jakarta EE 10</p>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 12 &#x2014; pom.xml generado</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; pom.xml (fragmento clave)</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;project&gt;</span>
+    <span class="kw">&lt;groupId&gt;</span><span class="st">com.veterinaria</span><span class="kw">&lt;/groupId&gt;</span>
+    <span class="kw">&lt;artifactId&gt;</span><span class="st">AppVeterinaria01</span><span class="kw">&lt;/artifactId&gt;</span>
+    <span class="kw">&lt;version&gt;</span><span class="st">1.0-SNAPSHOT</span><span class="kw">&lt;/version&gt;</span>
+    <span class="kw">&lt;packaging&gt;</span><span class="st">war</span><span class="kw">&lt;/packaging&gt;</span>
+
+    <span class="kw">&lt;properties&gt;</span>
+        <span class="kw">&lt;maven.compiler.release&gt;</span><span class="nm">21</span><span class="kw">&lt;/maven.compiler.release&gt;</span>
+        <span class="kw">&lt;project.build.sourceEncoding&gt;</span><span class="st">UTF-8</span><span class="kw">&lt;/project.build.sourceEncoding&gt;</span>
+    <span class="kw">&lt;/properties&gt;</span>
+
+    <span class="kw">&lt;dependencies&gt;</span>
+        <span class="kw">&lt;dependency&gt;</span>
+            <span class="kw">&lt;groupId&gt;</span><span class="an">jakarta.platform</span><span class="kw">&lt;/groupId&gt;</span>
+            <span class="kw">&lt;artifactId&gt;</span><span class="an">jakarta.jakartaee-web-api</span><span class="kw">&lt;/artifactId&gt;</span>
+            <span class="kw">&lt;version&gt;</span><span class="nm">10.0.0</span><span class="kw">&lt;/version&gt;</span>
+            <span class="kw">&lt;scope&gt;</span><span class="st">provided</span><span class="kw">&lt;/scope&gt;</span>  <span class="cm">&lt;!-- GlassFish ya lo tiene --&gt;</span>
+        <span class="kw">&lt;/dependency&gt;</span>
+    <span class="kw">&lt;/dependencies&gt;</span>
+<span class="kw">&lt;/project&gt;</span><span class="cl">pom.xml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>scope=provided:</strong> Significa que GlassFish ya incluye estas librer&#xED;as. Maven las usa solo para compilar, pero NO las empaqueta en el .war. Esto evita conflictos de versiones.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 7: Estructura del proyecto Maven Web -->
+<div class="sec" id="s7">
+  <div class="sec-hdr"><div class="sec-num">7</div><div class="sec-titulo">Estructura del proyecto Maven Web</div></div>
+
+  <div class="dn">DIAPOSITIVA 13 &#x2014; &#xC1;rbol de carpetas</div>
+  <div class="tree">
+<span class="tree-dir">AppVeterinaria01/</span>
+&#x251C;&#x2500;&#x2500; <span class="tree-file">pom.xml</span>                        <span class="tree-desc">&#x2190; configuraci&#xF3;n Maven y dependencias</span>
+&#x2514;&#x2500;&#x2500; <span class="tree-dir">src/main/</span>
+    &#x251C;&#x2500;&#x2500; <span class="tree-dir">java/com/veterinaria/</span>        <span class="tree-desc">&#x2190; c&#xF3;digo Java (beans, servicios, DAOs)</span>
+    &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-dir">controlador/</span>             <span class="tree-desc">&#x2190; @Named beans (conectan vista-negocio)</span>
+    &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-dir">servicio/</span>                <span class="tree-desc">&#x2190; l&#xF3;gica de negocio</span>
+    &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-dir">dao/</span>                     <span class="tree-desc">&#x2190; acceso a datos (EntityManager)</span>
+    &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-dir">modelo/</span>                  <span class="tree-desc">&#x2190; @Entity clases (mapean tablas)</span>
+    &#x251C;&#x2500;&#x2500; <span class="tree-dir">resources/META-INF/</span>
+    &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">persistence.xml</span>          <span class="tree-desc">&#x2190; configuraci&#xF3;n JPA y conexi&#xF3;n BD</span>
+    &#x2514;&#x2500;&#x2500; <span class="tree-dir">webapp/</span>                      <span class="tree-desc">&#x2190; contenido web</span>
+        &#x251C;&#x2500;&#x2500; <span class="tree-dir">WEB-INF/</span>
+        &#x2502;   &#x251C;&#x2500;&#x2500; <span class="tree-file">web.xml</span>              <span class="tree-desc">&#x2190; configuraci&#xF3;n del Faces Servlet</span>
+        &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">beans.xml</span>            <span class="tree-desc">&#x2190; activa CDI (inyecci&#xF3;n de dependencias)</span>
+        &#x251C;&#x2500;&#x2500; <span class="tree-dir">resources/css/</span>
+        &#x2502;   &#x2514;&#x2500;&#x2500; <span class="tree-file">estilos.css</span>          <span class="tree-desc">&#x2190; hojas de estilo</span>
+        &#x2514;&#x2500;&#x2500; <span class="tree-file">index.xhtml</span>              <span class="tree-desc">&#x2190; p&#xE1;gina principal JSF</span>
+  </div>
+
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">&#x1F4C1; src/main/java</div>
+      <div class="card-body" style="font-size:.84rem">
+        Aqu&#xED; va todo el c&#xF3;digo Java: entidades, DAOs, servicios y controladores. Se organiza en paquetes seg&#xFA;n la capa.
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">&#x1F310; src/main/webapp</div>
+      <div class="card-body" style="font-size:.84rem">
+        Aqu&#xED; van las p&#xE1;ginas .xhtml, archivos CSS, im&#xE1;genes y la configuraci&#xF3;n web (WEB-INF/). Es la ra&#xED;z p&#xFA;blica de la aplicaci&#xF3;n.
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 8: Archivos de configuracion -->
+<div class="sec" id="s8">
+  <div class="sec-hdr"><div class="sec-num">8</div><div class="sec-titulo">Archivos de configuraci&#xF3;n</div></div>
+
+  <div class="dn">DIAPOSITIVA 14 &#x2014; web.xml</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; WEB-INF/web.xml</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;?xml version=</span><span class="st">"1.0"</span> <span class="kw">encoding=</span><span class="st">"UTF-8"</span><span class="kw">?&gt;</span>
+<span class="kw">&lt;web-app</span> xmlns=<span class="st">"https://jakarta.ee/xml/ns/jakartaee"</span>
+         version=<span class="st">"6.0"</span><span class="kw">&gt;</span>
+
+    <span class="cm">&lt;!-- Faces Servlet: intercepta peticiones .xhtml --&gt;</span>
+    <span class="kw">&lt;servlet&gt;</span>
+        <span class="kw">&lt;servlet-name&gt;</span><span class="cn">Faces Servlet</span><span class="kw">&lt;/servlet-name&gt;</span>
+        <span class="kw">&lt;servlet-class&gt;</span><span class="cn">jakarta.faces.webapp.FacesServlet</span><span class="kw">&lt;/servlet-class&gt;</span>
+        <span class="kw">&lt;load-on-startup&gt;</span><span class="nm">1</span><span class="kw">&lt;/load-on-startup&gt;</span>
+    <span class="kw">&lt;/servlet&gt;</span>
+
+    <span class="kw">&lt;servlet-mapping&gt;</span>
+        <span class="kw">&lt;servlet-name&gt;</span><span class="cn">Faces Servlet</span><span class="kw">&lt;/servlet-name&gt;</span>
+        <span class="kw">&lt;url-pattern&gt;</span><span class="st">*.xhtml</span><span class="kw">&lt;/url-pattern&gt;</span>
+    <span class="kw">&lt;/servlet-mapping&gt;</span>
+
+    <span class="cm">&lt;!-- P&#xE1;gina de inicio --&gt;</span>
+    <span class="kw">&lt;welcome-file-list&gt;</span>
+        <span class="kw">&lt;welcome-file&gt;</span><span class="st">index.xhtml</span><span class="kw">&lt;/welcome-file&gt;</span>
+    <span class="kw">&lt;/welcome-file-list&gt;</span>
+
+<span class="kw">&lt;/web-app&gt;</span><span class="cl">web.xml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 15 &#x2014; beans.xml</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; WEB-INF/beans.xml</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;?xml version=</span><span class="st">"1.0"</span> <span class="kw">encoding=</span><span class="st">"UTF-8"</span><span class="kw">?&gt;</span>
+<span class="kw">&lt;beans</span> xmlns=<span class="st">"https://jakarta.ee/xml/ns/jakartaee"</span>
+       version=<span class="st">"4.0"</span>
+       bean-discovery-mode=<span class="st">"annotated"</span><span class="kw">&gt;</span>
+<span class="kw">&lt;/beans&gt;</span><span class="cl">beans.xml</span></code></pre>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card c-azul">
+      <div class="card-hdr">&#x2699;&#xFE0F; web.xml &#x2014; &#xBF;Para qu&#xE9; sirve?</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Registra el <strong>Faces Servlet</strong></li>
+          <li>Mapea las URLs <code>*.xhtml</code> al servlet JSF</li>
+          <li>Define la p&#xE1;gina de bienvenida</li>
+          <li>Sin este archivo, JSF no procesa las p&#xE1;ginas</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card c-verde">
+      <div class="card-hdr">&#x1F4E6; beans.xml &#x2014; &#xBF;Para qu&#xE9; sirve?</div>
+      <div class="card-body" style="font-size:.84rem">
+        <ul style="padding-left:16px">
+          <li>Activa el sistema <strong>CDI</strong> (inyecci&#xF3;n de dependencias)</li>
+          <li><code>bean-discovery-mode="annotated"</code>: solo detecta clases con anotaciones CDI</li>
+          <li>Sin este archivo, @Named y @Inject no funcionan</li>
+          <li>En Jakarta EE 10, es opcional si se usa modo "annotated"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 9: Primera pagina index.xhtml -->
+<div class="sec" id="s9">
+  <div class="sec-hdr"><div class="sec-num">9</div><div class="sec-titulo">Primera p&#xE1;gina: index.xhtml</div></div>
+
+  <div class="dn">DIAPOSITIVA 16 &#x2014; index.xhtml completo</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; webapp/index.xhtml</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">&lt;?xml version=</span><span class="st">"1.0"</span> <span class="kw">encoding=</span><span class="st">"UTF-8"</span><span class="kw">?&gt;</span>
+<span class="kw">&lt;!DOCTYPE html&gt;</span>
+<span class="kw">&lt;html</span> xmlns=<span class="st">"http://www.w3.org/1999/xhtml"</span>
+      xmlns:h=<span class="st">"jakarta.faces.html"</span>
+      xmlns:f=<span class="st">"jakarta.faces.core"</span><span class="kw">&gt;</span>
+
+<span class="kw">&lt;h:head&gt;</span>
+    <span class="kw">&lt;title&gt;</span>Sistema de Gesti&#xF3;n Veterinaria<span class="kw">&lt;/title&gt;</span>
+    <span class="kw">&lt;style&gt;</span>
+        body { font-family: 'Segoe UI', sans-serif; margin: 40px; background: #f8fafc; }
+        h1 { color: #1a3a5c; }
+        .info { background: #dbeafe; padding: 12px; border-radius: 8px; margin: 12px 0; }
+        .form-group { margin: 10px 0; }
+        label { font-weight: bold; display: block; margin-bottom: 4px; }
+        input[type="text"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 250px; }
+        button, input[type="submit"] { background: #2563a8; color: #fff; border: none;
+            padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+        .resultado { margin-top: 16px; padding: 12px; background: #dcfce7; border-radius: 8px; }
+    <span class="kw">&lt;/style&gt;</span>
+<span class="kw">&lt;/h:head&gt;</span>
+
+<span class="kw">&lt;h:body&gt;</span>
+    <span class="kw">&lt;h1&gt;</span>&#x1F3E5; Sistema de Gesti&#xF3;n Veterinaria<span class="kw">&lt;/h1&gt;</span>
+
+    <span class="kw">&lt;div</span> class=<span class="st">"info"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;p&gt;</span>Servidor: <span class="kw">&lt;h:outputText</span>
+            value=<span class="st">"#{facesContext.externalContext.request.serverName}"</span> <span class="kw">/&gt;</span><span class="kw">&lt;/p&gt;</span>
+        <span class="kw">&lt;p&gt;</span>Jakarta Faces activo &#x2713;<span class="kw">&lt;/p&gt;</span>
+    <span class="kw">&lt;/div&gt;</span>
+
+    <span class="kw">&lt;h:form&gt;</span>
+        <span class="kw">&lt;div</span> class=<span class="st">"form-group"</span><span class="kw">&gt;</span>
+            <span class="kw">&lt;label&gt;</span>Tu nombre:<span class="kw">&lt;/label&gt;</span>
+            <span class="kw">&lt;h:inputText</span> value=<span class="st">"#{saludoBean.nombre}"</span>
+                         required=<span class="st">"true"</span>
+                         requiredMessage=<span class="st">"Ingres&#xE1; tu nombre"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;/div&gt;</span>
+        <span class="kw">&lt;h:commandButton</span> value=<span class="st">"Saludar"</span>
+                         action=<span class="st">"#{saludoBean.saludar}"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;h:messages</span> style=<span class="st">"color:red"</span> <span class="kw">/&gt;</span>
+    <span class="kw">&lt;/h:form&gt;</span>
+
+    <span class="kw">&lt;h:panelGroup</span> rendered=<span class="st">"#{not empty saludoBean.mensaje}"</span><span class="kw">&gt;</span>
+        <span class="kw">&lt;div</span> class=<span class="st">"resultado"</span><span class="kw">&gt;</span>
+            <span class="kw">&lt;h:outputText</span> value=<span class="st">"#{saludoBean.mensaje}"</span> <span class="kw">/&gt;</span>
+        <span class="kw">&lt;/div&gt;</span>
+    <span class="kw">&lt;/h:panelGroup&gt;</span>
+
+<span class="kw">&lt;/h:body&gt;</span>
+<span class="kw">&lt;/html&gt;</span><span class="cl">index.xhtml</span></code></pre>
+    </div>
+  </div>
+
+
+  <div class="dn">DIAPOSITIVA 17 &#x2014; SaludoBean.java</div>
+  <div class="card">
+    <div class="card-hdr" style="background:#1e293b;color:#e2e8f0">&#x1F4C4; controlador/SaludoBean.java</div>
+    <div class="card-body" style="padding:0">
+<pre><code><span class="kw">package</span> com.veterinaria.controlador;
+
+<span class="kw">import</span> jakarta.enterprise.context.RequestScoped;
+<span class="kw">import</span> jakarta.inject.Named;
+
+<span class="an">@Named</span>           <span class="cm">// hace el bean accesible desde JSF: #{saludoBean}</span>
+<span class="an">@RequestScoped</span>   <span class="cm">// vive durante una petici&#xF3;n HTTP</span>
+<span class="kw">public class</span> <span class="cn">SaludoBean</span> {
+
+    <span class="kw">private</span> <span class="cn">String</span> nombre;
+    <span class="kw">private</span> <span class="cn">String</span> mensaje;
+
+    <span class="cm">// M&#xE9;todo que ejecuta el bot&#xF3;n</span>
+    <span class="kw">public void</span> <span class="mt">saludar</span>() {
+        <span class="kw">this</span>.mensaje = <span class="st">"&#xA1;Hola "</span> + nombre + <span class="st">"! Bienvenido al sistema."</span>;
+    }
+
+    <span class="cm">// Getters y Setters</span>
+    <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getNombre</span>()              { <span class="kw">return</span> nombre; }
+    <span class="kw">public void</span>   <span class="mt">setNombre</span>(<span class="cn">String</span> n)      { <span class="kw">this</span>.nombre = n; }
+    <span class="kw">public</span> <span class="cn">String</span> <span class="mt">getMensaje</span>()             { <span class="kw">return</span> mensaje; }
+    <span class="kw">public void</span>   <span class="mt">setMensaje</span>(<span class="cn">String</span> m)     { <span class="kw">this</span>.mensaje = m; }
+}<span class="cl">SaludoBean.java</span></code></pre>
+    </div>
+  </div>
+
+  <div class="alerta a-ok">
+    <span class="a-ico">&#x2705;</span>
+    <div><strong>&#xBF;C&#xF3;mo se conectan?</strong> La p&#xE1;gina usa <code>#{saludoBean.nombre}</code> que busca un bean llamado <code>saludoBean</code> (primera letra min&#xFA;scula del nombre de la clase). @Named registra la clase. @RequestScoped define su ciclo de vida.</div>
+  </div>
+</div>
+<div class="sep"></div>
+
+
+<!-- SECCION 10: Desplegar en GlassFish -->
+<div class="sec" id="s10">
+  <div class="sec-hdr"><div class="sec-num">10</div><div class="sec-titulo">Desplegar en GlassFish 7</div></div>
+
+  <div class="dn">DIAPOSITIVA 18 &#x2014; Pasos para desplegar</div>
+  <div class="paso">
+    <div class="paso-n">1</div>
+    <div class="paso-body">
+      <h4>Clean and Build</h4>
+      <p>Click derecho en el proyecto &#x2192; Clean and Build. Genera <code>target/AppVeterinaria01-1.0-SNAPSHOT.war</code></p>
+    </div>
+  </div>
+  <div class="paso">
+    <div class="paso-n">2</div>
+    <div class="paso-body">
+      <h4>Run (Deploy)</h4>
+      <p>Click en el bot&#xF3;n Run (&#x25B6;) o F6. NetBeans despliega autom&#xE1;ticamente en GlassFish.</p>
+    </div>
+  </div>
+  <div class="paso">
+    <div class="paso-n">3</div>
+    <div class="paso-body">
+      <h4>Abrir en el navegador</h4>
+      <p>Se abre autom&#xE1;ticamente: <code>http://localhost:8080/AppVeterinaria01/</code></p>
+    </div>
+  </div>
+  <div class="paso">
+    <div class="paso-n">4</div>
+    <div class="paso-body">
+      <h4>Verificar</h4>
+      <p>Deber&#xED;as ver el t&#xED;tulo, la informaci&#xF3;n del servidor y el formulario de saludo.</p>
+    </div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 19 &#x2014; Consola de administraci&#xF3;n GlassFish</div>
+  <div class="alerta a-info">
+    <span class="a-ico">&#x1F4A1;</span>
+    <div><strong>Admin Console:</strong> Tambi&#xE9;n pod&#xE9;s acceder a <code>http://localhost:4848</code> para ver la consola de administraci&#xF3;n de GlassFish. All&#xED; pod&#xE9;s ver las aplicaciones desplegadas, configurar DataSources, y m&#xE1;s.</div>
+  </div>
+
+  <div class="dn">DIAPOSITIVA 20 &#x2014; Errores comunes y soluciones</div>
+  <table>
+    <thead><tr><th>&#x26A0;&#xFE0F; Error</th><th>&#x1F50D; Causa probable</th><th>&#x2705; Soluci&#xF3;n</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>404 Not Found</code></td>
+        <td>La URL no coincide con el contexto de la app</td>
+        <td>Verificar que la URL sea <code>/AppVeterinaria01/index.xhtml</code></td>
+      </tr>
+      <tr>
+        <td><code>500 Internal Server Error</code></td>
+        <td>Error en el c&#xF3;digo Java o configuraci&#xF3;n</td>
+        <td>Revisar la consola de GlassFish (pesta&#xF1;a Output en NetBeans)</td>
+      </tr>
+      <tr>
+        <td>P&#xE1;gina en blanco</td>
+        <td>Faces Servlet no est&#xE1; mapeado</td>
+        <td>Verificar web.xml: url-pattern debe ser <code>*.xhtml</code></td>
+      </tr>
+      <tr>
+        <td><code>Target Unreachable: 'saludoBean'</code></td>
+        <td>CDI no detecta el bean</td>
+        <td>Verificar que exista beans.xml y que la clase tenga @Named</td>
+      </tr>
+      <tr>
+        <td>GlassFish no arranca</td>
+        <td>Puerto 8080 ocupado por otro proceso</td>
+        <td>Cerrar el proceso que usa el puerto o cambiar el puerto en GlassFish</td>
+      </tr>
+      <tr>
+        <td><code>ClassNotFoundException</code></td>
+        <td>Dependencia faltante o scope incorrecto</td>
+        <td>Verificar pom.xml: jakarta.jakartaee-web-api con scope <code>provided</code></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="sep"></div>
+
+
+<!-- RESUMEN Y ACTIVIDAD PRACTICA -->
+<div class="sec" id="res">
+  <div class="sec-hdr"><div class="sec-num">&#x2705;</div><div class="sec-titulo">Resumen y actividad pr&#xE1;ctica</div></div>
+
+  <div class="dn">DIAPOSITIVA 21 &#x2014; Resumen de la clase</div>
+  <table>
+    <thead><tr><th>Tema</th><th>Concepto clave</th><th>Tecnolog&#xED;a</th></tr></thead>
+    <tbody>
+      <tr><td>Arquitectura web</td><td>Cliente-servidor, HTTP stateless, request-response</td><td>HTTP/HTTPS</td></tr>
+      <tr><td>Capas de la app</td><td>Presentaci&#xF3;n &#x2192; Controlador &#x2192; Negocio &#x2192; Datos &#x2192; BD</td><td>JSF + CDI + JPA</td></tr>
+      <tr><td>Jakarta EE 10</td><td>Web Profile: JSF 4.0, CDI 4.0, JPA 3.1, Bean Validation</td><td>GlassFish 7</td></tr>
+      <tr><td>Ciclo de vida</td><td>Desarrollo &#x2192; .war &#x2192; Deploy &#x2192; Navegador</td><td>Maven + GlassFish</td></tr>
+      <tr><td>JSF</td><td>Componentes XHTML que generan HTML, conectados a beans</td><td>Jakarta Faces 4.0</td></tr>
+      <tr><td>Proyecto Maven</td><td>pom.xml con jakarta.jakartaee-web-api (provided)</td><td>Maven + NetBeans 25</td></tr>
+      <tr><td>Configuraci&#xF3;n</td><td>web.xml (Faces Servlet) + beans.xml (CDI)</td><td>Jakarta EE</td></tr>
+      <tr><td>Primer bean</td><td>@Named + @RequestScoped = bean accesible desde JSF</td><td>CDI 4.0</td></tr>
+    </tbody>
+  </table>
+
+  <div class="dn">DIAPOSITIVA 22 &#x2014; Actividad pr&#xE1;ctica</div>
+  <div class="card c-verde">
+    <div class="card-hdr">&#x1F3C6; Actividad pr&#xE1;ctica &#x2014; Primer proyecto Jakarta EE</div>
+    <div class="card-body">
+      <div class="paso">
+        <div class="paso-n">1</div>
+        <div class="paso-body">
+          <h4>Crear el proyecto</h4>
+          <p>Crear <code>AppVeterinaria01</code> en NetBeans siguiendo los pasos de la clase. Group Id: <code>com.veterinaria</code>, Jakarta EE 10 Web, GlassFish 7, JDK 21.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">2</div>
+        <div class="paso-body">
+          <h4>Configurar archivos</h4>
+          <p>Verificar que web.xml y beans.xml est&#xE9;n correctos seg&#xFA;n los ejemplos de la clase.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">3</div>
+        <div class="paso-body">
+          <h4>Crear SaludoBean.java</h4>
+          <p>En el paquete <code>com.veterinaria.controlador</code>, crear la clase con @Named y @RequestScoped.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">4</div>
+        <div class="paso-body">
+          <h4>Crear index.xhtml</h4>
+          <p>Copiar la p&#xE1;gina de ejemplo. Debe mostrar info del servidor y el formulario de saludo.</p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">5</div>
+        <div class="paso-body">
+          <h4>Desplegar y probar</h4>
+          <p>Run en NetBeans. Verificar en <code>http://localhost:8080/AppVeterinaria01/</code></p>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-n">6</div>
+        <div class="paso-body">
+          <h4>Modificar (desaf&#xED;o)</h4>
+          <p>Agregar un segundo campo (apellido) y que el saludo incluya nombre y apellido. Agregar un campo que muestre la fecha y hora actual del servidor.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alerta a-viol">
+    <span class="a-ico">&#x1F4CC;</span>
+    <div><strong>Pr&#xF3;xima clase:</strong> Introducci&#xF3;n a JPA &#x2014; mapeo de la primera entidad (@Entity, @Id, @Column), creaci&#xF3;n de la base de datos MySQL, y configuraci&#xF3;n de persistence.xml.</div>
+  </div>
+</div>
+
+
+
+<!-- FOOTER -->
+<footer>
+  Programaci&#xF3;n Web Avanzada &#x2014; Backend &nbsp;&#x7C;&nbsp; Clase 01: Introducci&#xF3;n al Backend Web con Java y Jakarta EE &nbsp;&#x7C;&nbsp; Jakarta EE 10 &#xB7; GlassFish 7 &#xB7; JDK 21
+</footer>
+
+</body>
+</html>
